@@ -6,13 +6,16 @@ Please include a summary of the feature/fix you made.
 
 - [ ] Bug fix
 - [ ] New feature
+- [ ] New ROS package
 
 # How Has This Been Tested?
 
 Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
 
-- [ ] Test A
-- [ ] Test B
+- [ ] Unit test: Provide instructions on how to run
+- [ ] Intergration test: Provide instructions on how to run
+- [ ] ROS node test: Provide instructions on how to run
+- [ ] System test: Provide instructions on how to run
 
 # Checklist:
 
