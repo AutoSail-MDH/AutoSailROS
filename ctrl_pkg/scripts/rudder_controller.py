@@ -1,9 +1,4 @@
-import sys
-import rospy
-import math
 from simple_pid import PID
-
-
 
 
 def rudder_angle_calculation(pid_corrected_heading, velocity):
@@ -15,7 +10,7 @@ def pid_(desired_heading, course, heading, velocity_flag=False):
     :param course: The current course
     :param heading: The current heading
     :param desired_heading: The desired heading of the vessel, in degrees
-    :param velocity_flag: True if the velocity is above the threshold
+    :param velocity_flag: True if the velocity is above the threshold for switching to course controller
     :return: The new angle of the rudder
     """
 
@@ -23,13 +18,15 @@ def pid_(desired_heading, course, heading, velocity_flag=False):
     ki = 1  # The Integral term scalar
     kd = 1  # The Derivative term scalar
     pid = PID(kp, ki, kd, 0)  # Initialization of the PID, with 0 as the control signal
-    pid.output_limits = (-45, 45)
+    pid.output_limits = (-45, 45)  # Limits the rudder angles to [-45, 45] degrees
     while True:
         if velocity_flag:
             control_signal = course
         else:
             control_signal = heading
+        pid.setpoint = desired_heading
         control = pid(control_signal)
+
 
 def trajectory_to_relative_heading(desired_trajectory, current_heading):
     heading = desired_trajectory-current_heading
