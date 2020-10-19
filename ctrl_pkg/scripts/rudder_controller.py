@@ -15,8 +15,8 @@ def pid_(desired_heading, course, heading, velocity_flag=False):
     """
 
     kp = 1  # The Proportional term scalar
-    ki = 1  # The Integral term scalar
-    kd = 1  # The Derivative term scalar
+    ki = 0.1  # The Integral term scalar
+    kd = 0.05  # The Derivative term scalar
     pid = PID(kp, ki, kd, 0)  # Initialization of the PID, with 0 as the control signal
     pid.output_limits = (-45, 45)  # Limits the rudder angles to [-45, 45] degrees
     while True:
