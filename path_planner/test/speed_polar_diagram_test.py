@@ -9,7 +9,7 @@ class TestStringMethods(unittest.TestCase):
         w_speed = 1
         w_theta = 90
         [max_vel, up_beat, dn_beat, w_theta] = spdf.speed_polar_diagram_calculation(w_speed, w_theta)
-        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45 + w_theta, 139.4 + w_theta])
+        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45, 139.4])
         print(max_vel)
         print(up_beat)
         print(dn_beat)
@@ -17,7 +17,7 @@ class TestStringMethods(unittest.TestCase):
         w_speed = 30
         w_theta = 30
         [max_vel, up_beat, dn_beat, w_theta] = spdf.speed_polar_diagram_calculation(w_speed, w_theta)
-        self.assertEqual([max_vel, up_beat, dn_beat], [12.6, 32.6 + w_theta, 148.1 + w_theta])
+        self.assertEqual([max_vel, up_beat, dn_beat], [12.6, 32.6, 148.1])
         print(max_vel)
         print(up_beat)
         print(dn_beat)
@@ -25,7 +25,7 @@ class TestStringMethods(unittest.TestCase):
         w_speed = 4.6
         w_theta = 350
         [max_vel, up_beat, dn_beat, w_theta] = spdf.speed_polar_diagram_calculation(w_speed, w_theta)
-        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45 + w_theta, 139.4 + w_theta])
+        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45, 139.4])
         print(max_vel)
         print(up_beat)
         print(dn_beat)
@@ -33,7 +33,7 @@ class TestStringMethods(unittest.TestCase):
         w_speed = -4.6
         w_theta = 350
         [max_vel, up_beat, dn_beat, w_theta] = spdf.speed_polar_diagram_calculation(w_speed, w_theta)
-        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45 + w_theta, 139.4 + w_theta])
+        self.assertEqual([max_vel, up_beat, dn_beat], [4.78, 45, 139.4])
 
         print(max_vel)
         print(up_beat)
