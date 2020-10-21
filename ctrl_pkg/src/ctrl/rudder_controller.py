@@ -58,7 +58,7 @@ class PidController:
 
     def use_heading(self, flag):
         """
-        Used to swich between course and heading control
+        Used to switch between course and heading control
         :param flag: True for heading, False for course
         :return:
         """
