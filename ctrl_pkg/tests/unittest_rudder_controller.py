@@ -26,37 +26,6 @@ class TestPID(unittest.TestCase):
         return
 
 """
-"""
-    
-class Plotting:
-    def __init__(self):
-        self.v = 5
-        self.heading = 0
-        self.course = self.heading
-        self.controller = rc.PidController
-        self.controller.set_current_heading(self.heading)
-        self.setpoint, self.y, self.x = [], [], []
-        self.rudder_angle = 0
-    def plot(self):
-        start_time = time.time()
-        last_time = start_time
-        while time.time() - start_time < 10:
-            current_time = time.time()
-            dt = current_time - last_time
-            rudder_angle = rc.rudder_angle_calculation(self.heading, )
-            self.heading += angular_vel(rudder_angle=rudder_angle, velocity=self.v)*dt
-            power = pid(water_temp)
-            heading =
-
-            self.x += [current_time - start_time]
-            self.y += [heading]
-            self.setpoint += [controller.pid.setpoint]
-
-            if current_time - start_time > 1:
-                pid.setpoint = 100
-
-            last_time = current_time
-"""
 
 
 class Plotting:
