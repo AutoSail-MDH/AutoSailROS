@@ -1,5 +1,6 @@
 import math
-from simple_pid import PID
+import time
+#from simple_pid import PID
 
 
 def rudder_angle_calculation(current_heading, pid_corrected_heading, rudder_limit, velocity):
@@ -31,66 +32,116 @@ def use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_
     else:
         return previous_bool
 
-
+"""
 class PidController:
-    def __init__(self, kp=1, ki=0.1, kd=0.05, limits=math.pi/4):
-        """
-        Initialization of the PID controller
-        :param kp: Proportional coefficient of the PID
-        :param ki: Integral coefficient of the PID
-        :param kd: Derivative coefficient of the PID
-        :param limits: The limits of the output and integral term
-        """
+    def __init__(self, kp=1, ki=0.1, kd=0.05, limits=math.pi):
+
         self.current_heading = None
         self.desired_course = None
         self.desired_heading = None
+        self.setpoint = None
         self.heading_flag = True
         self.pid = PID(kp, ki, kd, 0)  # Initialization of the PID, with 0 as the control signal
-        self.pid.output_limits = (-limits, limits)  # Limits the rudder angles to [-45, 45] degrees
+        self.pid.output_limits = (-limits, limits)  # Limits the PID adjusted heading integral part
+
+    def update_pid_output(self):
+        self.setpoint_to_use()
+        corrected_heading = self.pid(self.setpoint)
+        corrected_heading = corrected_heading % (2*math.pi)
+
 
     def set_limits(self, limits):
-        """
-        Update the limits of the rudder, in radian
-        :param limits: [lower limit, upper limit], e.g. [-pi/2, pi/2]
-        :return:
-        """
+
         self.pid.output_limits = (limits[0], limits[1])
 
     def use_heading(self, flag):
-        """
-        Used to switch between course and heading control
-        :param flag: True for heading, False for course
-        :return:
-        """
+
         self.heading_flag = flag
 
     def update_setpoint(self, setpoint):
-        """
-        Change the setpoint of the PID, e.g. to a new desired heading
-        :param setpoint: The new setpoint
-        :return:
-        """
-        self.pid.setpoint = setpoint
+
+        self.pid.setpoint = setpoint %
 
     def set_current_heading(self, heading):
-        """
-        Update the current heading
-        :param heading: The new heading
-        :return:
-        """
-        self.current_heading = heading
+
+        self.current_heading = heading % (2*math.pi)
 
     def setpoint_to_use(self):
-        """
-        Evaluates if heading or course controller should be used depending on the heading_flag
-        :return:
-        """
+
         if self.heading_flag:
-            return self.desired_heading
+            self.setpoint = self.desired_heading
         else:
-            return self.desired_course
+            self.setpoint = self.desired_course
 
     def __call__(self):
-        return self.pid(self.current_heading)
+        return self.update_pid_output()
+"""
+
+
+class PID:
+    def __init__(self, kp=1.0, ki=0.1, kd=0.05, setpoint=0, output_limits=(-math.pi, math.pi), sample_time=0.01):
+        self.previous_error = 0
+        self.integral = 0
+        self.derivative = 0
+        self.error = 0
+        self.setpoint = setpoint
+
+        # The coefficients of the PID
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+
+        self.sample_time = sample_time
+        self.min_value = output_limits[0]
+        self.max_value = output_limits[1]
+
+        if self.min_value > self.max_value:
+            raise ValueError("min must be greater than max")
+
+        self.last_time = time.time()
+        self.last_output = None
+        self.last_heading = 0
+
+    def __call__(self, control_signal):
+        # Computes the time since last call
+        _now = time.time()
+        dt = _now-self.last_time if _now-self.last_time else 1e-15
+
+        # Returns last value if the PID have recently ran
+        if dt < self.sample_time and self.last_output is not None:
+            return self.last_output
+
+        # The PID value calculations
+        self.error = math.atan2(math.sin(self.setpoint-control_signal), math.cos(self.setpoint-control_signal))
+        self.integral += max(min(self.error*dt, self.max_value), self.min_value)  # Clamed to avoid integral windup
+        self.derivative = (self.error-self.previous_error)/dt
+
+        # Processing of the output
+        self.previous_error = self.error
+        output = self.kp*self.error+self.ki*self.integral+self.kd*self.derivative
+        output = max(min(output, self.max_value), self.min_value)  # Clamed according to the output restrictions
+
+        # Saves status of the PID
+        self.last_output = output
+        self.last_heading = control_signal
+        self.last_time = _now
+
+        return output
+
+    def set_limits(self, limits):
+        if limits(0) > limits(1):
+            raise ValueError("min must be greater than max")
+        self.min_value = limits(0)
+        self.max_value = limits(1)
+
+    def reset(self):
+        self.error = 0
+        self.integral = 0
+        self.derivative = 0
+
+        self.last_time = time.time()
+        self.last_output = 0
+        self.last_heading = 0
+
 
 

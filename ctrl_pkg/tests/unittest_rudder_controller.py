@@ -14,59 +14,60 @@ def new_heading(pid_adjusted_heading, dt):  # Hittade bara på någonting
     :param dt: delta time
     :return: an emulated turning over time
     """
-    return float(pid_adjusted_heading*dt*10)
+    return float(pid_adjusted_heading*dt*10.0)
+
+
+def is_converging(_list, conv_point, error_margin=1e-3):
+    for i in _list[-10:]:
+        list_item = abs(i - conv_point)
+        if list_item > error_margin:
+            return False
+    return True
 
 
 class TestPID(unittest.TestCase):
+    def setUp(self):
+        self.pid = rc.PID(kp=1.0, ki=0.1, kd=0.05)
+
     def test_PidController_init(self):
-        self.pid = rc.PidController(kp=1, ki=2, kd=3, limits=math.pi/4)
-        self.assertEqual(self.pid.current_heading, None)
-        self.assertEqual(self.pid.desired_course, None)
-        self.assertEqual(self.pid.desired_heading, None)
-        self.assertEqual(self.pid.heading_flag, True)
-        self.assertEqual(self.pid.pid.tunings, (1, 2, 3))
-        self.assertEqual(self.pid.pid.output_limits, (-math.pi/4, math.pi/4))
+        self.assertEqual(self.pid.previous_error, 0)
+        self.assertEqual(self.pid.integral, 0)
+        self.assertEqual(self.pid.derivative, 0)
+        self.assertEqual(self.pid.error, 0)
+        self.assertEqual(self.pid.setpoint, 0)
+        self.assertEqual(self.pid.kp, 1)
+        self.assertEqual(self.pid.ki, 0.1)
+        self.assertEqual(self.pid.kd, 0.05)
 
-    def test_set_limits(self):
-        self.pid.set_limits((-1, 1))
-        self.assertEqual(self.pid.pid.output_limits, (-1, 1))
-        self.pid.set_limits((-2, 2))
-        self.assertEqual(self.pid.pid.output_limits, (-2, 2))
+        self.assertEqual(self.pid.sample_time, 0.01)
+        self.assertEqual(self.pid.min_value, -math.pi)
+        self.assertEqual(self.pid.max_value, math.pi)
+        self.assertEqual(self.pid.last_output, None)
+        self.assertEqual(self.pid.last_heading, 0)
 
-    def test_use_heading(self):
-        self.pid.use_heading(False)
-        self.assertEqual(self.pid.heading_flag, False)
-        self.pid.use_heading(True)
-        self.assertEqual(self.pid.heading_flag, True)
+    def test_PID_convergence(self):
+        last_time = time.time()
+        self.pid.setpoint = 0
+        heading = [0.0]
+        self.pid.setpoint = math.pi
+        check_time = time.time()
+        while True:
+            pid_adjusted_heading = self.pid(heading[-1])
+            heading += [new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=time.time()-last_time)]
+            if time.time()-check_time > 1:
+                check_time = time.time()
+                if is_converging(_list=heading, conv_point=self.pid.setpoint, error_margin=10):
+                    break
+            last_time = time.time()
 
-    def test_update_setpoint(self):
-        self.pid.update_setpoint(2)
-        self.assertEqual(self.pid.pid.setpoint, 2)
-        self.pid.update_setpoint(100)
-        self.assertEqual(self.pid.pid.setpoint, 100)
-        self.pid.update_setpoint(0)
-        self.assertEqual(self.pid.pid.setpoint, 0)
-        self.pid.update_setpoint(-1)
-        self.assertEqual(self.pid.pid.setpoint, -1)
-
-    def test_set_current_heading(self):
-        self.pid.set_current_heading(-2)
-        self.assertEqual(self.pid.current_heading, -2)
-        self.pid.set_current_heading(0)
-        self.assertEqual(self.pid.current_heading, 0)
-        self.pid.set_current_heading(1)
-        self.assertEqual(self.pid.current_heading, 1)
-
-    def test_setpoint_to_use(self):
-        self.pid.heading_flag = True
-        self.assertEqual(self.pid.setpoint_to_use(), self.pid.desired_heading)
-        self.pid.heading_flag = False
-        self.assertEqual(self.pid.setpoint_to_use(), self.pid.desired_course)
+    def test_PID_turning(self):
+        start_time = time.time()
+        self.pid.setpoint = 0
 
 
 class Plotting:
     def __init__(self):
-        self.pid = rc.PidController().pid
+        self.pid = rc.PID()
         self.heading = 0
         self.pid.tunings = (1, 0.001, 0.005)
 
@@ -86,9 +87,10 @@ class Plotting:
             y += [self.heading]
             setpoint += [self.pid.setpoint]
 
-            if current_time - start_time > 1:
-                self.pid.setpoint = math.pi*2
-
+            if (current_time - start_time > 1) & (current_time - start_time < 6):
+                self.pid.setpoint = math.pi
+            elif current_time - start_time > 6:
+                self.pid.setpoint = 2*math.pi-0.1
             last_time = current_time
 
         plt.plot(x, y, label='measured')
@@ -103,11 +105,4 @@ if __name__ == "__main__":
     # Plot the PID
     # plot = Plotting()
     # plot.plot()
-    test = TestPID()
-    test.test_PidController_init()
-    test.test_set_limits()
-    test.test_use_heading()
-    test.test_update_setpoint()
-    test.test_set_current_heading()
-    test.test_setpoint_to_use()
-
+    unittest.main()
