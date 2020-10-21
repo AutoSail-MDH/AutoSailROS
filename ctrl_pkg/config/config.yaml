@@ -10,5 +10,3 @@ rate: 10
 sail_limits:
   - (-np.pi / 5.2)
   - (np.pi / 5.2)
-
-rate: 10
