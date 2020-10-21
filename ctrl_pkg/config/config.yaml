@@ -1,0 +1,12 @@
+#  limits for the sail max rotation.
+name: "config"
+
+anonymous: False
+
+publisher_queue_size: 10
+rate: 10
+
+
+sail_limits:
+  - (-np.pi / 5.2)
+  - (np.pi / 5.2)
