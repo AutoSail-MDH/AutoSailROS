@@ -27,18 +27,22 @@ def is_converging(_list, conv_point, error_margin=1e-3):
 
 class TestPID(unittest.TestCase):
     def setUp(self):
-        self.pid = rc.PID(kp=1.0, ki=0.1, kd=0.05)
+        self.pid = rc.PID(kp=2.0, ki=0.1, kd=0.05)
 
     def test_PidController_init(self):
+        # PID values
         self.assertEqual(self.pid.previous_error, 0)
+        self.assertEqual(self.pid.error, 0)  # Proportional term
         self.assertEqual(self.pid.integral, 0)
         self.assertEqual(self.pid.derivative, 0)
-        self.assertEqual(self.pid.error, 0)
-        self.assertEqual(self.pid.setpoint, 0)
-        self.assertEqual(self.pid.kp, 1)
+
+        # PID coefficients
+        self.assertEqual(self.pid.kp, 2)
         self.assertEqual(self.pid.ki, 0.1)
         self.assertEqual(self.pid.kd, 0.05)
 
+        # PID settings
+        self.assertEqual(self.pid.setpoint, 0)
         self.assertEqual(self.pid.sample_time, 0.01)
         self.assertEqual(self.pid.min_value, -math.pi)
         self.assertEqual(self.pid.max_value, math.pi)
@@ -47,18 +51,18 @@ class TestPID(unittest.TestCase):
 
     def test_PID_convergence(self):
         last_time = time.time()
-        self.pid.setpoint = 0
+        check_time = last_time
         heading = [0.0]
         self.pid.setpoint = math.pi
-        check_time = time.time()
         while True:
+            _now = time.time()
             pid_adjusted_heading = self.pid(heading[-1])
-            heading += [new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=time.time()-last_time)]
-            if time.time()-check_time > 1:
-                check_time = time.time()
-                if is_converging(_list=heading, conv_point=self.pid.setpoint, error_margin=10):
+            heading += [new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now-last_time)]
+            if abs(_now-check_time) > 0.5:
+                check_time = _now
+                if is_converging(_list=heading, conv_point=self.pid.setpoint, error_margin=1e-1):
                     break
-            last_time = time.time()
+            last_time = _now
 
     def test_PID_turning(self):
         start_time = time.time()
@@ -96,7 +100,7 @@ class Plotting:
         plt.plot(x, y, label='measured')
         plt.plot(x, setpoint, label='target')
         plt.xlabel('time')
-        plt.ylabel('temperature')
+        plt.ylabel('heading')
         plt.legend()
         plt.show()
 

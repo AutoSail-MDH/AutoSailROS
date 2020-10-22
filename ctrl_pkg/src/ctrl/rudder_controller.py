@@ -100,7 +100,7 @@ class PID:
 
         self.last_time = time.time()
         self.last_output = None
-        self.last_heading = 0
+        self.last_control_signal = 0
 
     def __call__(self, control_signal):
         # Computes the time since last call
@@ -113,7 +113,8 @@ class PID:
 
         # The PID value calculations
         self.error = math.atan2(math.sin(self.setpoint-control_signal), math.cos(self.setpoint-control_signal))
-        self.integral += max(min(self.error*dt, self.max_value), self.min_value)  # Clamed to avoid integral windup
+        self.integral += self.error*dt
+        self.integral = max(min(self.integral, self.max_value), self.min_value)  # Clamed to avoid integral windup
         self.derivative = (self.error-self.previous_error)/dt
 
         # Processing of the output
@@ -123,7 +124,7 @@ class PID:
 
         # Saves status of the PID
         self.last_output = output
-        self.last_heading = control_signal
+        self.last_control_signal = control_signal
         self.last_time = _now
 
         return output
@@ -141,7 +142,7 @@ class PID:
 
         self.last_time = time.time()
         self.last_output = 0
-        self.last_heading = 0
+        self.last_control_signal = 0
 
 
 
