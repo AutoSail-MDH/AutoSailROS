@@ -49,7 +49,7 @@ def speed_polar_diagram_calculation(w_speed, w_theta):
 
 if __name__ == '__main__':
     w_speed = 4
-    w_theta = 20
+    w_theta = 0
     [max_vel, up_beat, dn_beat, w_theta] = speed_polar_diagram_calculation(w_speed, w_theta)
     print(max_vel)
     print(up_beat)
