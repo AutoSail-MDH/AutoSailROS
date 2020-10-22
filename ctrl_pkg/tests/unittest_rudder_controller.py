@@ -107,20 +107,20 @@ class TestPID(unittest.TestCase):
         setpoint = [0.0]
         _time = [0.0]
 
-        for i in range(0, 4):
+        for i in range(0, 5):
             self.pid.reset()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
-        for i in range(4, -1, -1):
+        for i in range(6, -1, -1):
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
 
         # Uncomment for plotting of heading
-        plt.plot(_time, heading, label='measured')
-        plt.plot(_time, setpoint, label='target')
-        plt.show()
+        # plt.plot(_time, heading, label='measured')
+        # plt.plot(_time, setpoint, label='target')
+        # plt.show()
 
     def test_PID_controller_switch(self):
         # Initial previous if use heading
@@ -145,6 +145,27 @@ class TestPID(unittest.TestCase):
         velocity = 1
         use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
         self.assertTrue(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+
+    def test_rudder_angle_calculation(self):
+        self.pid.setpoint = 0
+        heading = 0
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(heading)
+        angle = rc.rudder_angle_calculation(heading, pid_adjusted_heading, math.pi/4, 2)
+        self.assertAlmostEqual(angle, 0)
+        self.pid.setpoint = math.pi/4
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(heading)
+        angle = rc.rudder_angle_calculation(heading, pid_adjusted_heading, math.pi/4, 2)
+        self.assertAlmostEqual(angle, -math.pi/4)
+        self.pid.setpoint = -math.pi / 4
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(heading)
+        angle = rc.rudder_angle_calculation(heading, pid_adjusted_heading, math.pi / 4, 2)
+        self.assertAlmostEqual(angle, math.pi / 4)
 
 
 class Plotting:

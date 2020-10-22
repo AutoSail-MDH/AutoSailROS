@@ -1,6 +1,5 @@
 import math
 import time
-#from simple_pid import PID
 
 
 def rudder_angle_calculation(current_heading, pid_corrected_heading, rudder_limit, velocity):
@@ -115,6 +114,3 @@ class PID:
         self.last_time = time.time()
         self.last_output = 0
         self.last_control_signal = 0
-
-
-
