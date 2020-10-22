@@ -47,7 +47,7 @@ class TestPID(unittest.TestCase):
         self.assertEqual(self.pid.min_value, -math.pi)
         self.assertEqual(self.pid.max_value, math.pi)
         self.assertEqual(self.pid.last_output, None)
-        self.assertEqual(self.pid.last_heading, 0)
+        self.assertEqual(self.pid.last_control_signal, 0)
 
     def test_PID_convergence(self):
         last_time = time.time()
@@ -57,10 +57,10 @@ class TestPID(unittest.TestCase):
         while True:
             _now = time.time()
             pid_adjusted_heading = self.pid(heading[-1])
-            heading += [new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now-last_time)]
+            heading += [heading[-1]+new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now-last_time)]
             if abs(_now-check_time) > 0.5:
                 check_time = _now
-                if is_converging(_list=heading, conv_point=self.pid.setpoint, error_margin=1e-1):
+                if is_converging(_list=heading, conv_point=self.pid.setpoint, error_margin=1e-2):
                     break
             last_time = _now
 
@@ -73,7 +73,7 @@ class Plotting:
     def __init__(self):
         self.pid = rc.PID()
         self.heading = 0
-        self.pid.tunings = (1, 0.001, 0.005)
+        self.pid.tunings = (2, 0.001, 0.005)
 
     def plot(self):
         start_time = time.time()
