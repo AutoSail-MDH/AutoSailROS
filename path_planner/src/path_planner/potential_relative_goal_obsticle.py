@@ -14,7 +14,7 @@ def potential_relative_obstacle_calculation(obstacle, obstacle_weight, d_inf, p)
     for i in range(obstacle_shape[0]):
         u_o = potential_relative_obstacle_calculation_j(obstacle[i, :], obstacle_weight, d_inf, p) + u_o
     return u_o
-    # potential_relative_obstacle_calculation_j
+
 
 
 def potential_relative_goal_calculation(goal, goal_weight, p):
@@ -33,3 +33,5 @@ if __name__ == '__main__':
     u_g = potential_relative_goal_calculation(goal, goal_weight, p)
     print(u_o)
     print("Potential Ug", u_g)
+
+    # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6607961
