@@ -2,7 +2,6 @@
 publisher_queue_size: 10
 rate: 10
 
-
 sail_limits:
   - 0.60415243338
   - -0.60415243338
