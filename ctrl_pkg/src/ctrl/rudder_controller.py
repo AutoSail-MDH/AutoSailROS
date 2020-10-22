@@ -84,7 +84,12 @@ class PID:
         self.integral = 0
         self.derivative = 0
         self.error = 0
-        self.setpoint = setpoint
+
+        # Check if setpoint is in the first revolution, else make it so
+        if 0 <= setpoint < 2 * math.pi:
+            self._setpoint = setpoint
+        else:
+            self._setpoint = math.atan2(math.sin(setpoint), math.cos(setpoint))
 
         # The coefficients of the PID
         self.kp = kp
@@ -111,12 +116,8 @@ class PID:
         if dt < self.sample_time and self.last_output is not None:
             return self.last_output
 
-        # If value is not within first rotation, make it so
-        if not (0 <= self.setpoint < 2*math.pi):
-            self.setpoint = math.atan2(math.sin(self.setpoint), math.cos(self.setpoint))
-
         # The PID value calculations
-        self.error = math.atan2(math.sin(self.setpoint-control_signal), math.cos(self.setpoint-control_signal))
+        self.error = math.atan2(math.sin(self._setpoint-control_signal), math.cos(self._setpoint-control_signal))
         self.integral += self.error*dt
         self.integral = max(min(self.integral, self.max_value), self.min_value)  # Clamed to avoid integral windup
         self.derivative = (self.error-self.previous_error)/dt
@@ -132,6 +133,18 @@ class PID:
         self.last_time = _now
 
         return output
+
+    @property
+    def setpoint(self):
+        return self._setpoint
+
+    @setpoint.setter
+    def setpoint(self, new_setpoint):
+        if not (0 <= new_setpoint < 2*math.pi):
+            self._setpoint = math.atan2(math.sin(new_setpoint), math.cos(new_setpoint))
+        else:
+            self._setpoint = new_setpoint
+        self.reset()
 
     def set_limits(self, limits):
         if limits(0) > limits(1):
