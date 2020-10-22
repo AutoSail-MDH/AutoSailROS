@@ -15,7 +15,7 @@ def trajectory_to_relative_heading(desired_trajectory, current_heading):
     return heading
 
 
-def use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_threshold=3):
+def is_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_threshold=3):
     """
     Return True if heading should be used as the setpoint for the PID, depending on the velocity of the vessel and
     latching with an upper and lower threshold.
@@ -110,6 +110,10 @@ class PID:
         # Returns last value if the PID have recently ran
         if dt < self.sample_time and self.last_output is not None:
             return self.last_output
+
+        # If value is not within first rotation, make it so
+        if not (0 <= self.setpoint < 2*math.pi):
+            self.setpoint = math.atan2(math.sin(self.setpoint), math.cos(self.setpoint))
 
         # The PID value calculations
         self.error = math.atan2(math.sin(self.setpoint-control_signal), math.cos(self.setpoint-control_signal))
