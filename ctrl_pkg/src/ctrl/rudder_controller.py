@@ -32,51 +32,6 @@ def is_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, low
     else:
         return previous_bool
 
-"""
-class PidController:
-    def __init__(self, kp=1, ki=0.1, kd=0.05, limits=math.pi):
-
-        self.current_heading = None
-        self.desired_course = None
-        self.desired_heading = None
-        self.setpoint = None
-        self.heading_flag = True
-        self.pid = PID(kp, ki, kd, 0)  # Initialization of the PID, with 0 as the control signal
-        self.pid.output_limits = (-limits, limits)  # Limits the PID adjusted heading integral part
-
-    def update_pid_output(self):
-        self.setpoint_to_use()
-        corrected_heading = self.pid(self.setpoint)
-        corrected_heading = corrected_heading % (2*math.pi)
-
-
-    def set_limits(self, limits):
-
-        self.pid.output_limits = (limits[0], limits[1])
-
-    def use_heading(self, flag):
-
-        self.heading_flag = flag
-
-    def update_setpoint(self, setpoint):
-
-        self.pid.setpoint = setpoint %
-
-    def set_current_heading(self, heading):
-
-        self.current_heading = heading % (2*math.pi)
-
-    def setpoint_to_use(self):
-
-        if self.heading_flag:
-            self.setpoint = self.desired_heading
-        else:
-            self.setpoint = self.desired_course
-
-    def __call__(self):
-        return self.update_pid_output()
-"""
-
 
 class PID:
     def __init__(self, kp=1.0, ki=0.1, kd=0.05, setpoint=0, output_limits=(-math.pi, math.pi), sample_time=0.01):

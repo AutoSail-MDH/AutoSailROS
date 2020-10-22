@@ -17,7 +17,14 @@ def new_heading(pid_adjusted_heading, dt):  # Hittade bara på någonting
     return float(pid_adjusted_heading*dt*10.0)
 
 
-def is_converging(_list, conv_point, error_margin=1e-3):
+def is_converged(_list, conv_point, error_margin=1e-3):
+    """
+    Checks the last headings to see if they have converged
+    :param _list: The list of the previous headings
+    :param conv_point: The point of convolution
+    :param error_margin: How far from the point of convolution the heading is allowed to be
+    :return: True if the past 20 values is within the error margin, else False
+    """
     for i in _list[-20:]:
         list_item = abs(i - conv_point)
         if list_item > error_margin:
@@ -26,12 +33,21 @@ def is_converging(_list, conv_point, error_margin=1e-3):
 
 
 def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
+    """
+    Run until the heading have converged
+    :param pid: rudder_controller.PID class
+    :param heading: list of the previous headings
+    :param _time: Used for plotting. e.g. list = []
+    :param start_time: Used for plotting. time.time() when the run started.
+    :param setpoint: Used for plotting. e.g. list = []
+    """
     last_time = time.time()
-    while not is_converging(_list=heading, conv_point=pid.setpoint):
-        _now = time.time()
+    while not is_converged(_list=heading, conv_point=pid.setpoint):
+
 
         # Run PID and get new heading
         pid_adjusted_heading = pid(heading[-1])
+        _now = time.time()
         heading += [(heading[-1] + new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now - last_time))
                     % (2 * math.pi)]
 
@@ -41,8 +57,8 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
         if setpoint is not None:
             setpoint += [pid.setpoint]
 
+        # used for calculating dt in new_heading()
         last_time = _now
-    return heading
 
 
 class TestPID(unittest.TestCase):
@@ -71,8 +87,6 @@ class TestPID(unittest.TestCase):
 
     def test_PID_convergence(self):
         last_time = time.time()
-        check_time = last_time
-        start_time = last_time
         heading = [0.0]
         self.pid.setpoint = 3*math.pi
         run_convergence(pid=self.pid, heading=heading)
@@ -96,24 +110,41 @@ class TestPID(unittest.TestCase):
         for i in range(0, 4):
             self.pid.reset()
             self.pid.setpoint = 0.5*i*math.pi
-            while not is_converging(heading, self.pid.setpoint):
+            while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
         for i in range(4, -1, -1):
-            self.pid.reset()
             self.pid.setpoint = 0.5*i*math.pi
-            while not is_converging(heading, self.pid.setpoint):
+            while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
 
         # Uncomment for plotting of heading
-        #plt.plot(_time, heading, label='measured')
-        #plt.plot(_time, setpoint, label='target')
-        #plt.show()
+        plt.plot(_time, heading, label='measured')
+        plt.plot(_time, setpoint, label='target')
+        plt.show()
 
-    #def test_PID_controller_switch(self):
-    #    velocity = 1
-    #    use_heading = True
-    #    if rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity):
+    def test_PID_controller_switch(self):
+        # Initial previous if use heading
+        use_heading = True
 
+        velocity = 1
+        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertTrue(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+
+        velocity = 4
+        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertTrue(use_heading)
+
+        velocity = 8
+        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertFalse(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+
+        velocity = 4
+        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertFalse(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+
+        velocity = 1
+        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertTrue(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
 
 
 class Plotting:
