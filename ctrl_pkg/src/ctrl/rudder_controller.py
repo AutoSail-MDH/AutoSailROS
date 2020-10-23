@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# Standard libs
 import math
 import time
 
@@ -14,7 +16,7 @@ def trajectory_to_relative_heading(desired_trajectory, current_heading):
     return heading
 
 
-def is_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_threshold=3):
+def if_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_threshold=3):
     """
     Return True if heading should be used as the setpoint for the PID, depending on the velocity of the vessel and
     latching with an upper and lower threshold.
@@ -114,3 +116,4 @@ class PID:
         self.last_time = time.time()
         self.last_output = 0
         self.last_control_signal = 0
+

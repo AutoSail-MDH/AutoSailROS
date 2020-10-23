@@ -7,6 +7,7 @@ setup_args = generate_distutils_setup(
     package_dir={'': 'src'},
     install_requires=[
         "numpy"
+
     ]
 )
 setup(**setup_args)
