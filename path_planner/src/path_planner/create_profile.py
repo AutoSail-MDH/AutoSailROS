@@ -16,21 +16,21 @@ def create_profile(dim, pos_v):
         dim = dim + 1
     radius = (dim-1)/2
     l_range = np.linspace(-radius, radius, dim)
+    list_len = diameter * diameter - 1
 
     for j in range(7):
         for i in range(dim):
             p = PointClass(-radius+j, l_range[i], pos_v[0]-radius+j, pos_v[1]-radius+i, 0)
             profile_.append(p)
-    return profile_, dim
+    return profile_, list_len
 
 
 if __name__ == '__main__':
     diameter = 6
     position_v = np.array([9, 7])
 
-    profile, diameter = create_profile(dim=diameter, pos_v=position_v)
+    profile, list_len = create_profile(dim=diameter, pos_v=position_v)
 
-    list_len = diameter * diameter - 1
     for k in range(list_len):
         print("p", profile[k].l_kx, profile[k].l_ky, profile[k].g_kx, profile[k].g_ky)
 
