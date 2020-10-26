@@ -3,9 +3,9 @@ import numpy as np
 
 #  wind_sensor_readings[0] will give wind speed
 #  wind_sensor_readings[1] will give wind angle in degrees
-def sail_angle_calculation(wind_sensor_readings, sail_limits):
+def sail_angle_calculation(wind_sensor_readings):
     #  limits on sail angle
-    #  sail_limits = [-np.pi / 5.2, np.pi / 5.2]
+    sail_limits = [-np.pi / 5.2, np.pi / 5.2]
     sail_angle_rad = 0
     if -181 < int(wind_sensor_readings) < 181:
         sail_angle_rad = np.multiply(-np.sign(wind_sensor_readings),
