@@ -1,18 +1,31 @@
 #!/usr/bin/env python3
 # Standard libs
 import math
-import time
 
 
 def rudder_angle_calculation(current_heading, pid_corrected_heading, rudder_limit, velocity):
+    """
+    Calculates the angle of the rudder given
+    :param current_heading:
+    :param pid_corrected_heading:
+    :param rudder_limit:
+    :param velocity:
+    :return:
+    """
     if math.cos(current_heading-pid_corrected_heading) < 0:
         return math.copysign(1, velocity)*math.copysign(rudder_limit, math.sin(current_heading-pid_corrected_heading))
     else:
         return math.copysign(math.sin(current_heading-pid_corrected_heading)*rudder_limit, velocity)
 
 
-def trajectory_to_relative_heading(desired_trajectory, current_heading):
-    heading = desired_trajectory-current_heading
+def trajectory_to_relative_heading(desired_trajectory, current_course):
+    """
+    Transforms the course to a heading
+    :param desired_trajectory: The desired direction in global frame
+    :param current_course: The current direction in global frame
+    :return: The heading of the vessel
+    """
+    heading = desired_trajectory-current_course
     return heading
 
 

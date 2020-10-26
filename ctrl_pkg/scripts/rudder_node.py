@@ -8,7 +8,8 @@ import rospy
 import std_msgs.msg
 
 # Local libs
-import ctrl.rudder_controller as rc
+from ctrl import rudder_controller as rc
+from ctrl import pid
 
 
 # Class for saving the values of the subscribers
@@ -38,7 +39,7 @@ class SubscriberValues:
 
 if __name__ == "__main__":
     rospy.init_node("pid")
-    rc_pid = rc.PID()
+    rc_pid = pid.PID()
     values = SubscriberValues()
 
     # Constants
