@@ -8,8 +8,8 @@ publisher_queue_size: 1
 rate: 60
 
 sail_limits:
-  - (-np.pi / 5.2)
-  - (np.pi / 5.2)
+  - 0.60415243338
+  - -0.60415243338
 
 rudder_limits: 0.7853981633974483
 
