@@ -19,9 +19,9 @@ if __name__ == "__main__":
 
     #  Variables
     values = SubscriberValues()
-    Current_wind = 0.0
+    Current_wind = 45
     rate = rospy.Rate(1)
-
+    sail_limits = rospy.get_param("~sail_limits", 1)
     #  Publisher
     sail_angle = rospy.Publisher("sail_control_topic", std_msgs.msg.Float32, queue_size=1)
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         # calculate for new sail position
-        new_sail_angle = sail_angle_calculation(Current_wind)
+        new_sail_angle = sail_angle_calculation(Current_wind, sail_limits)
 
         # publish in log
         Publish_txt = "New angle"

@@ -2,4 +2,5 @@
    <node pkg="ctrl_pkg" name="sail_controller" type="sail_node.py">
       <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
    </node>
+
 </launch>
