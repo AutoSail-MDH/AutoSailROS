@@ -31,13 +31,26 @@ def reshape_profile(profile, dim):
     return profile_matrix
 
 
+def find_global_minima_angle(profile):
+    min_index = find_global_minima_index(profile)
+    angle = np.arctan2(profile[min_index].l_ky, profile[min_index].l_kx)
+    print(angle)
+
+
+def find_global_minima_index(profile):
+
+    potential =[obj.u for obj in profile]
+    return potential.index(min(potential))
+#    print(min(potential), potential.index(min(potential)))
+#    print(potential[potential.index(min(potential))])
+
 if __name__ == '__main__':
     # Profile parameters
     diameter = 100
     position_v = np.array([50, 50])
     # Goal & obstacle parameters
     obstacle = np.array([[20, 10], [50, 10], [60, 80]])
-    goal = np.array([50, 70])
+    goal = np.array([70, 70])
     goal_weight = 4
     obstacle_weight = 100
     d_inf = 10
@@ -51,11 +64,10 @@ if __name__ == '__main__':
     v_v = 4
 
     profile, list_len = cp.create_profile(dim=diameter, pos_v=position_v)
-
     profile = calculate_total_potential(profile, list_len, obstacle, obstacle_weight, d_inf, goal, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, heading)
-
-#    print("list_len", list_len)
     profile_matrix = reshape_profile(profile, diameter)
-#    print(profile_matrix)
+
+    find_global_minima_angle(profile)
+
     plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
     plt.show()
