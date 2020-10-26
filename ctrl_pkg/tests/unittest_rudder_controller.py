@@ -7,7 +7,8 @@ import time
 import matplotlib.pyplot as plt
 
 # Local libs
-from src.ctrl import rudder_controller as rc
+from ctrl import rudder_controller as rc
+from ctrl import pid
 
 
 def new_heading(pid_adjusted_heading, dt):  # Hittade bara på någonting
@@ -65,7 +66,7 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
 
 class TestPID(unittest.TestCase):
     def setUp(self):
-        self.pid = rc.PID(kp=2.0, ki=1, kd=0.05)
+        self.pid = pid.PID(kp=2.0, ki=1, kd=0.05)
 
     def test_PidController_init(self):
         # PID values
@@ -120,9 +121,9 @@ class TestPID(unittest.TestCase):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
 
         # Uncomment for plotting of heading
-        plt.plot(_time, heading, label='measured')
-        plt.plot(_time, setpoint, label='target')
-        plt.show()
+        # plt.plot(_time, heading, label='measured')
+        # plt.plot(_time, setpoint, label='target')
+        # plt.show()
 
     def test_PID_controller_switch(self):
         # Initial previous if use heading
@@ -175,7 +176,7 @@ class TestPID(unittest.TestCase):
 
 class Plotting:
     def __init__(self):
-        self.pid = rc.PID()
+        self.pid = pid.PID()
         self.heading = 0
         self.pid.tunings = (3, 0.1, 0.05)
 
