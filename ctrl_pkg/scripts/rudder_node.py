@@ -39,13 +39,20 @@ class SubscriberValues:
 
 if __name__ == "__main__":
     rospy.init_node("pid")
-    rc_pid = pid.PID()
+    kp = rospy.get_param("~pid_coefficients/kp", 1)
+    ki = rospy.get_param("~pid_coefficients/ki", 0.1)
+    kd = rospy.get_param("~pid_coefficients/kd", 0.05)
+    rc_pid = pid.PID(kp=kp, ki=ki, kd=kd)
     values = SubscriberValues()
 
     # Constants
     new_rudder_angle = 0
     if_heading_controller = True
-    r = rospy.Rate(60)
+    rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi/4)
+
+    # Set update frequency
+    refresh_rate = rospy.get_param("~rate", 60)
+    r = rospy.Rate(refresh_rate)
 
     # Temporary testing publishers TODO: remove
     pub_test1 = rospy.Publisher("pathplanner", std_msgs.msg.Float32, queue_size=1)
@@ -84,7 +91,7 @@ if __name__ == "__main__":
             pid_heading = rc_pid(control_signal=values.current_course)
             if_heading_controller = False
         new_rudder_angle = rc.rudder_angle_calculation(values.current_heading, pid_heading,
-                                                       rudder_limit=math.pi/4, velocity=v)
+                                                       rudder_limit=rudder_angle_limit, velocity=v)
 
         # Publish the rudder angle
         rudder_angle.publish(new_rudder_angle)

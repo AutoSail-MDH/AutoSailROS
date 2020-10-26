@@ -1,7 +1,19 @@
 #  limits for the sail max rotation.
-publisher_queue_size: 10
-rate: 10
+name: "config"
+
+anonymous: False
+
+publisher_queue_size: 1
+
+rate: 60
 
 sail_limits:
   - 0.60415243338
   - -0.60415243338
+
+rudder_limits: 0.7853981633974483
+
+pid_coefficients:
+    kp: 1
+    ki: 0.1
+    kd: 0.05
