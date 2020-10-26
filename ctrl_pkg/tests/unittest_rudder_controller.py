@@ -7,8 +7,8 @@ import time
 import matplotlib.pyplot as plt
 
 # Local libs
-from src.ctrl import rudder_controller as rc
-from src.ctrl import pid
+from ctrl import rudder_controller as rc
+from ctrl import pid
 
 
 def new_heading(pid_adjusted_heading, dt):  # Hittade bara på någonting
