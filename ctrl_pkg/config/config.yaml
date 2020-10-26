@@ -3,10 +3,17 @@ name: "config"
 
 anonymous: False
 
-publisher_queue_size: 10
-rate: 10
+publisher_queue_size: 1
 
+rate: 60
 
 sail_limits:
   - (-np.pi / 5.2)
   - (np.pi / 5.2)
+
+rudder_limits: 0.7853981633974483
+
+pid_coefficients:
+    kp: 1
+    ki: 0.1
+    kd: 0.05

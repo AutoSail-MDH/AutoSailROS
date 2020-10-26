@@ -46,6 +46,3 @@ def if_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, low
     else:
         return previous_bool
 
-
-
-
