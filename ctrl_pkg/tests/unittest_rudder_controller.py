@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+
+# Standard libs
 import unittest
-import sys
 import math
 import time
 import matplotlib.pyplot as plt
-sys.path.append('../scripts/')
+
+# Local libs
 from src.ctrl import rudder_controller as rc
 
 
@@ -25,7 +28,7 @@ def is_converged(_list, conv_point, error_margin=1e-3):
     :param error_margin: How far from the point of convolution the heading is allowed to be
     :return: True if the past 20 values is within the error margin, else False
     """
-    for i in _list[-20:]:
+    for i in _list[-100:]:
         list_item = abs(i - conv_point)
         if list_item > error_margin:
             return False
@@ -43,7 +46,6 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
     """
     last_time = time.time()
     while not is_converged(_list=heading, conv_point=pid.setpoint):
-
 
         # Run PID and get new heading
         pid_adjusted_heading = pid(heading[-1])
@@ -107,12 +109,12 @@ class TestPID(unittest.TestCase):
         setpoint = [0.0]
         _time = [0.0]
 
-        for i in range(0, 4):
+        for i in range(0, 5):
             self.pid.reset()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
-        for i in range(4, -1, -1):
+        for i in range(6, -1, -1):
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
@@ -127,24 +129,48 @@ class TestPID(unittest.TestCase):
         use_heading = True
 
         velocity = 1
-        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertTrue(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertTrue(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
 
         velocity = 4
-        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
         self.assertTrue(use_heading)
 
         velocity = 8
-        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertFalse(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertFalse(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
 
         velocity = 4
-        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertFalse(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertFalse(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
 
         velocity = 1
-        use_heading = rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertTrue(rc.is_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
+        self.assertTrue(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+
+    def test_rudder_angle_calculation(self):
+        control_signal = 0
+
+        self.pid.setpoint = 0
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(control_signal)
+        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        self.assertAlmostEqual(angle, 0)
+
+        self.pid.setpoint = math.pi/4
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(control_signal)
+        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        self.assertAlmostEqual(angle, -math.pi/4)
+
+        self.pid.setpoint = -math.pi / 4
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(control_signal)
+        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+        self.assertAlmostEqual(angle, math.pi / 4)
 
 
 class Plotting:
