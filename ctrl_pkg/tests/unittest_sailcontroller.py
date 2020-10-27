@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+PKG = 'package'
 import unittest
 import sys
 import rospy
@@ -31,4 +33,6 @@ class TestSailController(unittest.TestCase):
     
 
 if __name__ == '__main__':
-    unittest.main()
+    import rostest
+    rostest.rosrun(PKG, "unittest_sail_controller", TestSailController)
+    #  unittest.main()
