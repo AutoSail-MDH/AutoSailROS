@@ -55,21 +55,19 @@ if __name__ == "__main__":
     r = rospy.Rate(refresh_rate)
 
     # Temporary testing publishers TODO: remove
-    pub_test1 = rospy.Publisher("pathplanner", std_msgs.msg.Float32, queue_size=1)
-    pub_test_current_course = rospy.Publisher("current_course", std_msgs.msg.Float32, queue_size=1)
+    pub_test_current_course = rospy.Publisher("path_planner/course", std_msgs.msg.Float32, queue_size=1)
     pub_test_current_heading = rospy.Publisher("current_heading", std_msgs.msg.Float32, queue_size=1)
-    pub_test4 = rospy.Publisher("velocity_above_threshold", std_msgs.msg.Bool, queue_size=1)
 
     # Subscribers
-    rospy.Subscriber(name="current_course", data_class=std_msgs.msg.Float32, callback=values.callback_course,
-                     queue_size=1)  # TODO: change the name to what is used by the current course publishing
+    rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float32, callback=values.callback_course,
+                     queue_size=1)
     rospy.Subscriber(name="current_heading", data_class=std_msgs.msg.Float32, callback=values.callback_heading,
                      queue_size=1)  # TODO: change the name of topic
     rospy.Subscriber(name="velocity", data_class=std_msgs.msg.Bool, callback=values.callback_velocity_flag,
                      queue_size=1)  # TODO: change the name
 
     # Publishers
-    rudder_angle = rospy.Publisher(name="rudder_angle", data_class=std_msgs.msg.Float32, queue_size=1)
+    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32, queue_size=1)
 
     # Parameters for testing TODO: remove
     i = 0
