@@ -6,6 +6,25 @@ import matplotlib.pyplot as plt
 
 
 def calculate_total_potential(profile, list_len, obstacle, obstacle_weight, d_inf, goal, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, heading):
+    """
+    Summarizes all the potentials in one point
+    :param profile: The points in the area being considered
+    :param list_len: Length of the profile.
+    :param obstacle: A numpy array of all the obstacles.
+    :param obstacle_weight: The fixed weight value of the obstacle.
+    :param d_inf: The zone of influence for obstacles.
+    :param goal: The postion of the goal i.e current waypoint
+    :param goal_weight: The fixed weight value of the goal.
+    :param p_ngz: The fixed value added to a points potential if it is in the no-go zone
+    :param p_hyst: The value added to the potential of a point if the point is behind the vessel i.e the coast of
+     tacking.
+    :param g_v: A set scalar for the velocity of the vessel
+    :param v_v: The velocity of the vessel
+    :param w_speed: The wind speed
+    :param w_theta: The wind angle
+    :param heading: The heading of the vessel
+    :return: The profile were every point contations it total potential.
+    """
     p = np.array([0, 0])
     for i in range(list_len + 1):
         p[0] = profile[i].g_kx
@@ -20,6 +39,12 @@ def calculate_total_potential(profile, list_len, obstacle, obstacle_weight, d_in
 
 
 def reshape_profile(profile, dim):
+    """
+    Rechapes the porifle into a matrix for the heat map plot.
+    :param profile: The points in the area being considered
+    :param dim: The lenght of one side in the square matrix around the vessel.
+    :return: The profile as a matrix.
+    """
     g = 0
     if (dim % 2) == 0:
         dim = dim + 1
@@ -32,17 +57,25 @@ def reshape_profile(profile, dim):
 
 
 def find_global_minima_angle(profile):
+    """
+    Finds the minimum potential in the profile.
+    :param profile:The points in the area being considered
+    :return: The angle and index to/of the minimum potential in the profile.
+    """
     min_index = find_global_minima_index(profile)
     angle = np.arctan2(profile[min_index].l_ky, profile[min_index].l_kx)
-    print(angle)
+    return angle, min_index
 
 
 def find_global_minima_index(profile):
-
-    potential =[obj.u for obj in profile]
+    """
+    Findes the index for the minimum potential
+    :param profile:The points in the area being considered
+    :return: The index of the minimum potential
+    """
+    potential = [obj.u for obj in profile]
     return potential.index(min(potential))
-#    print(min(potential), potential.index(min(potential)))
-#    print(potential[potential.index(min(potential))])
+
 
 if __name__ == '__main__':
     # Profile parameters

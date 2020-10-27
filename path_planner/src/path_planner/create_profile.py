@@ -11,14 +11,22 @@ class PointClass:
 
 
 def create_profile(dim, pos_v):
+    """
+    Creates a list for all points in determined area around the boat with  local, global coordinates and the potential
+    for that points.
+    :param dim: he lenght of one side in the square matrix around the vessel for which potential is calculated.
+    :param pos_v: The position of the vessel
+    :return: A list for all points in determined area around the boat with  local, global coordinates and the potential
+    for that points.
+    """
     profile_ = []
     if (dim % 2) == 0:
         dim = dim + 1
     radius = (dim-1)/2
     l_range = np.linspace(-radius, radius, dim)
-    list_len = diameter * diameter - 1
+    list_len = dim * dim - 1
 
-    for j in range(7):
+    for j in range(dim):
         for i in range(dim):
             p = PointClass(-radius+j, l_range[i], pos_v[0]-radius+j, pos_v[1]-radius+i, 0)
             profile_.append(p)
