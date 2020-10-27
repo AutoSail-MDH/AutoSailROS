@@ -1,4 +1,4 @@
-#  to test run: rostest ctrl_pkg rostest.test
+<!-- to test run: rostest ctrl_pkg rostest.test -->
 <launch>
    <node pkg="ctrl_pkg" name="sail_node" type="sail_node.py">
       <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
@@ -27,10 +27,10 @@
     </test>
 
 
-</launch>
+
 
 <!-- hztest -->
-<launch>
+
   <node name="rudder_controller" pkg="ctrl_pkg" type="rudder_controller.py" />
 
   <param name="hztest1/topic" value="chatter" />
