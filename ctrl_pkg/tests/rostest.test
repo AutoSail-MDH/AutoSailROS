@@ -1,19 +1,29 @@
 <launch>
-   <node pkg="ctrl_pkg" name="sail_controller" type="sail_node.py">
+   <node pkg="ctrl_pkg" name="sail_node" type="sail_node.py">
       <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
    </node>
 
    <!-- Run unittest and rostest for services -->
-    <test pkg="ctrl_pkg" type="unittest_sailcontroller.py" test-name="unittest_sailcontroller"/>
-    <test pkg="ctrl_pkg" type="unittest_rudder_controller.py" test-name="unittest_rudder_controller"/>
+    <test pkg="ctrl_pkg" type="unittest_sailcontroller.py" test-name="sail_controller"/>
+
 
     <!-- Run publish tests -->
-    <test pkg="ctrl_pkg" type="hztest" test-name="hztest1">
-        <param name="topic" value="angle_rad"/>
-        <param name="hz" value="60"/>
+    <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
+        <param name="topic" value="sail_control_topic"/>
+        <param name="hz" value="15"/>
         <param name="hzerror" value="0.5"/>
         <param name="test_duration" value="10.0"/>
     </test>
+
+    <test pkg="rostest" type="publishtest" test-name="sail_control_pubtest">
+  <rosparam>
+    topics:
+      - name: sail_control_topic
+        timeout: 10
+        negative: False
+  </rosparam>
+    </test>
+
 
 </launch>
 
