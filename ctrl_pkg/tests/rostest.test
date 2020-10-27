@@ -5,6 +5,7 @@
 
    <!-- Run unittest and rostest for services -->
     <test pkg="ctrl_pkg" type="unittest_sailcontroller.py" test-name="sail_controller"/>
+    <test pkg="ctrl_pkg" type="unittest_rudder_controller.py" test-name="rudder_controller"/>
 
 
     <!-- Run publish tests -->
@@ -16,12 +17,12 @@
     </test>
 
     <test pkg="rostest" type="publishtest" test-name="sail_control_pubtest">
-  <rosparam>
-    topics:
-      - name: sail_control_topic
-        timeout: 10
-        negative: False
-  </rosparam>
+      <rosparam>
+        topics:
+          - name: sail_control_topic
+            timeout: 10
+            negative: False
+      </rosparam>
     </test>
 
 
