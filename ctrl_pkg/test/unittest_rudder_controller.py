@@ -218,6 +218,8 @@ if __name__ == "__main__":
     # plot = Plotting()
     # plot.plot()
     import rostest
+    import rosunit
 
-    unittest.main()
-    rostest.rosrun("test_roslaunch", "test_rudder", TestRudder)
+    #unittest.main()
+    rosunit.unitrun("ctrl_pkg", "unittest_rudder_controller", TestRudder)
+

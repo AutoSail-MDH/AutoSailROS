@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#!/usr/bin/env python3
 import unittest
 import sys
 
@@ -31,4 +32,5 @@ class TestSailController(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    rostest.rosrun(PKG, "unittest_sail_controller", TestSailController)
+    import rosunit
+    rosunit.unitrun("ctrl_pkg", "unittest_sailcontroller", TestSailController)

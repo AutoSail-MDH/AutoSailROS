@@ -10,7 +10,7 @@
     <test pkg="ctrl_pkg" type="unittest_rudder_controller.py" test-name="rudder_controller"/>
 
 
-    <!-- Run publish tests -->
+    <!-- Run publish test -->
     <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
         <param name="topic" value="sail_control_topic"/>
         <param name="hz" value="60"/>
@@ -29,7 +29,7 @@
 
     <test test-name="rudder_controller_test" pkg="rostest" type="hztest" name="hztest1" >
       <param name="topic" value="rudder_angle" />
-      <param name="hz" value="10.0" />
+      <param name="hz" value="60.0" />
       <param name="hzerror" value="0.5" />
       <param name="test_duration" value="5.0" />
     </test>
