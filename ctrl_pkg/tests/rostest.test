@@ -11,7 +11,7 @@
     <!-- Run publish tests -->
     <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
         <param name="topic" value="sail_control_topic"/>
-        <param name="hz" value="15"/>
+        <param name="hz" value="60"/>
         <param name="hzerror" value="0.5"/>
         <param name="test_duration" value="10.0"/>
     </test>

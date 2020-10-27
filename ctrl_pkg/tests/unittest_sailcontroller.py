@@ -1,13 +1,10 @@
 #!/usr/bin/env python
-PKG = 'package'
 import unittest
 import sys
-import rospy
-import numpy as np
 
 from ctrl.sail_controller import sail_angle_calculation
 #  from ctrl import rudder_controller
-
+PKG = 'package'
 sys.path.append('../scripts/')
 
 
@@ -35,4 +32,3 @@ class TestSailController(unittest.TestCase):
 if __name__ == '__main__':
     import rostest
     rostest.rosrun(PKG, "unittest_sail_controller", TestSailController)
-    #  unittest.main()
