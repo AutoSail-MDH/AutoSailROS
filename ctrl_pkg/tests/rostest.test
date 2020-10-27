@@ -10,7 +10,7 @@
     <!-- Run publish tests -->
     <test pkg="ctrl_pkg" type="hztest" test-name="hztest1">
         <param name="topic" value="angle_rad"/>
-        <param name="hz" value="10"/>
+        <param name="hz" value="60"/>
         <param name="hzerror" value="0.5"/>
         <param name="test_duration" value="10.0"/>
     </test>

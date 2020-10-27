@@ -121,9 +121,9 @@ class TestPID(unittest.TestCase):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
 
         # Uncomment for plotting of heading
-        # plt.plot(_time, heading, label='measured')
-        # plt.plot(_time, setpoint, label='target')
-        # plt.show()
+        plt.plot(_time, heading, label='measured')
+        plt.plot(_time, setpoint, label='target')
+        plt.show()
 
     def test_PID_controller_switch(self):
         # Initial previous if use heading
@@ -214,4 +214,5 @@ if __name__ == "__main__":
     # Plot the PID
     # plot = Plotting()
     # plot.plot()
+
     unittest.main()
