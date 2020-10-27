@@ -1,3 +1,4 @@
+#  to test run: rostest ctrl_pkg rostest.test
 <launch>
    <node pkg="ctrl_pkg" name="sail_node" type="sail_node.py">
       <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
