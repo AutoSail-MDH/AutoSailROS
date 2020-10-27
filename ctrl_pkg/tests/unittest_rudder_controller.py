@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 # Standard libs
+import sys
 import unittest
 import math
 import time
 import matplotlib.pyplot as plt
+
+# Third party libs
 
 # Local libs
 from ctrl import rudder_controller as rc
@@ -64,7 +67,7 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
         last_time = _now
 
 
-class TestPID(unittest.TestCase):
+class TestRudder(unittest.TestCase):
     def setUp(self):
         self.pid = pid.PID(kp=2.0, ki=1, kd=0.05)
 
@@ -121,9 +124,9 @@ class TestPID(unittest.TestCase):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
 
         # Uncomment for plotting of heading
-        plt.plot(_time, heading, label='measured')
-        plt.plot(_time, setpoint, label='target')
-        plt.show()
+        #plt.plot(_time, heading, label='measured')
+        #plt.plot(_time, setpoint, label='target')
+        #plt.show()
 
     def test_PID_controller_switch(self):
         # Initial previous if use heading
@@ -214,5 +217,7 @@ if __name__ == "__main__":
     # Plot the PID
     # plot = Plotting()
     # plot.plot()
+    import rostest
 
     unittest.main()
+    rostest.rosrun("test_roslaunch", "test_rudder", TestRudder)

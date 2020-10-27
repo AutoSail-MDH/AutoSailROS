@@ -38,7 +38,7 @@ class SubscriberValues:
 
 
 if __name__ == "__main__":
-    rospy.init_node("pid")
+    rospy.init_node("rudder_controller")
     kp = rospy.get_param("~pid_coefficients/kp", 1)
     ki = rospy.get_param("~pid_coefficients/ki", 0.1)
     kd = rospy.get_param("~pid_coefficients/kd", 0.05)

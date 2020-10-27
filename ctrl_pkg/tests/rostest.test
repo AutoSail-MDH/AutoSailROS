@@ -16,3 +16,14 @@
     </test>
 
 </launch>
+
+<!-- hztest -->
+<launch>
+  <node name="rudder_controller" pkg="ctrl_pkg" type="rudder_controller.py" />
+
+  <param name="hztest1/topic" value="chatter" />
+  <param name="hztest1/hz" value="10.0" />
+  <param name="hztest1/hzerror" value="0.5" />
+  <param name="hztest1/test_duration" value="5.0" />
+  <test test-name="hztest_test" pkg="rostest" type="hztest" name="hztest1" />
+</launch>
