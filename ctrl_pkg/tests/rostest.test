@@ -1,4 +1,4 @@
-<!-- to test run: rostest ctrl_pkg rostest.test -->
+<!-- to tests run: rostest ctrl_pkg rostest.tests -->
 <launch>
     <node pkg="ctrl_pkg" name="sail_node" type="sail_node.py">
       <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
@@ -12,7 +12,7 @@
     <test pkg="ctrl_pkg" type="unittest_rudder_controller.py" test-name="rudder_controller"/>
 
 
-    <!-- Run publish test -->
+    <!-- Run publish tests -->
     <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
         <param name="topic" value="sail_control_topic"/>
         <param name="hz" value="60"/>
@@ -30,7 +30,7 @@
     </test>
 
     <test test-name="rudder_controller_test" pkg="rostest" type="hztest" name="hztest1" >
-      <param name="topic" value="rudder_angle" />
+      <param name="topic" value="rudder_controller/rudder_angle" />
       <param name="hz" value="60.0" />
       <param name="hzerror" value="0.5" />
       <param name="test_duration" value="5.0" />

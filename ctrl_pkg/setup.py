@@ -6,8 +6,8 @@ setup_args = generate_distutils_setup(
     packages=['ctrl'],
     package_dir={'': 'src'},
     install_requires=[
-        "numpy"
-
+        "numpy",
+        "matplotlib"
     ]
 )
 setup(**setup_args)

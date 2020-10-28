@@ -200,14 +200,14 @@ catkin_install_python(PROGRAMS
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_ctrl_pkg.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+## Add gtest based cpp tests target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-tests tests/test_ctrl_pkg.cpp)
+# if(TARGET ${PROJECT_NAME}-tests)
+#   target_link_libraries(${PROJECT_NAME}-tests ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+# catkin_add_nosetests(tests)
 if(CATKIN_ENABLE_TESTING)
    find_package(rostest REQUIRED)
   add_rostest(tests/rostest.test)
