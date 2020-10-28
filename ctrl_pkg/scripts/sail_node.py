@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import rospy
 import std_msgs.msg
-import yaml
 from ctrl.sail_controller import sail_angle_calculation
 
 
@@ -16,6 +15,9 @@ class SubscriberValues:
 
 if __name__ == "__main__":
     rospy.init_node("sail_control")
+
+    # temporary until we know how wind sensor output looks like
+    Current_wind = 45
 
     #  Variables
     values = SubscriberValues()
