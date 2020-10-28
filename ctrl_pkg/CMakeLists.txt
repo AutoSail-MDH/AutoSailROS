@@ -10,6 +10,8 @@ project(ctrl_pkg)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  geometry_msgs
+  sensor_msgs
   #catkin_python_setup()  # http://docs.ros.org/en/hydro/api/catkin/html/user_guide/setup_dot_py.html
 )
 

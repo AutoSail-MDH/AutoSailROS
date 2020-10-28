@@ -6,6 +6,8 @@ import math
 # Third party libs
 import rospy
 import std_msgs.msg
+import geometry_msgs.msg
+import sensor_msgs.msg
 
 # Local libs
 from ctrl import rudder_controller as rc
@@ -21,20 +23,20 @@ class SubscriberValues:
         self.velocity = 0
 
     def callback_desired_course(self, data):
-        if data.data is not None:
-            self.desired_course = data.data
+        self.desired_course = data.data
 
     def callback_current_heading(self, data):
-        if data.data is not None:
-            self.current_heading = data.data
+        self.current_heading = data.orientation.z
 
     def callback_velocity(self, data):
-        if data.data is not None:
-            self.velocity = data.data
+        x = data.twist.twist.linear.x
+        y = data.twist.twist.linear.y
+        self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
+        self.current_course = math.atan2(math.cos(x), math.sin(y))
+        rospy.loginfo(x)
 
-    def callback_current_course(self, data):
-        if data.data is not None:
-            self.current_course = data.data
+    #def callback_current_course(self, data):
+    #    self.current_course = data.data
 
 
 if __name__ == "__main__":
@@ -48,7 +50,7 @@ if __name__ == "__main__":
     # Constants
     new_rudder_angle = 0
     if_heading_controller = True
-    rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi/4)
+    rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi / 4)
     queue_size = rospy.get_param("~queue_size", 1)
 
     # Set update frequency
@@ -56,17 +58,17 @@ if __name__ == "__main__":
     r = rospy.Rate(refresh_rate)
 
     rospy.loginfo_once("queue_size: {}\n refresh_rate: {}\n kp: {}\n ki: {}\n kd: {}".format(queue_size, refresh_rate,
-                                                                                         kp, ki, kd))
+                                                                                             kp, ki, kd))
 
     # Subscribers
     rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float32,
                      callback=values.callback_desired_course, queue_size=queue_size)
-    rospy.Subscriber(name="current_heading", data_class=std_msgs.msg.Float32,
-                     callback=values.callback_current_heading, queue_size=queue_size)  # TODO: change the name of topic
-    rospy.Subscriber(name="velocity", data_class=std_msgs.msg.Bool,
-                     callback=values.callback_velocity, queue_size=queue_size)  # TODO: change the name
-    rospy.Subscriber(name="current_course", data_class=std_msgs.msg.Float32,
-                     callback=values.callback_current_course, queue_size=queue_size)  # TODO: change the name
+    rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
+                     callback=values.callback_current_heading, queue_size=queue_size)
+    rospy.Subscriber(name="gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
+                     callback=values.callback_velocity, queue_size=queue_size)
+    #rospy.Subscriber(name="current_course", data_class=std_msgs.msg.Float32,
+    #                 callback=values.callback_current_course, queue_size=queue_size)  # TODO: change the name
 
     # Publishers
     rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32,
@@ -91,4 +93,3 @@ if __name__ == "__main__":
 
         # Keep sync with the ROS frequency
         r.sleep()
-
