@@ -18,6 +18,6 @@ def sail_angle_calculation(wind_sensor_readings, sail_limits):
 
     if -181 < int(wind_sensor_readings) < 181:
         sail_angle_rad = np.multiply(-np.sign(wind_sensor_readings),
-                                     (((float(min(sail_limits)) - float(max(sail_limits))) / np.pi) *
-                                      np.abs(np.deg2rad(wind_sensor_readings)) + max(sail_limits)))
+                                     (((float(-sail_limits) - float(sail_limits)) / np.pi) *
+                                      np.abs(np.deg2rad(wind_sensor_readings)) + sail_limits))
     return sail_angle_rad

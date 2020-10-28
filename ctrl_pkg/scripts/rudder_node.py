@@ -49,25 +49,27 @@ if __name__ == "__main__":
     new_rudder_angle = 0
     if_heading_controller = True
     rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi/4)
+    queue_size = rospy.get_param("~queue_size", math.pi/4)
 
     # Set update frequency
     refresh_rate = rospy.get_param("~rate", 60)
     r = rospy.Rate(refresh_rate)
 
     # Temporary testing publishers TODO: remove
-    pub_test_current_course = rospy.Publisher("path_planner/course", std_msgs.msg.Float32, queue_size=1)
-    pub_test_current_heading = rospy.Publisher("current_heading", std_msgs.msg.Float32, queue_size=1)
+    pub_test_current_course = rospy.Publisher("path_planner/course", std_msgs.msg.Float32, queue_size=queue_size)
+    pub_test_current_heading = rospy.Publisher("current_heading", std_msgs.msg.Float32, queue_size=queue_size)
 
     # Subscribers
     rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float32, callback=values.callback_course,
-                     queue_size=1)
+                     queue_size=queue_size)
     rospy.Subscriber(name="current_heading", data_class=std_msgs.msg.Float32, callback=values.callback_heading,
-                     queue_size=1)  # TODO: change the name of topic
+                     queue_size=queue_size)  # TODO: change the name of topic
     rospy.Subscriber(name="velocity", data_class=std_msgs.msg.Bool, callback=values.callback_velocity_flag,
-                     queue_size=1)  # TODO: change the name
+                     queue_size=queue_size)  # TODO: change the name
 
     # Publishers
-    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32, queue_size=1)
+    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32,
+                                   queue_size=queue_size)
 
     # Parameters for testing TODO: remove
     i = 0

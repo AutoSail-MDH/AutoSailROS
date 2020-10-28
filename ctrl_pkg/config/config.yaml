@@ -1,16 +1,11 @@
-#  limits for the sail max rotation.
-name: "config"
-
-anonymous: False
-
-publisher_queue_size: 1
+queue_size: 1
 
 rate: 60
 
-sail_limits:
-  - 0.60415243338
-  - -0.60415243338
+# pi/5.2 radians
+sail_limits: 0.60415243338
 
+# pi/4 radians
 rudder_limits: 0.7853981633974483
 
 pid_coefficients:

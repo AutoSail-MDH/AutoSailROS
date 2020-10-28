@@ -20,15 +20,16 @@ if __name__ == "__main__":
     #  Variables
     values = SubscriberValues()
     Current_wind = 45
-    predefined_rate = rospy.get_param("~rate", 1)
+    predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
     sail_limits = rospy.get_param("~sail_limits", 1)
+    queue_size = rospy.get_param("~queue_size", 1)
     #  Publisher
-    sail_angle = rospy.Publisher("sail_control_topic", std_msgs.msg.Float32, queue_size=1)
+    sail_angle = rospy.Publisher("sail_control_topic", std_msgs.msg.Float32, queue_size=queue_size)
 
     #  subscriber
     rospy.Subscriber(name="sail_control_topic", data_class=std_msgs.msg.Float32, callback=values.callback_SailAngle,
-                     queue_size=1)
+                     queue_size=queue_size)
 
     while not rospy.is_shutdown():
         # calculate for new sail position
