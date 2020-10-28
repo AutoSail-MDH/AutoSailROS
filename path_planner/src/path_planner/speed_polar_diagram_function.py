@@ -5,11 +5,23 @@ import std_msgs.msg
 
 
 def find_nearest(array, value):
+    """
+    round wind speed to closest hole number 4,6,8,10,12,14,16,20,25
+    :param array: The array of values i.e 4,6,8,10,12,14,16,20,25
+    :param value: The value being rounded
+    :return: The rounded wind speed
+    """
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
 def speed_polar_diagram_calculation(w_speed, w_theta):
+    """
+    Calculates the maximum velocity and no-go zones.
+    :param w_speed: Wind speed
+    :param w_theta: Wind angele
+    :return: Maximum possible velocity, no-go zones and wind angle.
+    """
 
     up_beat = np.array([45, 42.4, 40.5, 37.5, 35.4, 34.1, 33.5, 32.8, 32.6])
     dn_beat = np.array([139.4, 143.1, 146.4, 152.4, 163.7, 169.2, 170.8, 169.7, 148.1])
