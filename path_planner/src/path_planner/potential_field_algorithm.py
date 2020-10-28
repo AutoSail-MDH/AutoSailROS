@@ -12,6 +12,29 @@ class PointClass:
 
 
 class PotentialField:
+    up_beat = np.array([45, 42.4, 40.5, 37.5, 35.4, 34.1, 33.5, 32.8, 32.6])
+    dn_beat = np.array([139.4, 143.1, 146.4, 152.4, 163.7, 169.2, 170.8, 169.7, 148.1])
+    #        angles = np.array([32, 36, 40, 45, 60, 70, 80, 90, 100, 110, 120, 130, 135, 140, 150, 160, 170, 180])
+    speed_array = np.array([4, 6, 8, 10, 12, 14, 16, 20, 25])
+    speed_diagram = np.array([[2.69, 4.03, 5.11, 5.89, 6.35, 6.61, 6.77, 6.98, 7.15],
+                              [3.06, 4.5, 5.62, 6.38, 6.74, 6.94, 7.08, 7.28, 7.44],
+                              [3.39, 4.9, 6.05, 6.72, 7, 7.18, 7.31, 7.51, 7.68],
+                              [3.74, 5.31, 6.44, 7.01, 7.26, 7.42, 7.55, 7.75, 7.93],
+                              [4.47, 6.1, 6.99, 7.5, 7.78, 7.95, 8.1, 8.36, 8.62],
+                              [4.71, 6.32, 7.12, 7.64, 8.01, 8.22, 8.42, 8.72, 9.04],
+                              [4.78, 6.36, 7.14, 7.66, 8.11, 8.48, 8.69, 9.06, 9.52],
+                              [4.7, 6.35, 7.35, 7.81, 8.06, 8.51, 8.9, 9.44, 10.05],
+                              [4.71, 6.5, 7.4, 7.92, 8.21, 8.46, 8.82, 9.79, 10.65],
+                              [4.7, 6.44, 7.3, 7.89, 8.35, 8.65, 8.91, 9.62, 11.25],
+                              [4.47, 6.17, 7.1, 7.71, 8.28, 8.79, 9.15, 9.88, 11.01],
+                              [4.02, 5.69, 6.79, 7.45, 8.01, 8.59, 9.19, 10.39, 11.74],
+                              [3.76, 5.4, 6.6, 7.28, 7.84, 8.4, 8.98, 10.53, 12.19],
+                              [3.5, 5.1, 6.37, 7.11, 7.65, 8.19, 8.74, 10.24, 12.6],
+                              [2.98, 4.45, 5.71, 6.66, 7.25, 7.74, 8.23, 9.4, 11.78],
+                              [2.53, 3.82, 5.01, 6.06, 6.83, 7.38, 7.85, 8.84, 10.77],
+                              [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
+                              [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
+
     def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed):
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
@@ -46,41 +69,19 @@ class PotentialField:
         """
         w_speed_polar_diagram = self.w_speed
 
-        up_beat = np.array([45, 42.4, 40.5, 37.5, 35.4, 34.1, 33.5, 32.8, 32.6])
-        dn_beat = np.array([139.4, 143.1, 146.4, 152.4, 163.7, 169.2, 170.8, 169.7, 148.1])
-#        angles = np.array([32, 36, 40, 45, 60, 70, 80, 90, 100, 110, 120, 130, 135, 140, 150, 160, 170, 180])
-        speed_array = np.array([4, 6, 8, 10, 12, 14, 16, 20, 25])
-        speed_diagram = np.array([[2.69, 4.03, 5.11, 5.89, 6.35, 6.61, 6.77, 6.98, 7.15],
-                                  [3.06, 4.5, 5.62, 6.38, 6.74, 6.94, 7.08, 7.28, 7.44],
-                                  [3.39, 4.9, 6.05, 6.72, 7, 7.18, 7.31, 7.51, 7.68],
-                                  [3.74, 5.31, 6.44, 7.01, 7.26, 7.42, 7.55, 7.75, 7.93],
-                                  [4.47, 6.1, 6.99, 7.5, 7.78, 7.95, 8.1, 8.36, 8.62],
-                                  [4.71, 6.32, 7.12, 7.64, 8.01, 8.22, 8.42, 8.72, 9.04],
-                                  [4.78, 6.36, 7.14, 7.66, 8.11, 8.48, 8.69, 9.06, 9.52],
-                                  [4.7, 6.35, 7.35, 7.81, 8.06, 8.51, 8.9, 9.44, 10.05],
-                                  [4.71, 6.5, 7.4, 7.92, 8.21, 8.46, 8.82, 9.79, 10.65],
-                                  [4.7, 6.44, 7.3, 7.89, 8.35, 8.65, 8.91, 9.62, 11.25],
-                                  [4.47, 6.17, 7.1, 7.71, 8.28, 8.79, 9.15, 9.88, 11.01],
-                                  [4.02, 5.69, 6.79, 7.45, 8.01, 8.59, 9.19, 10.39, 11.74],
-                                  [3.76, 5.4, 6.6, 7.28, 7.84, 8.4, 8.98, 10.53, 12.19],
-                                  [3.5, 5.1, 6.37, 7.11, 7.65, 8.19, 8.74, 10.24, 12.6],
-                                  [2.98, 4.45, 5.71, 6.66, 7.25, 7.74, 8.23, 9.4, 11.78],
-                                  [2.53, 3.82, 5.01, 6.06, 6.83, 7.38, 7.85, 8.84, 10.77],
-                                  [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
-                                  [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
         if w_speed_polar_diagram < 4:
             w_speed_polar_diagram = 4  # wind speed < 4 set to 4
         if w_speed_polar_diagram > 25:
             w_speed_polar_diagram = 25  # winds peed > 25 set to 25
         # round wind speed to closest hole number 4,6,8,10,12,14,16,20,25
-        w_speed_polar_diagram = self.find_nearest(speed_array, w_speed_polar_diagram)
+        w_speed_polar_diagram = self.find_nearest(self.speed_array, w_speed_polar_diagram)
         w_speed_index = np.where(
-            speed_array == w_speed_polar_diagram)  # remap the wind speed to the corresponding index in the arrays.
+            self.speed_array == w_speed_polar_diagram)  # remap the wind speed to the corresponding index in the arrays.
         w_speed_index = w_speed_index[0]
 
-        max_vel = max(np.amax(speed_diagram[:, w_speed_index], axis=1))
+        max_vel = max(np.amax(self.speed_diagram[:, w_speed_index], axis=1))
 
-        return [max_vel, max(up_beat[w_speed_index]), max(dn_beat[w_speed_index]), w_theta]
+        return [max_vel, max(self.up_beat[w_speed_index]), max(self.dn_beat[w_speed_index]), w_theta]
 
     def create_profile(self, pos_v):
         """
@@ -145,7 +146,6 @@ class PotentialField:
         :param heading:Heading of the vessel
         :return:
         """
-
         [max_vel, up_beat, dn_beat, w_theta] = self.speed_polar_diagram_calculation(w_theta)
         no_go = np.array([np.deg2rad(up_beat), np.deg2rad(dn_beat)])
         w_theta = np.deg2rad(w_theta)
@@ -233,7 +233,7 @@ class PotentialField:
         potential = [obj.u for obj in profile]
         return potential.index(min(potential))
 
-    def main_loop(self, position_v, obstacle, goal, w_theta, heading):
+    def calculate_segment(self, position_v, obstacle, goal, w_theta, heading):
         """
         The function calculates and saves the global x,y coordinates for all points the vessel travels through to one
         waypoint.
@@ -263,46 +263,9 @@ class PotentialField:
             heading[1] = profile[min_index].l_ky
             i = i + 1
 
-    def calc_all_waypoints(self, position_v, obstacle, w_theta, heading, waypoints):
-        """
-        Calculates the main_loop function for all waypoints and saves the whole path in an array.
-        :param position_v: The current position of the vessel.
-        :param obstacle: A numpy array of all the obstacles.
-        :param w_theta: The wind angle
-        :param heading: The heading of the vessel
-        :param waypoints: List of all the waypoints
-        :return: The x,y coordinates for all points from the start of the path planner to the end goal.
-        """
-        x_all = []
-        y_all = []
-        length = np.zeros(len(waypoints) + 1)
-        for j in range(len(waypoints)):
-            goal = waypoints[j]
-            x_j, y_j = self.main_loop(position_v, obstacle, goal, w_theta, heading)
-            length[j+1] = len(x_j) + length[j]
-            x_all[int(length[j]):int(length[j+1])] = x_j
-            y_all[int(length[j]):int(length[j+1])] = y_j
-        return x_all, y_all
-
-
-def plot_path():
-    plt.plot(x, y)
-    for i in range(len(obstacle_Init)):
-        plt.plot(obstacle_Init[i][0], obstacle_Init[i][1], 'x')
-    for i in range(len(waypoints_Init)):
-        plt.plot(waypoints_Init[i][0], waypoints_Init[i][1], 'o')
-
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title(
-        "Wind " + str(w_theta_Init) + '°' + ', start (' + str(start[0]) + ',' + str(start[1]) + ')' + ', hystersis '
-        + str(p_hyst_Init))
-    plt.show()
-
-
 if __name__ == '__main__':
     # Profile parameters
-    diameterInit = 10
+    diameter_Init = 10
     # Goal & obstacle parameters
     goal_weight_Init = 4
     obstacle_weight_Init = 200
@@ -323,64 +286,10 @@ if __name__ == '__main__':
     position_v_Init = np.array([300, 100])
     start = np.copy(position_v_Init)
 
-    potential_field_object = PotentialField(diameterInit, obstacle_weight_Init, d_inf_Init, goal_weight_Init,
+    potential_field_object = PotentialField(diameter_Init, obstacle_weight_Init, d_inf_Init, goal_weight_Init,
                                             p_ngz_Init, p_hyst_Init, g_v_Init, v_v_Init, w_speed_Init)
 
     x, y = potential_field_object.calc_all_waypoints(position_v_Init, obstacle_Init, w_theta_Init, heading_Init,
                                                      waypoints_Init)
 
     plot_path()
-
-    """ Orginal 
-
-    # Profile parameters
-    diameter = 10
-    # Goal & obstacle parameters
-    goal_weight = 4
-    obstacle_weight = 200
-    d_inf = 40
-    # Wind parameters
-    heading = np.array([1, 0])
-    w_speed = 10
-    # theta
-    w_theta = 90
-    p_ngz = 40
-    p_hyst = 16
-    g_v = 1
-    v_v = 4
-    x = []
-    y = []
-
-    obstacle = np.array([[40, 40], [50, 60], [83, 94], [82, 100], [0, 80], [45, 35], [50, 30], [115, 70]])
-    waypoints = np.array([[100, 100], [200, 200], [200, 100], [150, 50]])
-    goal = waypoints[0]
-    position_v = np.array([0, 0])
-    start = np.copy(position_v)
-
-    length = np.zeros(len(waypoints)+1)
-    x, y = calc_all_waypoints(diameter, position_v, obstacle, obstacle_weight, d_inf, goal, goal_weight, p_ngz, p_hyst,
-     g_v, v_v, w_speed, w_theta, heading, length)
-
-    plt.plot(x, y)
-
-    plt.plot(obstacle[0][0], obstacle[0][1], 'x')
-    plt.plot(obstacle[1][0], obstacle[1][1], 'x')
-    plt.plot(obstacle[2][0], obstacle[2][1], 'x')
-    plt.plot(obstacle[3][0], obstacle[3][1], 'x')
-    plt.plot(obstacle[4][0], obstacle[4][1], 'x')
-    plt.plot(obstacle[5][0], obstacle[5][1], 'x')
-    plt.plot(obstacle[6][0], obstacle[6][1], 'x')
-    plt.plot(obstacle[7][0], obstacle[7][1], 'x')
-    plt.plot(waypoints[0][0], waypoints[0][1], 'o')
-    plt.plot(waypoints[1][0], waypoints[1][1], 'o')
-    plt.plot(waypoints[2][0], waypoints[2][1], 'o')
-    plt.plot(waypoints[3][0], waypoints[3][1], 'o')
-
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title("Wind " + str(w_theta) + '°' + ', start (' + str(start[0]) + ',' + str(start[1]) + ')' + ', hystersis ' 
-    + str(p_hyst))
-
-    plt.show()
-    
-    """
