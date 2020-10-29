@@ -2,8 +2,8 @@ queue_size: 1
 
 rate: 60
 
-# pi/5.2 radians
-sail_limits: 0.60415243338
+# 80 degree
+sail_limits: 1.3962634
 
 # pi/4 radians
 rudder_limits: 0.7853981633974483
