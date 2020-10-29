@@ -2,6 +2,9 @@
 # Standard libs
 import math
 
+# Global variables
+heading_latch = True
+
 
 def calculate_rudder_angle(current_heading, pid_corrected_heading, rudder_limit, velocity):
     """
@@ -29,20 +32,22 @@ def trajectory_to_relative_heading(desired_trajectory, current_course):
     return heading
 
 
-def if_use_heading_as_setpoint(previous_bool, velocity=0, upper_threshold=5, lower_threshold=3):
+def is_heading_setpoint(velocity=0, upper_threshold=5, lower_threshold=3):
     """
     Return True if heading should be used as the setpoint for the PID, depending on the velocity of the vessel and
     latching with an upper and lower threshold.
     :param velocity: The velocity of the vessel
-    :param previous_bool: True if heading is currently used as setpoint
     :param upper_threshold: Threshold for switching to course controller
     :param lower_threshold: Threshold for switching to heading controller
     :return: True if heading controller should be used, False if course controller should be used
     """
+    global heading_latch
     if velocity < lower_threshold:
+        heading_latch = True
         return True
     elif velocity > upper_threshold:
+        heading_latch = False
         return False
     else:
-        return previous_bool
+        return heading_latch
 
