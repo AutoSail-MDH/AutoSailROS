@@ -74,7 +74,7 @@ if __name__ == "__main__":
         rc_pid(values.desired_course)
 
         # Change between the course controller and the heading controller
-        if rc.if_use_heading_as_setpoint(previous_bool=if_heading_controller, velocity=values.velocity):
+        if rc.is_heading_setpoint(previous_bool=if_heading_controller, velocity=values.velocity):
             pid_heading = rc_pid(control_signal=values.current_heading)
             if_heading_controller = True
         else:

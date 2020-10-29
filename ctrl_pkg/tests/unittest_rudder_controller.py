@@ -142,28 +142,25 @@ class TestRudder(unittest.TestCase):
         #plt.show()
 
     def test_PID_controller_switch(self):
-        # Initial previous if use heading
-        use_heading = True
-
         velocity = 1
-        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertTrue(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        self.assertTrue(heading_latch)
 
         velocity = 4
-        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertTrue(use_heading)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        self.assertTrue(heading_latch)
 
         velocity = 8
-        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertFalse(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        self.assertFalse(heading_latch)
 
         velocity = 4
-        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertFalse(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        self.assertFalse(heading_latch)
 
         velocity = 1
-        use_heading = rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity)
-        self.assertTrue(rc.if_use_heading_as_setpoint(previous_bool=use_heading, velocity=velocity))
+        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        self.assertTrue(heading_latch)
 
     def test_rudder_angle_calculation(self):
         control_signal = 0
