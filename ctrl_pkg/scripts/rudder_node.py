@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
     # Constants
     new_rudder_angle = 0
-    if_heading_controller = True
     rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi / 4)
     queue_size = rospy.get_param("~queue_size", 1)
 
@@ -74,13 +73,12 @@ if __name__ == "__main__":
         rc_pid(values.desired_course)
 
         # Change between the course controller and the heading controller
-        if rc.is_heading_setpoint(previous_bool=if_heading_controller, velocity=values.velocity):
+        if rc.is_heading_setpoint(velocity=values.velocity):
             pid_heading = rc_pid(control_signal=values.current_heading)
-            if_heading_controller = True
         else:
             pid_heading = rc_pid(control_signal=values.current_course)
-            if_heading_controller = False
-        new_rudder_angle = rc.calculate_rudder_angle(values.current_heading, pid_heading,
+        new_rudder_angle = rc.calculate_rudder_angle(current_heading=values.current_heading,
+                                                     pid_corrected_headin=pid_heading,
                                                      rudder_limit=rudder_angle_limit, velocity=values.velocity)
 
         # Publish the rudder angle
