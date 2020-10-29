@@ -133,7 +133,8 @@ class TestRudder(unittest.TestCase):
         for i in range(6, -1, -1):
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
-                run_convergence(self.pid, heading, _time, start_time, setpoint)
+                converged = run_convergence(self.pid, heading, _time, start_time, setpoint)
+                self.assertTrue(converged, "It took more than a minute to converge")
 
         # Uncomment for plotting of heading
         #plt.plot(_time, heading, label='measured')
