@@ -49,6 +49,7 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
     :param setpoint: Used for plotting. e.g. list = []
     """
     last_time = time.time()
+    start_time = last_time
     while not is_converged(_list=heading, conv_point=pid.setpoint):
 
         # Run PID and get new heading
@@ -65,6 +66,9 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
 
         # used for calculating dt in new_heading()
         last_time = _now
+        if (last_time - start_time) > 60:
+            return False
+    return True
 
 
 class TestRudder(unittest.TestCase):
@@ -95,29 +99,21 @@ class TestRudder(unittest.TestCase):
         last_time = time.time()
         heading = [0.0]
 
-        test_start = time.time()
         self.pid.setpoint = 3*math.pi
-        run_convergence(pid=self.pid, heading=heading)
-        time_taken = time.time() - test_start
-        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+        converged = run_convergence(pid=self.pid, heading=heading)
+        self.assertTrue(converged, "It took more than a minute to converge")
 
-        test_start = time.time()
         self.pid.setpoint = 0
-        run_convergence(pid=self.pid, heading=heading)
-        time_taken = time.time() - test_start
-        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+        converged = run_convergence(pid=self.pid, heading=heading)
+        self.assertTrue(converged, "It took more than a minute to converge")
 
-        test_start = time.time()
         self.pid.setpoint = 0.5 * math.pi
-        run_convergence(pid=self.pid, heading=heading)
-        time_taken = time.time() - test_start
-        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+        converged = run_convergence(pid=self.pid, heading=heading)
+        self.assertTrue(converged, "It took more than a minute to converge")
 
-        test_start = time.time()
         self.pid.setpoint = 2 * math.pi
-        run_convergence(pid=self.pid, heading=heading)
-        time_taken = time.time() - test_start
-        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+        converged = run_convergence(pid=self.pid, heading=heading)
+        self.assertTrue(converged, "It took more than a minute to converge")
 
     def test_PID_turning(self):
 
@@ -130,19 +126,15 @@ class TestRudder(unittest.TestCase):
         _time = [0.0]
 
         for i in range(0, 5):
-            test_start = time.time()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
-                run_convergence(self.pid, heading, _time, start_time, setpoint)
-            time_taken = time.time() - test_start
-            self.assertLess(time_taken, 60, "It took more than a minute to converge")
+                converged = run_convergence(self.pid, heading, _time, start_time, setpoint)
+                self.assertTrue(converged, "It took more than a minute to converge")
         for i in range(6, -1, -1):
-            test_start = time.time()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
-                run_convergence(self.pid, heading, _time, start_time, setpoint)
-            time_taken = time.time() - test_start
-            self.assertLess(time_taken, 60, "It took more than a minute to converge")
+                converged = run_convergence(self.pid, heading, _time, start_time, setpoint)
+                self.assertTrue(converged, "It took more than a minute to converge")
 
         # Uncomment for plotting of heading
         #plt.plot(_time, heading, label='measured')
@@ -180,21 +172,21 @@ class TestRudder(unittest.TestCase):
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, 0)
 
         self.pid.setpoint = math.pi/4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, -math.pi/4)
 
         self.pid.setpoint = -math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, math.pi / 4)
 
 
