@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import rospy
 import std_msgs.msg
-from ctrl.sail_controller import sail_angle_calculation
+from ctrl.sail_controller import calculate_sail_angle
+from ctrl.sail_controller import trim_sail
 
 
 class SubscriberValues:
@@ -29,19 +30,20 @@ if __name__ == "__main__":
     #  Publisher
     sail_angle = rospy.Publisher("sail_control_topic", std_msgs.msg.Float32, queue_size=queue_size)
 
-    #  subscriber
-    rospy.Subscriber(name="sail_control_topic", data_class=std_msgs.msg.Float32, callback=values.callback_SailAngle,
-                     queue_size=queue_size)
+    #  subscriber wind sensor readings
+    #  rospy.Subscriber(name="sail_control_topic", data_class=std_msgs.msg.Float32, callback=values.callback_SailAngle,
+    #                 queue_size=queue_size)
 
     while not rospy.is_shutdown():
         # calculate for new sail position
-        new_sail_angle = sail_angle_calculation(Current_wind, sail_limits)
+        new_sail_angle_rad = calculate_sail_angle(Current_wind, sail_limits)
+        trim_degree = trim_sail(new_sail_angle_rad*60)
 
         # publish in log
-        rospy.loginfo(new_sail_angle)
+        rospy.loginfo(new_sail_angle_rad)
 
         # Publish the sail angle
-        sail_angle.publish(new_sail_angle)
+        sail_angle.publish(new_sail_angle_rad)
 
         # Keep sync with the ROS frequency
         rate.sleep()
