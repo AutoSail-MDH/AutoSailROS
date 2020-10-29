@@ -78,7 +78,7 @@ if __name__ == "__main__":
         else:
             pid_heading = rc_pid(control_signal=values.current_course)
         new_rudder_angle = rc.calculate_rudder_angle(current_heading=values.current_heading,
-                                                     pid_corrected_headin=pid_heading,
+                                                     pid_corrected_heading=pid_heading,
                                                      rudder_limit=rudder_angle_limit, velocity=values.velocity)
 
         # Publish the rudder angle
