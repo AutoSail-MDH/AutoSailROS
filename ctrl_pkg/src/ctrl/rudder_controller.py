@@ -3,7 +3,7 @@
 import math
 
 
-def rudder_angle_calculation(current_heading, pid_corrected_heading, rudder_limit, velocity):
+def calculate_rudder_angle(current_heading, pid_corrected_heading, rudder_limit, velocity):
     """
     Calculates the angle of the rudder given
     :param current_heading:

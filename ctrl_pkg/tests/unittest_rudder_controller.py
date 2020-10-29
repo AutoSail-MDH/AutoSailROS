@@ -172,21 +172,21 @@ class TestRudder(unittest.TestCase):
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, 0)
 
         self.pid.setpoint = math.pi/4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi/4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, -math.pi/4)
 
         self.pid.setpoint = -math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.rudder_angle_calculation(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
         self.assertAlmostEqual(angle, math.pi / 4)
 
 
