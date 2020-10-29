@@ -94,14 +94,30 @@ class TestRudder(unittest.TestCase):
     def test_PID_convergence(self):
         last_time = time.time()
         heading = [0.0]
+
+        test_start = time.time()
         self.pid.setpoint = 3*math.pi
         run_convergence(pid=self.pid, heading=heading)
+        time_taken = time.time() - test_start
+        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+
+        test_start = time.time()
         self.pid.setpoint = 0
         run_convergence(pid=self.pid, heading=heading)
+        time_taken = time.time() - test_start
+        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+
+        test_start = time.time()
         self.pid.setpoint = 0.5 * math.pi
         run_convergence(pid=self.pid, heading=heading)
+        time_taken = time.time() - test_start
+        self.assertLess(time_taken, 60, "It took more than a minute to converge")
+
+        test_start = time.time()
         self.pid.setpoint = 2 * math.pi
         run_convergence(pid=self.pid, heading=heading)
+        time_taken = time.time() - test_start
+        self.assertLess(time_taken, 60, "It took more than a minute to converge")
 
     def test_PID_turning(self):
 
@@ -114,14 +130,19 @@ class TestRudder(unittest.TestCase):
         _time = [0.0]
 
         for i in range(0, 5):
-            self.pid.reset()
+            test_start = time.time()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
+            time_taken = time.time() - test_start
+            self.assertLess(time_taken, 60, "It took more than a minute to converge")
         for i in range(6, -1, -1):
+            test_start = time.time()
             self.pid.setpoint = 0.5*i*math.pi
             while not is_converged(heading, self.pid.setpoint):
                 run_convergence(self.pid, heading, _time, start_time, setpoint)
+            time_taken = time.time() - test_start
+            self.assertLess(time_taken, 60, "It took more than a minute to converge")
 
         # Uncomment for plotting of heading
         #plt.plot(_time, heading, label='measured')
