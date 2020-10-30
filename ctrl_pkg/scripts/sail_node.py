@@ -28,7 +28,8 @@ if __name__ == "__main__":
     sail_limits = rospy.get_param("~sail_limits", 1)
     queue_size = rospy.get_param("~queue_size", 1)
     #  Publisher
-    sail_angle = rospy.Publisher("sail_control_topic", std_msgs.msg.Float32, queue_size=queue_size)
+    sail_angle = rospy.Publisher("sail_control/sail_angle", std_msgs.msg.Float32, queue_size=queue_size)
+    sail_servo = rospy.Publisher("sail_control/sail_servo_angle", std_msgs.msg.Float32, queue_size=queue_size)
 
     #  subscriber wind sensor readings
     #  rospy.Subscriber(name="sail_control_topic", data_class=std_msgs.msg.Float32, callback=values.callback_SailAngle,
@@ -41,9 +42,11 @@ if __name__ == "__main__":
 
         # publish in log
         rospy.loginfo(new_sail_angle_rad)
+        rospy.loginfo(trim_degree)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
+        sail_angle.publish(trim_degree)
 
         # Keep sync with the ROS frequency
         rate.sleep()
