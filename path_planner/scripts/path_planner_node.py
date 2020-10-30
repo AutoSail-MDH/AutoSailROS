@@ -7,7 +7,6 @@ import sensor_msgs.msg
 import geometry_msgs.msg
 
 from path_planner import potential_field_algorithm as pfa
-import matplotlib.pyplot as plt
 
 waypoints = np.array([])
 obstacles = np.array([])
@@ -21,9 +20,9 @@ radius = 6371  # Earth Radius in KM
 
 
 class ReferencePoint:
-    def __init__(self, scrX, scrY, lat, lng, pos_x, pos_y):
-        self.scrX = scrX
-        self.scrY = scrY
+    def __init__(self, scr_x, scr_y, lat, lng, pos_x, pos_y):
+        self.scrX = scr_x
+        self.scrY = scr_y
         self.lat = lat
         self.lng = lng
         self.pos_x = pos_x
@@ -39,9 +38,9 @@ def latlng_to_global_xy_ref(lat, lng, p0_lat, p1_lat):
     :param p1_lat: latitude for the second ref point
     :return:
     """
-    x = radius*lng*math.cos((p0_lat + p1_lat)/2)
-    y = radius*lat
-    return [x,  y]
+    x = radius * lng * math.cos((p0_lat + p1_lat) / 2)
+    y = radius * lat
+    return [x, y]
 
 
 def calculate_reference_points(lat, lon):
@@ -58,10 +57,10 @@ def calculate_reference_points(lat, lon):
     lat_rad = math.radians(lat)
     lon_rad = math.radians(lon)
 
-    lat_1 = math.asin(math.sin(lat_rad)*math.cos(distance_0/radius) +
-                     math.cos(lat_rad)*math.sin(distance_0/radius)*math.cos(bearing_0))
-    lon_1 = lon_rad + math.atan2(math.sin(bearing_0)*math.sin(distance_0/radius)*math.cos(lat_rad),
-             math.cos(distance_0/radius)-math.sin(lat_rad)*math.sin(lat_1))
+    lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / radius) +
+                      math.cos(lat_rad) * math.sin(distance_0 / radius) * math.cos(bearing_0))
+    lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / radius) * math.cos(lat_rad),
+                                 math.cos(distance_0 / radius) - math.sin(lat_rad) * math.sin(lat_1))
 
     lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / radius) +
                       math.cos(lat_rad) * math.sin(distance_1 / radius) * math.cos(bearing_1))
@@ -72,40 +71,37 @@ def calculate_reference_points(lat, lon):
     lon_1 = math.degrees(lon_1)
     lat_2 = math.degrees(lat_2)
     lon_2 = math.degrees(lon_2)
-    print("lat, lon", latitude, longitude)
-    print("lat_1, lon_1", lat_1, lon_1)
-    print("lat_2, lon_2", lat_2, lon_2)
     return [lat_1, lon_1, lat_2, lon_2]
 
 
-def latlng_to_global_xy(lat, lng, p0, p1):
+def latlng_to_global_xy(lat, lng, p_0, p_1):
     """
     converts latitude, longitude to global x,y coordinates for any point
     :param lat: latitude of the point
     :param lng: longitude of the point
-    :param p0: ReferencePoint 0
-    :param p1: ReferencePoint 1
+    :param p_0: ReferencePoint 0
+    :param p_1: ReferencePoint 1
     :return: global x,y coordinates for the point
     """
-    x = radius*lng*math.cos((p0.lat + p1.lat)/2)
-    y = radius*lat
-    return [x,  y]
+    x = radius * lng * math.cos((p_0.lat + p_1.lat) / 2)
+    y = radius * lat
+    return [x, y]
 
 
-def latlng_to_screen_xy(lat, lng, p0, p1):
+def latlng_to_screen_xy(lat, lng, p_0, p_1):
     """
     convert latitude, longitude for a point to x,y in the reference frame
     :param lat: latitude for the point being converted
     :param lng: longitude for the point being converted
-    :param p0: reference point 0
-    :param p1: reference point 1
+    :param p_0: reference point 0
+    :param p_1: reference point 1
     :return: x,y coordinates for the point in the reference frame
     """
-    pos = latlng_to_global_xy(lat, lng, p0, p1)
-    perX = ((pos[0]-p0.pos_x)/(p1.pos_x - p0.pos_x))
-    perY = ((pos[1]-p0.pos_y)/(p1.pos_y - p0.pos_y))
+    pos = latlng_to_global_xy(lat, lng, p_0, p_1)
+    per_x = ((pos[0] - p_0.pos_x) / (p_1.pos_x - p_0.pos_x))
+    per_y = ((pos[1] - p_0.pos_y) / (p_1.pos_y - p_0.pos_y))
 
-    return p0.scrX + (p1.scrX - p0.scrX)*perX, p0.scrY + (p1.scrY - p0.scrY)*perY
+    return p_0.scrX + (p_1.scrX - p_0.scrX) * per_x, p_0.scrY + (p_1.scrY - p_0.scrY) * per_y
 
 
 def waypoint_callback(data):
@@ -174,6 +170,7 @@ def obstacles_callback(data):
     global obstacles
     obstacles = data.data
 
+
 def path_planner_subscriber():
     """
     start the subscriber methods
@@ -186,10 +183,12 @@ def path_planner_subscriber():
     rospy.Subscriber("/gps/navheading", sensor_msgs.msg.Imu, gps_heading_callback)
     rospy.Subscriber("/wind_sensor", std_msgs.msg.Int64MultiArray, wind_sensor_callback)
     rospy.Subscriber("/path_planner/obstacles", std_msgs.msg.Float64MultiArray, obstacles_callback)
+
+
 #    rospy.spin()
 
 
-def path_planning_Init():
+def path_planning_init():
     """
     initialize the path planner by creating the reference frame and converting waypoints and obstacles to x,y
     coordinates in that reference frame. The reference frame is created in such a way that one x,y corresponds to one
@@ -210,81 +209,81 @@ def path_planning_Init():
     [lat_0, lon_0, lat_1, lon_1] = calculate_reference_points(latitude, longitude)
     ref0_pos = latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
     ref1_pos = latlng_to_global_xy_ref(lat_1, lon_1, lat_0, lat_1)
+
     # Calculate global X and Y for top-left reference point
-    p0 = ReferencePoint(0, 100, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
+    p_0 = ReferencePoint(0, 100, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
     # Calculate global X and Y for bottom-right reference point
-    p1 = ReferencePoint(100, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
+    p_1 = ReferencePoint(100, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     j = 0
     for i in range(int(length_waypoints / 2)):
-        waypoints_xy = latlng_to_screen_xy(waypoints[j], waypoints[j + 1], p0, p1)
+        waypoints_xy = latlng_to_screen_xy(waypoints[j], waypoints[j + 1], p_0, p_1)
         waypoint_xy_array[i, 0] = waypoints_xy[0]
         waypoint_xy_array[i, 1] = waypoints_xy[1]
         j = j + 2
     j = 0
     for i in range(int(length_obstacles / 2)):
-        obstacles_xy = latlng_to_screen_xy(obstacles[j], obstacles[j + 1], p0, p1)
-        obstacles_xy_array[i, 0] = obstacles_xy[0]
-        obstacles_xy_array[i, 1] = obstacles_xy[1]
+        obstacles_xy_1d = latlng_to_screen_xy(obstacles[j], obstacles[j + 1], p_0, p_1)
+        obstacles_xy_array[i, 0] = obstacles_xy_1d[0]
+        obstacles_xy_array[i, 1] = obstacles_xy_1d[1]
         j = j + 2
     print("obstacles_xy_array", obstacles_xy_array)
 
-    return waypoint_xy_array, obstacles_xy_array,  p0, p1
+    return waypoint_xy_array, obstacles_xy_array, p_0, p_1
 
 
-def path_planning_calc_heading(waypoint_array, obstacles_array, p0, p1):
+def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1):
     """
     calculates the desired heading of the vessel
     :param waypoint_array: np.array of waypoints in x,y reference frame
     :param obstacles_array: np.array of obstacles in x,y reference frame
-    :param p0: reference point 0
-    :param p1: reference point 1
+    :param p_0: reference point 0
+    :param p_1: reference point 1
     :return: desired heading
     """
     global w_speed
     global w_theta
     global latitude
     global longitude
-    position_v = latlng_to_screen_xy(latitude, longitude, p0, p1)
+
+    position_v = latlng_to_screen_xy(latitude, longitude, p_0, p_1)
     pub_heading = rospy.Publisher('/path_planner/heading', std_msgs.msg.Float64, queue_size=10)
-    heading_angle = std_msgs.msg.Float64()
-    # Profile parameters
-    diameter_init = 100
-    # Goal & obstacle parameters
-    goal_weight_init = 5
-    obstacle_weight_init = 20
-    d_inf_init = 4
-    # Wind parameters
-    p_ngz_init = 200
-    p_hyst_init = 10
-    g_v_init = 1
-    v_v_init = 4
-    potential_field_object = pfa.PotentialField(diameter_init, obstacle_weight_init, d_inf_init, goal_weight_init,
-                                                p_ngz_init, p_hyst_init, g_v_init, v_v_init, w_speed)
+
+    profile_diameter = rospy.get_param("~profile_diameter", default=100)
+    goal_weight = rospy.get_param("~goal_weight", default=5)
+    obstacle_weight = rospy.get_param("~obstacle_weight", default=20)
+    d_inf = rospy.get_param("~d_inf", default=20)
+    p_ngz = rospy.get_param("~p_ngz", default=200)
+    p_hyst = rospy.get_param("~p_hyst", default=10)
+    g_v = rospy.get_param("~g_v", default=1)
+
+    potential_field_object = pfa.PotentialField(profile_diameter, obstacle_weight, d_inf, goal_weight,
+                                                p_ngz, p_hyst, g_v, lin_velocity, w_speed)
 
     goal = waypoint_array[0]
     profile, list_len = potential_field_object.create_profile(pos_v=position_v)
 
-    profile = potential_field_object.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta, heading)
+    profile = potential_field_object.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
+                                                               heading)
     min_angle, min_index = potential_field_object.find_global_minima_angle(profile)
-    heading_angle = min_angle
-    pub_heading.publish(heading_angle)
-    print("min_angle", min_angle)
+    desired_heading_angle = min_angle
+    pub_heading.publish(desired_heading_angle)
     return min_angle
 
-#    profile_matrix = potential_field_object.reshape_profile(profile)
-#    plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
-#    plt.show()
 
+"""
+    import matplotlib.pyplot as plt
+    profile_matrix = potential_field_object.reshape_profile(profile)
+    plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
+    plt.show()
+"""
 
 if __name__ == '__main__':
     try:
         path_planner_subscriber()
-        waypoint_xy_array, obstacles_xy_array, p0, p1 = path_planning_Init()
+        waypoint_xy, obstacles_xy, p0, p1 = path_planning_init()
         while not rospy.is_shutdown():
-            path_planning_calc_heading(waypoint_xy_array, obstacles_xy_array, p0, p1)
+            rate = rospy.Rate(60)
+            path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1)
+            rate.sleep()
     except rospy.ROSInterruptException:
         pass
-
-
-
-

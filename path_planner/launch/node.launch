@@ -1,0 +1,5 @@
+<launch>
+   <node pkg="path_planner" name="path_planner" type="path_planner_node.py">
+      <rosparam command="load" file="$(find path_planner)/config/config.yaml"/>
+   </node>
+</launch>
