@@ -204,6 +204,12 @@ install(DIRECTORY launch/
     PATTERN ".svn" EXCLUDE
 )
 
+## Install config files
+install(DIRECTORY config/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+    PATTERN ".svn" EXCLUDE
+)
+
 #############
 ## Testing ##
 #############
