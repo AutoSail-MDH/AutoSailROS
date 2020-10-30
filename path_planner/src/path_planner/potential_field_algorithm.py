@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 class PointClass:
@@ -239,7 +238,7 @@ class PotentialField:
         waypoint.
         :param position_v: The current position of the vessel.
         :param obstacle: A numpy array of all the obstacles.
-        :param goal: The postion of the goal i.e current waypoint
+        :param goal: The position of the goal i.e current waypoint
         :param w_theta: The wind angle
         :param heading: The heading of the vessel
         :return: The x,y coordinates for all points from the start of the calculation to the goal.
@@ -262,4 +261,3 @@ class PotentialField:
             heading[0] = profile[min_index].l_kx
             heading[1] = profile[min_index].l_ky
             i = i + 1
-

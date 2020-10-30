@@ -51,6 +51,7 @@ def path_planner_partner_publisher():
         pub_wind_sensor.publish(wind_data)
         rate.sleep()
 
+
 if __name__ == '__main__':
     try:
         path_planner_partner_publisher()
