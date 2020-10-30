@@ -41,8 +41,7 @@ if __name__ == "__main__":
         trim_degree = trim_sail(new_sail_angle_rad*60)
 
         # publish in log
-        rospy.loginfo(new_sail_angle_rad)
-        rospy.loginfo(trim_degree)
+        rospy.loginfo("trim_degree: %f sail_angle: %f", trim_degree, new_sail_angle_rad)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
