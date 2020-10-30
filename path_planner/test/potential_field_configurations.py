@@ -54,7 +54,6 @@ def configuration_1():
     position_v_init = np.array([0, 0])
     start = np.copy(position_v_init)
 
-
     potential_field_object = pfa.PotentialField(diameter_init, obstacle_weight_init, d_inf_init, goal_weight_init,
                                                 p_ngz_init, p_hyst_init, g_v_init, v_v_init, w_speed_init)
     x, y = calc_all_waypoints(position_v_init, obstacle_init, w_theta_init, heading_init,
