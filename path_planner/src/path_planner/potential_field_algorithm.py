@@ -263,33 +263,3 @@ class PotentialField:
             heading[1] = profile[min_index].l_ky
             i = i + 1
 
-if __name__ == '__main__':
-    # Profile parameters
-    diameter_Init = 10
-    # Goal & obstacle parameters
-    goal_weight_Init = 4
-    obstacle_weight_Init = 200
-    d_inf_Init = 40
-    # Wind parameters
-    heading_Init = np.array([1, 0])
-    w_speed_Init = 10
-    # theta
-    w_theta_Init = 90
-    p_ngz_Init = 40
-    p_hyst_Init = 10
-    g_v_Init = 1
-    v_v_Init = 4
-
-    obstacle_Init = np.array([[-50, 110], [-50, 90]])
-    waypoints_Init = np.array([[200, 100], [100, 200], [0, 100], [-50, 100]])
-    goal_Init = waypoints_Init[0]
-    position_v_Init = np.array([300, 100])
-    start = np.copy(position_v_Init)
-
-    potential_field_object = PotentialField(diameter_Init, obstacle_weight_Init, d_inf_Init, goal_weight_Init,
-                                            p_ngz_Init, p_hyst_Init, g_v_Init, v_v_Init, w_speed_Init)
-
-    x, y = potential_field_object.calc_all_waypoints(position_v_Init, obstacle_Init, w_theta_Init, heading_Init,
-                                                     waypoints_Init)
-
-    plot_path()
