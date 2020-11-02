@@ -13,10 +13,10 @@ def calculate_sail_angle(wind_sensor_readings, sail_limits):
     """
     global sail_angle_rad
 
-    if -181 < int(wind_sensor_readings) < 181:
+    if -np.pi <= wind_sensor_readings < np.pi:
         sail_angle_rad = np.multiply(-np.sign(wind_sensor_readings),
                                      (((float(-sail_limits) - float(sail_limits)) / np.pi) *
-                                      np.abs(np.deg2rad(wind_sensor_readings)) + sail_limits))
+                                      np.abs(wind_sensor_readings) + sail_limits))
     return sail_angle_rad
 
 
