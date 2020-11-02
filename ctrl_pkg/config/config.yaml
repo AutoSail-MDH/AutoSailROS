@@ -5,6 +5,7 @@ rate: 10
 
 # --- Sail Configs ---
 sail_limits: 1.3962634  # 80 degree
+sail_servo_scalar: 20.25
 
 # --- Rudder Configs ---
 rudder_limits: 0.7853981633974483  # pi/4 radians

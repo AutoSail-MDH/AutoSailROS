@@ -65,7 +65,7 @@ if __name__ == "__main__":
                      callback=values.callback_velocity, queue_size=queue_size)  # The velocity and course
 
     # Publishers
-    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32,
+    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float64,
                                    queue_size=queue_size)
 
     while not rospy.is_shutdown():
