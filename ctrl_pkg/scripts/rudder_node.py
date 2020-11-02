@@ -27,13 +27,14 @@ class SubscriberValues:
 
     def callback_current_heading(self, data):
         self.current_heading = data.orientation.z
+        rospy.loginfo("heading: {}".format(self.current_heading))
 
     def callback_velocity(self, data):
         x = data.twist.twist.linear.x
         y = data.twist.twist.linear.y
         self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
         self.current_course = math.atan2(math.cos(x), math.sin(y))
-        rospy.loginfo(x)
+        rospy.loginfo("velocity x: {}\n {}".format(x, y))
 
     #def callback_current_course(self, data):
     #    self.current_course = data.data
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     # Subscribers
     rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float32,
                      callback=values.callback_desired_course, queue_size=queue_size)
-    rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
+    rospy.Subscriber(name="gps/navheading", data_class=sensor_msgs.msg.Imu,
                      callback=values.callback_current_heading, queue_size=queue_size)
     rospy.Subscriber(name="gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
                      callback=values.callback_velocity, queue_size=queue_size)
