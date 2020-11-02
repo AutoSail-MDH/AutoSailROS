@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 from path_planner import *
 from path_planner import potential_relative_wind as prw
@@ -281,6 +282,7 @@ class TestStringMethods(unittest.TestCase):
 
         #   Test 2.16
         w_theta = 315
+        w_speed = 20
         heading = np.array([1, 1])
         p = np.array([-1, 0])
         case = prw.wind_potential_calculation(p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, p, heading)
@@ -458,6 +460,7 @@ class TestStringMethods(unittest.TestCase):
         case = prw.wind_potential_calculation(p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, p, heading)
         self.assertEqual("case3", case)
 
+        w_speed = 20
         p = np.array([-4, 1])
         case = prw.wind_potential_calculation(p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, p, heading)
         self.assertEqual("case3", case)
@@ -478,4 +481,6 @@ class TestStringMethods(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    import rosunit
+    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestStringMethods)
+    #  unittest.main()

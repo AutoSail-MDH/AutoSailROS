@@ -162,7 +162,10 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS scripts/speed_polar_diagram.py scripts/speed_polar_diagram_client.py
+  scripts/path_planner_node.py
+  scripts/path_planner_partner_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+
 )
 
 ## Mark executables for installation

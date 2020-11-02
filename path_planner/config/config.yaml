@@ -1,7 +1,7 @@
 goal_weight: 5 # the weight determining how much the goal will affect the potential of a point
-profile_diameter: 100 # n in the nxn square around the vessel for which potential is calculated
+profile_diameter: 50 # n in the nxn square around the vessel for which potential is calculated
 obstacle_weight: 20 # the weight determining how much the obstacles will affect the potential of a point
 d_inf: 20 # the euclidean distance inside which obstacles affect the potential of a point
-p_ngz: 40 # the potential added to a point inside the no-go zones
+p_ngz: 200 # the potential added to a point inside the no-go zones
 p_hyst: 10 # the extra potential added to a point behind the vessel i.e the coast of tacking
 g_v: 1 # scalar multipied to the velocity consideration

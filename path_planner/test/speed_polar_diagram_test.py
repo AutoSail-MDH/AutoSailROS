@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 from path_planner import *
 from path_planner import speed_polar_diagram_function as spdf
@@ -41,4 +42,6 @@ class TestStringMethods(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    import rosunit
+    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestStringMethods)
+    # unittest.main()
