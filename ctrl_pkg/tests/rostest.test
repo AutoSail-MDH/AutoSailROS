@@ -14,18 +14,18 @@
 
     <!-- Run publish tests -->
     <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
-        <param name="topic" value="sail_control_topic"/>
+        <param name="topic" value="sail_control/sail_angle"/>
         <param name="hz" value="60"/>
         <param name="hzerror" value="0.5"/>
         <param name="test_duration" value="10.0"/>
     </test>
 
-    <test pkg="rostest" type="publishtest" test-name="sail_control_pubtest">
+    <test pkg="rostest" type="publishtest" test-name="sail_control_pubtest" >
         <rosparam>
             topics:
-                - name: sail_control_topic
-                timeout: 10
-                negative: False
+                - name: sail_control/sail_angle
+                  timeout: 10
+                  negative: False
         </rosparam>
     </test>
 
