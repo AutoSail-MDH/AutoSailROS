@@ -147,7 +147,7 @@ class PotentialField:
         """
         [max_vel, up_beat, dn_beat, w_theta] = self.speed_polar_diagram_calculation(w_theta)
         no_go = np.array([np.deg2rad(up_beat), np.deg2rad(dn_beat)])
-        w_theta = np.deg2rad(w_theta)
+#        w_theta = np.deg2rad(w_theta)
         point_angle = np.arctan2(p[1], p[0])
         heading_angle = np.arctan2(heading[1], heading[0])
         rel_heading_angle = heading_angle - w_theta

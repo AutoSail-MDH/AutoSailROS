@@ -38,12 +38,15 @@ def wind_potential_calculation(p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, p, hea
     if (no_go[1] <= rel_point_angle <= no_go[1] + 2*(np.pi - no_go[1])) or (
             no_go[0] >= abs(rel_point_angle) >= 0) \
             or (abs(rel_point_angle) >= (2 * np.pi - no_go[0])):
-        return p_ngz
+        return "case1"
+#        return p_ngz
     if (rel_heading_angle < no_go[1] < rel_point_angle) or (
             rel_heading_angle > no_go[1] > rel_point_angle):
-        return p_hyst + g_v * ((v_v - max_vel) / max_vel)
+        return "case2"
+#        return p_hyst + g_v * ((v_v - max_vel) / max_vel)
     else:
-        return g_v * ((v_v - max_vel) / max_vel)
+        return "case3"
+#        return g_v * ((v_v - max_vel) / max_vel)
 
 
 if __name__ == '__main__':

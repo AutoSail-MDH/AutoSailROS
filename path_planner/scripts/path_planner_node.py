@@ -181,9 +181,8 @@ def path_planner_subscriber():
     rospy.Subscriber("gps/fix", sensor_msgs.msg.NavSatFix, gps_position_callback)
     rospy.Subscriber("gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
     rospy.Subscriber("/gps/navheading", sensor_msgs.msg.Imu, gps_heading_callback)
-    rospy.Subscriber("/wind_sensor", std_msgs.msg.Int64MultiArray, wind_sensor_callback)
+    rospy.Subscriber("/wind_sensor", std_msgs.msg.Float64MultiArray, wind_sensor_callback)
     rospy.Subscriber("/path_planner/obstacles", std_msgs.msg.Float64MultiArray, obstacles_callback)
-
 
 #    rospy.spin()
 
@@ -210,9 +209,7 @@ def path_planning_init():
     ref0_pos = latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
     ref1_pos = latlng_to_global_xy_ref(lat_1, lon_1, lat_0, lat_1)
 
-    # Calculate global X and Y for top-left reference point
     p_0 = ReferencePoint(0, 100, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
-    # Calculate global X and Y for bottom-right reference point
     p_1 = ReferencePoint(100, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     j = 0
     for i in range(int(length_waypoints / 2)):
@@ -267,22 +264,22 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1):
     min_angle, min_index = potential_field_object.find_global_minima_angle(profile)
     desired_heading_angle = min_angle
     pub_heading.publish(desired_heading_angle)
-    return min_angle
 
-
-"""
+    """
     import matplotlib.pyplot as plt
     profile_matrix = potential_field_object.reshape_profile(profile)
     plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
     plt.show()
 """
+    return min_angle
+
 
 if __name__ == '__main__':
     try:
         path_planner_subscriber()
         waypoint_xy, obstacles_xy, p0, p1 = path_planning_init()
         while not rospy.is_shutdown():
-            rate = rospy.Rate(60)
+            rate = rospy.Rate(1)  # profile_diameter: 20
             path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1)
             rate.sleep()
     except rospy.ROSInterruptException:

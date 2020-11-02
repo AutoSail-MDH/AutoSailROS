@@ -15,7 +15,7 @@ def path_planner_partner_publisher():
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
     pub_gps_heading = rospy.Publisher('/gps/navheading', sensor_msgs.msg.Imu, queue_size=10)
-    pub_wind_sensor = rospy.Publisher('/wind_sensor', std_msgs.msg.Int64MultiArray, queue_size=10)
+    pub_wind_sensor = rospy.Publisher('/wind_sensor', std_msgs.msg.Float64MultiArray, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', std_msgs.msg.Float64MultiArray, queue_size=10)
 
     rospy.init_node('path_planner_partner')
@@ -25,7 +25,7 @@ def path_planner_partner_publisher():
     mat_obstacles.data = [59.606017, 16.568077, 59.606036, 16.567455, 59.605756, 16.567307]
     # waypoints
     mat_waypoints = std_msgs.msg.Float64MultiArray()
-    mat_waypoints.data = [59.606502, 16.568896]  # 100, 100
+    mat_waypoints.data = [59.606214, 16.567691]  # 59.606502, 16.568896
     # gps position
     fix = sensor_msgs.msg.NavSatFix()
     fix.longitude = 16.567138
@@ -39,8 +39,8 @@ def path_planner_partner_publisher():
     heading.orientation.x = 1
     heading.orientation.y = 2
     # wind sensor
-    wind_data = std_msgs.msg.Int64MultiArray()
-    wind_data.data = [15, 0]
+    wind_data = std_msgs.msg.Float64MultiArray()
+    wind_data.data = [15, 0.7854]  # 5.498
     while not rospy.is_shutdown():
         # rospy.loginfo(mat.data)
         pub_waypoints.publish(mat_waypoints)
