@@ -36,7 +36,7 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         # calculate for new sail position
         new_sail_angle_rad = calculate_sail_angle(values.desired_angle, sail_limits)
-        trim_degree = trim_sail(new_sail_angle_rad*180/np.pi)
+        trim_degree = trim_sail(new_sail_angle_rad)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
