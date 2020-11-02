@@ -13,10 +13,10 @@
 
 
     <!-- Run publish tests -->
-    <test pkg="rostest" type="hztest" test-name="sail_control_hztest">
+    <test pkg="rostest" type="hztest" test-name="sail_control_hztest" name="sail_hztest">
         <param name="topic" value="sail_control/sail_angle"/>
-        <param name="hz" value="60"/>
-        <param name="hzerror" value="0.5"/>
+        <param name="hz" value="10.0"/>
+        <param name="hzerror" value="0.1"/>
         <param name="test_duration" value="10.0"/>
     </test>
 
@@ -29,10 +29,20 @@
         </rosparam>
     </test>
 
-    <test test-name="rudder_controller_test" pkg="rostest" type="hztest" name="hztest1" >
+    <!-- Rudder tests -->
+    <test test-name="rudder_controller_test" pkg="rostest" type="hztest" name="rudder_hztest" >
         <param name="topic" value="rudder_controller/rudder_angle" />
-        <param name="hz" value="60.0" />
-        <param name="hzerror" value="0.5" />
-        <param name="test_duration" value="5.0" />
+        <param name="hz" value="10.0" />
+        <param name="hzerror" value="0.1" />
+        <param name="test_duration" value="10.0" />
+    </test>
+
+    <test pkg="rostest" type="publishtest" test-name="rudder_control_pubtest" >
+        <rosparam>
+            topics:
+                - name: rudder_controller/rudder_angle
+                  timeout: 10
+                  negative: False
+        </rosparam>
     </test>
 </launch>

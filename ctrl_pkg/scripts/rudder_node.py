@@ -57,7 +57,7 @@ if __name__ == "__main__":
                                                                                              kp, ki, kd))
 
     # Subscribers
-    rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float32,
+    rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float64,
                      callback=values.callback_desired_course, queue_size=queue_size)  # The desired course
     rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
                      callback=values.callback_current_heading, queue_size=queue_size)  # The heading

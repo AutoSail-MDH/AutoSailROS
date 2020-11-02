@@ -1,12 +1,13 @@
+# --- Global Configs ---
 queue_size: 1
 
-rate: 60
+rate: 10
 
-# 80 degree
-sail_limits: 1.3962634
+# --- Sail Configs ---
+sail_limits: 1.3962634  # 80 degree
 
-# pi/4 radians
-rudder_limits: 0.7853981633974483
+# --- Rudder Configs ---
+rudder_limits: 0.7853981633974483  # pi/4 radians
 
 pid_coefficients:
     kp: 1

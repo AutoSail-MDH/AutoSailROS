@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     #  Variables
     values = SubscriberValues()
-    Current_wind = 45
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
     sail_limits = rospy.get_param("~sail_limits", 1)
@@ -41,11 +40,11 @@ if __name__ == "__main__":
         trim_degree = trim_sail(new_sail_angle_rad*60)
 
         # publish in log
-        rospy.loginfo("trim_degree: %f sail_angle: %f", trim_degree, new_sail_angle_rad)
+        #rospy.loginfo("trim_degree: %f sail_angle: %f", trim_degree, new_sail_angle_rad)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
-        sail_angle.publish(trim_degree)
+        sail_servo.publish(trim_degree)
 
         # Keep sync with the ROS frequency
         rate.sleep()
