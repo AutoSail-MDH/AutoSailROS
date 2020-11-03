@@ -31,13 +31,17 @@ if __name__ == "__main__":
     sail_servo = rospy.Publisher("sail_control/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     #  subscriber wind sensor readings
-    rospy.Subscriber(name="sail_control_topic", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
+    rospy.Subscriber(name="wind/apparent", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
                      queue_size=queue_size)
 
     while not rospy.is_shutdown():
         # calculate for new sail position
         new_sail_angle_rad = calculate_sail_angle(values.wind_angle, sail_limits)
         trim_degree = trim_sail(new_sail_angle_rad, sail_limits, servo_scalar)
+
+        rospy.loginfo("Wind angle: %f", values.wind_angle)
+        rospy.loginfo("Sail angle: %f", new_sail_angle_rad)
+        rospy.loginfo("Trim degree: %f", trim_degree)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)

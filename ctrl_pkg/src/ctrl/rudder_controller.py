@@ -16,10 +16,7 @@ def calculate_rudder_angle(current_heading, pid_corrected_heading, rudder_limit,
     :return:
     """
     # If the boat is going in the wrong direction, use max rudder angle, else use
-    if math.cos(current_heading-pid_corrected_heading) < 0:
-        return math.copysign(1, velocity)*math.copysign(rudder_limit, math.sin(current_heading-pid_corrected_heading))
-    else:
-        return math.copysign(math.sin(current_heading-pid_corrected_heading)*rudder_limit, velocity)
+    return max(min(-pid_corrected_heading, rudder_limit), -rudder_limit)
 
 
 def trajectory_to_relative_heading(desired_trajectory, current_course):
@@ -33,7 +30,7 @@ def trajectory_to_relative_heading(desired_trajectory, current_course):
     return heading
 
 
-def is_heading_setpoint(velocity=0, upper_threshold=5, lower_threshold=3):
+def is_heading_setpoint(velocity=0, upper_threshold=1.5, lower_threshold=0.5):
     """
     Return True if heading should be used as the setpoint for the PID, depending on the velocity of the vessel and
     latching with an upper and lower threshold.

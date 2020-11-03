@@ -36,7 +36,7 @@ class SubscriberValues:
         x = data.twist.twist.linear.x
         y = data.twist.twist.linear.y
         self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
-        self.current_course = math.atan2(math.cos(x), math.sin(y))
+        self.current_course = math.atan2(math.sin(y), math.cos(x))
 
 
 if __name__ == "__main__":
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                      callback=values.callback_velocity, queue_size=queue_size)  # The velocity and course
 
     # Publishers
-    rudder_angle = rospy.Publisher(name="/rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32,
+    rudder_angle = rospy.Publisher(name="/rudder_controller/rudder_angle", data_class=std_msgs.msg.Float64,
                                    queue_size=queue_size)
 
     while not rospy.is_shutdown():
@@ -75,12 +75,19 @@ if __name__ == "__main__":
 
         # Change between the course controller and the heading controller
         if rc.is_heading_setpoint(velocity=values.velocity):
+            rospy.loginfo("Current heading: %f", values.current_heading)
             pid_heading = rc_pid(control_signal=values.current_heading)
         else:
+            rospy.loginfo("Current course: %f", values.current_course)
             pid_heading = rc_pid(control_signal=values.current_course)
         new_rudder_angle = rc.calculate_rudder_angle(current_heading=values.current_heading,
                                                      pid_corrected_heading=pid_heading,
                                                      rudder_limit=rudder_angle_limit, velocity=values.velocity)
+
+        rospy.loginfo("Desired course: %f", values.desired_course)
+        rospy.loginfo("Current velocity: %f", values.velocity)
+        rospy.loginfo("PID output: %f", pid_heading)
+        rospy.loginfo("Rudder angle: %f", new_rudder_angle)
 
         # Publish the rudder angle
         rudder_angle.publish(new_rudder_angle)
