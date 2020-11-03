@@ -51,6 +51,8 @@ if __name__ == "__main__":
     new_rudder_angle = 0
     rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi / 4)
     queue_size = rospy.get_param("~queue_size", 1)
+    upper_velocity_threshold = rospy.get_param("~rudder_upper_threshold", 1.5)
+    lower_velocity_threshold = rospy.get_param("~rudder_lower_threshold", 0.5)
 
     # Set update frequency
     refresh_rate = rospy.get_param("~rate", 60)
@@ -74,15 +76,15 @@ if __name__ == "__main__":
             rc_pid.setpoint = values.desired_course
 
         # Change between the course controller and the heading controller
-        if rc.is_heading_setpoint(velocity=values.velocity):
+        if rc.is_heading_setpoint(velocity=values.velocity, upper_threshold=upper_velocity_threshold,
+                                  lower_threshold=lower_velocity_threshold):
             rospy.loginfo("Current heading: %f", values.current_heading)
             pid_heading = rc_pid(control_signal=values.current_heading)
         else:
             rospy.loginfo("Current course: %f", values.current_course)
             pid_heading = rc_pid(control_signal=values.current_course)
-        new_rudder_angle = rc.calculate_rudder_angle(current_heading=values.current_heading,
-                                                     pid_corrected_heading=pid_heading,
-                                                     rudder_limit=rudder_angle_limit, velocity=values.velocity)
+        new_rudder_angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_heading,
+                                                     rudder_limit=rudder_angle_limit)
 
         rospy.loginfo("Desired course: %f", values.desired_course)
         rospy.loginfo("Current velocity: %f", values.velocity)
