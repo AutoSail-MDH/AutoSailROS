@@ -14,40 +14,40 @@ def path_planner_partner_publisher():
     pub_waypoints = rospy.Publisher('path_planner/waypoints', std_msgs.msg.Float64MultiArray, queue_size=10)
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
-    pub_gps_heading = rospy.Publisher('/gps/navheading', sensor_msgs.msg.Imu, queue_size=10)
+    # pub_gps_heading = rospy.Publisher('/filter/quaternion', geometry_msgs.msg.QuaternionStamped, queue_size=10)
     pub_wind_sensor = rospy.Publisher('/wind_sensor', std_msgs.msg.Float64MultiArray, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', std_msgs.msg.Float64MultiArray, queue_size=10)
-
     rospy.init_node('path_planner_partner')
     rate = rospy.Rate(60)  # 60hz
-    # obstacles
+    # obstacles 59.619834, 16.557354
     mat_obstacles = std_msgs.msg.Float64MultiArray()
-    mat_obstacles.data = [59.606017, 16.568077, 59.606036, 16.567455, 59.605756, 16.567307]
-    # waypoints
+    mat_obstacles.data = []
+    # waypoints [59.620879, 16.562914, 59.616884, 16.565244, 59.614469, 16.560352, 59.617795, 16.556490]
     mat_waypoints = std_msgs.msg.Float64MultiArray()
-    mat_waypoints.data = [59.606214, 16.567691]  # 59.606502, 16.568896
-    # gps position
+#    mat_waypoints.data = [59.620879, 16.562914, 59.616884, 16.565244, 59.614469, 16.560352, 59.617795, 16.556490]
+    mat_waypoints.data = [59.621189, 16.555377, 59.616463, 16.560807, 59.617339, 16.555198, 59.622185, 16.567209,
+                          59.635126, 16.552199]
+    # gps position 59.617595, 16.561043
     fix = sensor_msgs.msg.NavSatFix()
-    fix.longitude = 16.567138
-    fix.latitude = 59.605596
-    # gps velocity 59.605596, 16.567138
+    fix.latitude = 59.617595
+    fix.longitude = 16.561043
+    # gps velocity
     velocity = geometry_msgs.msg.TwistWithCovarianceStamped()
     velocity.twist.twist.linear.x = 2
     velocity.twist.twist.linear.y = 2
     # gps heading
-    heading = sensor_msgs.msg.Imu()
-    heading.orientation.x = 1
-    heading.orientation.y = 2
+    heading = geometry_msgs.msg.QuaternionStamped()
+    heading.quaternion.x = 1
+    heading.quaternion.y = 2
     # wind sensor
     wind_data = std_msgs.msg.Float64MultiArray()
     wind_data.data = [15, 0.7854]  # 5.498
     while not rospy.is_shutdown():
-        # rospy.loginfo(mat.data)
         pub_waypoints.publish(mat_waypoints)
         pub_obstacles.publish(mat_obstacles)
         pub_gps_position.publish(fix)
         pub_gps_velocity.publish(velocity)
-        pub_gps_heading.publish(heading)
+        # pub_gps_heading.publish(heading)
         pub_wind_sensor.publish(wind_data)
         rate.sleep()
 
