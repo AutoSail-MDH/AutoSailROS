@@ -15,6 +15,7 @@ def calculate_rudder_angle(current_heading, pid_corrected_heading, rudder_limit,
     :param velocity:
     :return:
     """
+    # If the boat is going in the wrong direction, use max rudder angle, else use
     if math.cos(current_heading-pid_corrected_heading) < 0:
         return math.copysign(1, velocity)*math.copysign(rudder_limit, math.sin(current_heading-pid_corrected_heading))
     else:

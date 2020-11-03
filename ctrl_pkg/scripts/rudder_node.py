@@ -26,14 +26,17 @@ class SubscriberValues:
         self.desired_course = data.data
 
     def callback_current_heading(self, data):
-        self.current_heading = data.orientation.z
+        # transform the quaternion to an Euler angle
+        q = data.orientation
+        yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
+
+        self.current_heading = yaw
 
     def callback_velocity(self, data):
         x = data.twist.twist.linear.x
         y = data.twist.twist.linear.y
         self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
         self.current_course = math.atan2(math.cos(x), math.sin(y))
-        rospy.loginfo(x)
 
 
 if __name__ == "__main__":
@@ -53,24 +56,22 @@ if __name__ == "__main__":
     refresh_rate = rospy.get_param("~rate", 60)
     r = rospy.Rate(refresh_rate)
 
-    rospy.loginfo_once("queue_size: {}\n refresh_rate: {}\n kp: {}\n ki: {}\n kd: {}".format(queue_size, refresh_rate,
-                                                                                             kp, ki, kd))
-
     # Subscribers
-    rospy.Subscriber(name="path_planner/course", data_class=std_msgs.msg.Float64,
+    rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
                      callback=values.callback_desired_course, queue_size=queue_size)  # The desired course
     rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
                      callback=values.callback_current_heading, queue_size=queue_size)  # The heading
-    rospy.Subscriber(name="gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
+    rospy.Subscriber(name="/gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
                      callback=values.callback_velocity, queue_size=queue_size)  # The velocity and course
 
     # Publishers
-    rudder_angle = rospy.Publisher(name="rudder_controller/rudder_angle", data_class=std_msgs.msg.Float64,
+    rudder_angle = rospy.Publisher(name="/rudder_controller/rudder_angle", data_class=std_msgs.msg.Float32,
                                    queue_size=queue_size)
 
     while not rospy.is_shutdown():
         # Update the course given by the path planner
-        rc_pid(values.desired_course)
+        if rc_pid.setpoint != values.desired_course:
+            rc_pid.setpoint = values.desired_course
 
         # Change between the course controller and the heading controller
         if rc.is_heading_setpoint(velocity=values.velocity):

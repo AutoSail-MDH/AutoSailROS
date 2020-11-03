@@ -163,27 +163,38 @@ class TestRudder(unittest.TestCase):
         self.assertTrue(heading_latch)
 
     def test_rudder_angle_calculation(self):
-        control_signal = 0
+        current_heading = 0
 
         self.pid.setpoint = 0
         pid_adjusted_heading = 0
         for i in range(100000):
-            pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+            pid_adjusted_heading = self.pid(current_heading)
+        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
+                                          rudder_limit=math.pi / 4, velocity=2)
         self.assertAlmostEqual(angle, 0)
 
         self.pid.setpoint = math.pi/4
         pid_adjusted_heading = 0
         for i in range(100000):
-            pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+            pid_adjusted_heading = self.pid(current_heading)
+        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
+                                          rudder_limit=math.pi / 4, velocity=2)
         self.assertAlmostEqual(angle, -math.pi/4)
 
         self.pid.setpoint = -math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
-            pid_adjusted_heading = self.pid(control_signal)
-        angle = rc.calculate_rudder_angle(control_signal, pid_adjusted_heading, math.pi / 4, 2)
+            pid_adjusted_heading = self.pid(current_heading)
+        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
+                                          rudder_limit=math.pi / 4, velocity=2)
+        self.assertAlmostEqual(angle, math.pi / 4)
+
+        self.pid.setpoint = -math.pi
+        pid_adjusted_heading = 0
+        for i in range(100000):
+            pid_adjusted_heading = self.pid(current_heading)
+        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
+                                          rudder_limit=math.pi / 4, velocity=2)
         self.assertAlmostEqual(angle, math.pi / 4)
 
 
