@@ -21,7 +21,7 @@ def new_heading(pid_adjusted_heading, dt):  # Hittade bara på någonting
     :param dt: delta time
     :return: an emulated turning over time
     """
-    return float(pid_adjusted_heading*dt*10.0)
+    return float(pid_adjusted_heading * dt * 10.0)
 
 
 def is_converged(_list, conv_point, error_margin=1e-3):
@@ -60,7 +60,7 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
 
         # Used for plotting
         if _time is not None and start_time is not None:
-            _time += [_now-start_time]
+            _time += [_now - start_time]
         if setpoint is not None:
             setpoint += [pid.setpoint]
 
@@ -99,7 +99,7 @@ class TestRudder(unittest.TestCase):
         last_time = time.time()
         heading = [0.0]
 
-        self.pid.setpoint = 3*math.pi
+        self.pid.setpoint = 3 * math.pi
         converged = run_convergence(pid=self.pid, heading=heading)
         self.assertTrue(converged, "It took more than a minute to converge")
 
@@ -126,20 +126,20 @@ class TestRudder(unittest.TestCase):
         _time = [0.0]
 
         for i in range(0, 5):
-            self.pid.setpoint = 0.5*i*math.pi
+            self.pid.setpoint = 0.5 * i * math.pi
             while not is_converged(heading, self.pid.setpoint):
                 converged = run_convergence(self.pid, heading, _time, start_time, setpoint)
                 self.assertTrue(converged, "It took more than a minute to converge")
         for i in range(6, -1, -1):
-            self.pid.setpoint = 0.5*i*math.pi
+            self.pid.setpoint = 0.5 * i * math.pi
             while not is_converged(heading, self.pid.setpoint):
                 converged = run_convergence(self.pid, heading, _time, start_time, setpoint)
                 self.assertTrue(converged, "It took more than a minute to converge")
 
         # Uncomment for plotting of heading
-        #plt.plot(_time, heading, label='measured')
-        #plt.plot(_time, setpoint, label='target')
-        #plt.show()
+        # plt.plot(_time, heading, label='measured')
+        # plt.plot(_time, setpoint, label='target')
+        # plt.show()
 
     def test_PID_controller_switch(self):
         velocity = 1
@@ -169,32 +169,28 @@ class TestRudder(unittest.TestCase):
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
-        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
-                                          rudder_limit=math.pi / 4, velocity=2)
+        angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
         self.assertAlmostEqual(angle, 0)
 
-        self.pid.setpoint = math.pi/4
+        self.pid.setpoint = math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
-        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
-                                          rudder_limit=math.pi / 4, velocity=2)
-        self.assertAlmostEqual(angle, -math.pi/4)
+        angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
+        self.assertAlmostEqual(angle, -math.pi / 4)
 
         self.pid.setpoint = -math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
-        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
-                                          rudder_limit=math.pi / 4, velocity=2)
+        angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
         self.assertAlmostEqual(angle, math.pi / 4)
 
         self.pid.setpoint = -math.pi
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
-        angle = rc.calculate_rudder_angle(current_heading=current_heading, pid_corrected_heading=pid_adjusted_heading,
-                                          rudder_limit=math.pi / 4, velocity=2)
+        angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
         self.assertAlmostEqual(angle, math.pi / 4)
 
 
@@ -223,7 +219,7 @@ class Plotting:
             if (current_time - start_time > 1) & (current_time - start_time < 6):
                 self.pid.setpoint = math.pi
             elif current_time - start_time > 6:
-                self.pid.setpoint = 2*math.pi-0.1
+                self.pid.setpoint = 2 * math.pi - 0.1
             last_time = current_time
 
         plt.plot(x, y, label='measured')
@@ -241,6 +237,5 @@ if __name__ == "__main__":
     import rostest
     import rosunit
 
-    #unittest.main()
+    # unittest.main()
     rosunit.unitrun("ctrl_pkg", "unittest_rudder_controller", TestRudder)
-
