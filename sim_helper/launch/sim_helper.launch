@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="sim_helper" type="sim_converter_node.py" name="sim_helper"/>
+    <remap from="/wind/apparent" to="/wind/apparent_rad"/>
+    <remap from="/sail_control/sail_angle" to="/main_sail_position/command"/>
+    <remap from="/rudder_controller/rudder_angle" to="/rudder_position/command"/>
+    <include file="$(find ctrl_pkg)/launch/node.launch"/>
+    <node pkg="topic_tools" type="relay" name="sail_relay" args="/main_sail_position/command /fore_sail_position/command"/>
+</launch>
