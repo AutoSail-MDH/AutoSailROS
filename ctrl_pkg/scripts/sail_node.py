@@ -7,6 +7,8 @@ from sensor_msgs.msg import Imu
 from ctrl import pid
 from ctrl.sail_controller import calculate_sail_angle
 from ctrl.sail_controller import trim_sail
+from dynamic_reconfigure.server import Server
+from ctrl_pkg.cfg import SailControllerConfig
 
 
 class SubscriberValues:
@@ -26,20 +28,30 @@ class SubscriberValues:
         self.roll_angle = roll
 
 
+def dynamic_reconf_callback(config, level):
+    global sc_pid, sail_limits
+    sc_pid.kp = config.kp
+    sc_pid.ki = config.ki
+    sc_pid.kd = config.kd
+    sail_limits = config.sail_limit*math.pi/180
+    rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={sail_limit}""".format(**config))
+    return config
+
+
 if __name__ == "__main__":
-    rospy.init_node("sail_control")
+    rospy.init_node("sail_controller")
 
     #  Variables
     values = SubscriberValues()
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
-    sail_limits = rospy.get_param("~sail_limits", np.pi/5.2)
+    sail_limits = rospy.get_param("~sail_limits", 80)*math.pi/180
     queue_size = rospy.get_param("~queue_size", 1)
     servo_scalar = rospy.get_param("~sail_servo_scalar", 20.25)
 
     #  Publisher
-    sail_angle = rospy.Publisher("sail_control/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
-    sail_servo = rospy.Publisher("sail_control/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_angle = rospy.Publisher("sail_controller/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     #  subscriber wind sensor readings
     rospy.Subscriber(name="wind/apparent", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
@@ -53,6 +65,9 @@ if __name__ == "__main__":
     kd = rospy.get_param("~pid_coefficients/kd", 0.05)
     setpoint = rospy.get_param("~sail_setpoint", math.pi/6)
     sc_pid = pid.PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint)
+
+    # Dynamic reconfigure
+    srv = Server(SailControllerConfig, dynamic_reconf_callback)
 
     while not rospy.is_shutdown():
         # calculate for new sail position

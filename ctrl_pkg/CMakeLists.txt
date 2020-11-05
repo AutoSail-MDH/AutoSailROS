@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   sensor_msgs
+  dynamic_reconfigure
   #catkin_python_setup()  # http://docs.ros.org/en/hydro/api/catkin/html/user_guide/setup_dot_py.html
 )
 
@@ -90,10 +91,10 @@ catkin_python_setup()
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+   cfg/RudderController.cfg
+   cfg/SailController.cfg
+)
 
 ###################################
 ## catkin specific configuration ##

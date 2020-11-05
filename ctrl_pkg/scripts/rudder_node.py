@@ -49,7 +49,8 @@ def dynamic_reconf_callback(config, level):
     rudder_angle_limit = config.rudder_limit*math.pi/180
     upper_velocity_threshold = config.upper_threshold
     lower_velocity_threshold = config.lower_threshold
-    rospy.loginfo("hello")
+    rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={rudder_limit},\
+     upper={upper_threshold}, lower={lower_threshold}""".format(**config))
     return config
 
 
@@ -73,7 +74,7 @@ if __name__ == "__main__":
     r = rospy.Rate(refresh_rate)
 
     # Dynamic reconfigure
-    src = Server(RudderControllerConfig, dynamic_reconf_callback)
+    srv = Server(RudderControllerConfig, dynamic_reconf_callback)
 
     # Subscribers
     rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
