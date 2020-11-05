@@ -12,6 +12,8 @@ import sensor_msgs.msg
 # Local libs
 from ctrl import rudder_controller as rc
 from ctrl import pid
+from dynamic_reconfigure.server import Server
+from ctrl_pkg.cfg import RudderControllerConfig
 
 
 # Class for saving the values of the subscribers
@@ -39,6 +41,18 @@ class SubscriberValues:
         self.current_course = math.atan2(math.sin(y), math.cos(x))
 
 
+def dynamic_reconf_callback(config, level):
+    global rc_pid, rudder_angle_limit, lower_velocity_threshold, upper_velocity_threshold
+    rc_pid.kp = config.kp
+    rc_pid.ki = config.ki
+    rc_pid.kd = config.kd
+    rudder_angle_limit = config.rudder_limit*math.pi/180
+    upper_velocity_threshold = config.upper_threshold
+    lower_velocity_threshold = config.lower_threshold
+    rospy.loginfo("hello")
+    return config
+
+
 if __name__ == "__main__":
     rospy.init_node("rudder_controller")
     kp = rospy.get_param("~pid_coefficients/kp", 1)
@@ -49,7 +63,7 @@ if __name__ == "__main__":
 
     # Constants
     new_rudder_angle = 0
-    rudder_angle_limit = rospy.get_param("~rudder_limits", math.pi / 4)
+    rudder_angle_limit = rospy.get_param("~rudder_limits", 45)*math.pi/180
     queue_size = rospy.get_param("~queue_size", 1)
     upper_velocity_threshold = rospy.get_param("~rudder_upper_threshold", 1.5)
     lower_velocity_threshold = rospy.get_param("~rudder_lower_threshold", 0.5)
@@ -57,6 +71,9 @@ if __name__ == "__main__":
     # Set update frequency
     refresh_rate = rospy.get_param("~rate", 60)
     r = rospy.Rate(refresh_rate)
+
+    # Dynamic reconfigure
+    src = Server(RudderControllerConfig, dynamic_reconf_callback)
 
     # Subscribers
     rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
