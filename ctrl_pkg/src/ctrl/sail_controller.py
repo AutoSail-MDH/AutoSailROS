@@ -2,7 +2,8 @@ import numpy as np
 
 sail_angle_rad = 0
 
-def calculate_sail_angle(wind_sensor_readings, sail_limits):
+
+def calculate_sail_angle(wind_sensor_readings):
     """
     Calculating the optimum angle the mast should be, dependant on the wind direction
     :param wind_sensor_readings: input from the wind sensor, to determine the direction the wind
@@ -11,11 +12,24 @@ def calculate_sail_angle(wind_sensor_readings, sail_limits):
     """
     global sail_angle_rad
 
-    if -np.pi <= wind_sensor_readings <= np.pi:
-        sail_angle_rad = np.multiply(-np.sign(wind_sensor_readings),
-                                     (((float(-sail_limits) - float(sail_limits)) / np.pi) *
-                                      np.abs(wind_sensor_readings) + sail_limits))
+    sail_angle_rad = np.abs(wind_sensor_readings) + np.deg2rad(40)
+    if abs(wind_sensor_readings) > np.deg2rad(140):
+        sail_angle_rad = 0
+    elif abs(wind_sensor_readings) < np.deg2rad(45):
+        sail_angle_rad = wind_sensor_readings + np.pi
+
     return sail_angle_rad
+
+
+def calculate_sail_v2(current_pid_roll, max_roll, max_sail):
+    if current_pid_roll >= max_roll:
+        return max_sail
+    elif current_pid_roll <= 0:
+        return 0
+
+    if max_roll == 0:
+        raise ValueError("max roll can not be 0")
+    return current_pid_roll/max_roll*max_sail
 
 
 def trim_sail(sail_angle, sail_limits, scalar):

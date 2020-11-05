@@ -104,10 +104,10 @@ if __name__ == "__main__":
         new_rudder_angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_heading,
                                                      rudder_limit=rudder_angle_limit)
 
-        rospy.loginfo("Desired course: %f", values.desired_course)
-        rospy.loginfo("Current velocity: %f", values.velocity)
-        rospy.loginfo("PID output: %f", pid_heading)
-        rospy.loginfo("Rudder angle: %f", new_rudder_angle)
+        rospy.loginfo_throttle(0.1, "Desired course: %f", values.desired_course*180/math.pi)
+        rospy.loginfo_throttle(0.1, "Current velocity: %f", values.velocity)
+        rospy.loginfo_throttle(0.1, "PID output: %f", pid_heading*180/math.pi)
+        rospy.loginfo_throttle(0.1, "Rudder angle: %f", new_rudder_angle*180/math.pi)
 
         # Publish the rudder angle
         rudder_angle.publish(new_rudder_angle)

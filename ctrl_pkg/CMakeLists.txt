@@ -165,6 +165,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/rudder_node.py
   scripts/sail_node.py
+  scripts/sail_node_pid.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

@@ -71,10 +71,10 @@ class PID:
         self.reset()
 
     def set_limits(self, limits):
-        if limits(0) > limits(1):
+        if limits[0] > limits[1]:
             raise ValueError("min must be greater than max")
-        self.min_value = limits(0)
-        self.max_value = limits(1)
+        self.min_value = limits[0]
+        self.max_value = limits[1]
 
     def reset(self):
         self.error = 0

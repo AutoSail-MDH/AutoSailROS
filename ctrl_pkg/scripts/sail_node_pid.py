@@ -3,9 +3,9 @@ import rospy
 import std_msgs.msg
 import numpy as np
 import math
-from sensor_msgs.msg import Imu
+import sensor_msgs.msg
 from ctrl import pid
-from ctrl.sail_controller import calculate_sail_angle
+from ctrl.sail_controller import calculate_sail_v2
 from ctrl.sail_controller import trim_sail
 from dynamic_reconfigure.server import Server
 from ctrl_pkg.cfg import SailControllerConfig
@@ -23,8 +23,8 @@ class SubscriberValues:
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        roll = math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
-
+        roll = abs(math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2)))
+        rospy.loginfo_throttle(0.1, "roll angle: %f", roll*180/math.pi)
         self.roll_angle = roll
 
 
@@ -45,42 +45,45 @@ if __name__ == "__main__":
     values = SubscriberValues()
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
-    sail_limits = rospy.get_param("~sail_limits", 80)*math.pi/180
+    sail_limits = rospy.get_param("~sail_limits", np.pi/5.2)
     queue_size = rospy.get_param("~queue_size", 1)
     servo_scalar = rospy.get_param("~sail_servo_scalar", 20.25)
+    max_roll = rospy.get_param("~max_roll", math.pi/6)
 
     #  Publisher
-    sail_angle = rospy.Publisher("sail_controller/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
-    sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_angle = rospy.Publisher("sail_control/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_servo = rospy.Publisher("sail_control/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     #  subscriber wind sensor readings
     rospy.Subscriber(name="wind/apparent", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
                      queue_size=queue_size)
-    rospy.Subscriber(name="/gps/navheading", data_class=Imu, callback=values.callback_roll_angle,
+    rospy.Subscriber(name="gps/navheading", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
                      queue_size=queue_size)
 
     # Initialize PID
     kp = rospy.get_param("~pid_coefficients/kp", 1)
     ki = rospy.get_param("~pid_coefficients/ki", 0.1)
     kd = rospy.get_param("~pid_coefficients/kd", 0.05)
-    setpoint = rospy.get_param("~sail_setpoint", 0.1)
-    sc_pid = pid.PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint)
+    setpoint = rospy.get_param("~sail_setpoint", math.pi/12)
+    sc_pid = pid.PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint, output_limits=(-max_roll, max_roll))
 
     # Dynamic reconfigure
     srv = Server(SailControllerConfig, dynamic_reconf_callback)
 
     while not rospy.is_shutdown():
         # calculate for new sail position
-        pid_corrected_roll = sc_pid(values.roll_angle)
+        pid_corrected_roll = abs(sc_pid(values.roll_angle))
+        rospy.loginfo("PID correction: %f", pid_corrected_roll)
 
-        new_sail_angle_rad = max(-sail_limits, min(pid_corrected_roll, sail_limits))
-        #new_sail_angle_rad = calculate_sail_angle(values.wind_angle, sail_limits)
+        new_sail_angle_rad = calculate_sail_v2(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
+                                               max_sail=sail_limits)
+
+        new_sail_angle_rad = -math.copysign(new_sail_angle_rad, values.wind_angle)
+
         trim_degree = trim_sail(new_sail_angle_rad, sail_limits, servo_scalar)
-
-        rospy.loginfo("PID output: %f", pid_corrected_roll)
-        rospy.loginfo("Wind angle: %f", values.wind_angle)
-        rospy.loginfo("Sail angle: %f", new_sail_angle_rad)
-        rospy.loginfo("Trim degree: %f", trim_degree)
+        rospy.loginfo_throttle(0.1, "Wind angle: %f", values.wind_angle*180/math.pi)
+        rospy.loginfo_throttle(0.1, "Sail angle: %f", new_sail_angle_rad*180/math.pi)
+        rospy.loginfo_throttle(0.1, "Trim degree: %f", trim_degree)
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
