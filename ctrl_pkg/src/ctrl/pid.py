@@ -82,5 +82,5 @@ class PID:
         self.derivative = 0
 
         self.last_time = time.time()
-        self.last_output = 0
+        self.last_output = None
         self.last_control_signal = 0
