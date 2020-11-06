@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import rospy
 import std_msgs.msg
-import numpy as np
 import math
 import sensor_msgs.msg
 from ctrl import pid
@@ -45,14 +44,15 @@ if __name__ == "__main__":
     values = SubscriberValues()
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
-    sail_limits = rospy.get_param("~sail_limits", np.pi/5.2)
+    sail_limits = rospy.get_param("~sail_limits", math.pi/5.2)*math.pi/180
     queue_size = rospy.get_param("~queue_size", 1)
     servo_scalar = rospy.get_param("~sail_servo_scalar", 20.25)
-    max_roll = rospy.get_param("~max_roll", math.pi/6)
+    max_roll = rospy.get_param("~max_roll", math.pi/6)*math.pi/180
 
     #  Publisher
-    sail_angle = rospy.Publisher("sail_control/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
-    sail_servo = rospy.Publisher("sail_control/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_angle = rospy.Publisher("sail_controller/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    pid_pub = rospy.Publisher("sail_controller/pid", std_msgs.msg.Float64, queue_size=queue_size)
 
     #  subscriber wind sensor readings
     rospy.Subscriber(name="wind/apparent", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     kp = rospy.get_param("~pid_coefficients/kp", 1)
     ki = rospy.get_param("~pid_coefficients/ki", 0.1)
     kd = rospy.get_param("~pid_coefficients/kd", 0.05)
-    setpoint = rospy.get_param("~sail_setpoint", math.pi/12)
+    setpoint = rospy.get_param("~sail_setpoint", math.pi/12)*math.pi/180
     sc_pid = pid.PID(kp=kp, ki=ki, kd=kd, setpoint=setpoint, output_limits=(-max_roll, max_roll))
 
     # Dynamic reconfigure
@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         # calculate for new sail position
-        pid_corrected_roll = abs(sc_pid(values.roll_angle))
+        pid_corrected_roll = -(sc_pid(values.roll_angle))
         rospy.loginfo("PID correction: %f", pid_corrected_roll)
 
         new_sail_angle_rad = calculate_sail_v2(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
@@ -86,6 +86,7 @@ if __name__ == "__main__":
         rospy.loginfo_throttle(0.1, "Trim degree: %f", trim_degree)
 
         # Publish the sail angle
+        pid_pub.publish(pid_corrected_roll)
         sail_angle.publish(new_sail_angle_rad)
         sail_servo.publish(trim_degree)
 

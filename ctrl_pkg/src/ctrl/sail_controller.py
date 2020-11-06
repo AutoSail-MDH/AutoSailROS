@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 
 sail_angle_rad = 0
@@ -42,5 +43,5 @@ def trim_sail(sail_angle, sail_limits, scalar):
         return 0
     elif sail_angle < 0:
         return sail_limits * scalar
-    servo_degree = np.multiply(sail_limits-np.abs(sail_angle), scalar)
+    servo_degree = np.multiply(sail_limits-abs(sail_angle), scalar)
     return np.abs(servo_degree)
