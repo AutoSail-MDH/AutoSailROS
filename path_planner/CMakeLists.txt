@@ -208,3 +208,12 @@ catkin_install_python(PROGRAMS scripts/speed_polar_diagram.py scripts/speed_pola
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+## Install config files
+install(DIRECTORY config/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+    PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY launch/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+    PATTERN ".svn" EXCLUDE
+)
