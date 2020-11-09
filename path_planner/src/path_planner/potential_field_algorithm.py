@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 
 class PointClass:
@@ -36,7 +37,8 @@ class PotentialField:
                               [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
                               [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
 
-    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed):
+    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed,
+                 waypoint_radius, num_circle_point):
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
         self.d_inf = d_inf
@@ -46,6 +48,8 @@ class PotentialField:
         self.g_v = g_v
         self.v_v = v_v
         self.w_speed = w_speed
+        self.waypoint_radius = waypoint_radius
+        self.num_circle_point = num_circle_point
 
     def find_nearest(self, array, value):
         """
@@ -61,6 +65,24 @@ class PotentialField:
 
     def is_not_used(self):
         pass
+
+    def rotate_point(self, x, y, r):
+        self.is_not_used()
+        rx = (x*math.cos(r)) - (y*math.sin(r))
+        ry = (y*math.cos(r)) + (x*math.sin(r))
+        return rx, ry
+
+    def generate_circle_waypoints(self, center):
+        # calculate the angle between the points
+        point_angle = (2*math.pi) / self.num_circle_point
+        points = []
+        for i in range(self.num_circle_point):
+            # create x,y at the circumference with angle point_angle * i
+            (p_x, p_y) = self.rotate_point(0, self.waypoint_radius, point_angle * i)
+            p_x += center[0]
+            p_y += center[1]
+            points.append((round(p_x), round(p_y)))
+        return points
 
     def speed_polar_diagram_calculation(self, w_theta):
         """
@@ -101,11 +123,20 @@ class PotentialField:
         radius = (dim-1)/2
         l_range = np.linspace(-radius, radius, dim)
         list_len = dim * dim - 1
+        zero = np.array((0, 0))
+        p_d = np.array((0, 0))
         # create the profile as a list with PointClass at every index
         for j in range(dim):
             for i in range(dim):
-                p = PointClass(-radius+j, l_range[i], pos_v[0]-radius+j, pos_v[1]-radius+i, 0)
-                profile_.append(p)
+                p_d[0] = -radius + j
+                p_d[1] = l_range[i]
+                if np.linalg.norm(zero - p_d) <= radius:
+                    p = PointClass(-radius + j, l_range[i], pos_v[0] - radius + j, pos_v[1] - radius + i, 0)
+                    profile_.append(p)
+                else:
+                    p = PointClass(-radius + j, l_range[i], pos_v[0] - radius + j, pos_v[1] - radius + i, 100)
+                    profile_.append(p)
+
         return profile_, list_len
 
     def potential_relative_obstacle_calculation_j(self, obstacle, p):
@@ -116,7 +147,10 @@ class PotentialField:
         :return: The potential for one point relative obstacles.
         """
         if np.linalg.norm(p - obstacle) <= self.d_inf:
-            return self.obstacle_weight * ((1 / np.linalg.norm(p - obstacle)) - (1 / self.d_inf))
+            if p[0] == obstacle[0] and p[1] == obstacle[1]:
+                return self.obstacle_weight
+            else:
+                return self.obstacle_weight * ((1 / np.linalg.norm(p - obstacle)) - (1 / self.d_inf))
         elif np.linalg.norm(p - obstacle) > self.d_inf:
             return 0
 
@@ -204,7 +238,7 @@ class PotentialField:
             p[0] = profile[i].l_kx
             p[1] = profile[i].l_ky
             u_w = self.wind_potential_calculation(w_theta, p, heading)
-            profile[i].u = u_o + u_g + u_w
+            profile[i].u = u_o + u_g + u_w + profile[i].u
         return profile
 
     def reshape_profile(self, profile):

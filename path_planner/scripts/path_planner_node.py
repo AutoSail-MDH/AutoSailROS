@@ -5,6 +5,7 @@ import math
 import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
+from scipy.spatial import distance
 
 from path_planner import potential_field_algorithm as pfa
 
@@ -34,13 +35,16 @@ class ReferencePoint:
 
 class ConfigClass:
     def __init__(self):
-        self.profile_diameter = rospy.get_param("~profile_diameter", default=100)
-        self.goal_weight = rospy.get_param("~goal_weight", default=5)
-        self.obstacle_weight = rospy.get_param("~obstacle_weight", default=20)
-        self.d_inf = rospy.get_param("~d_inf", default=20)
-        self.p_ngz = rospy.get_param("~p_ngz", default=200)
-        self.p_hyst = rospy.get_param("~p_hyst", default=10)
-        self.g_v = rospy.get_param("~g_v", default=1)
+        self.profile_diameter = rospy.get_param("~profile_diameter")
+        self.goal_weight = rospy.get_param("~goal_weight")
+        self.obstacle_weight = rospy.get_param("~obstacle_weight")
+        self.d_inf = rospy.get_param("~d_inf")
+        self.p_ngz = rospy.get_param("~p_ngz")
+        self.p_hyst = rospy.get_param("~p_hyst")
+        self.g_v = rospy.get_param("~g_v")
+        self.local_coord_scale = rospy.get_param("~local_coord_scale")
+        self.waypoint_radius = rospy.get_param("~waypoint_radius")
+        self.num_circle_point = rospy.get_param("~num_circle_point")
 
 
 def latlng_to_global_xy_ref(lat, lng, p0_lat, p1_lat):
@@ -190,7 +194,6 @@ def imu_heading_callback(data):
     heading[1] = np.sin(yaw)*np.cos(pitch)
 
 
-
 def obstacles_callback(data):
     """
     reads the /path_planner/obstacles topic and saves the obstacle as a global np.array
@@ -222,6 +225,10 @@ def quaternion_to_euler_yaw(heading_quaternion):
     return pitch, yaw
 
 
+def true_wind():
+    print("true_wind")
+
+
 def path_planner_subscriber():
     """
     start the subscriber methods
@@ -239,7 +246,7 @@ def path_planner_subscriber():
     rospy.Subscriber("waypoint/index", std_msgs.msg.Int64, waypoint_index_callback)
 
 
-def path_planning_init():
+def path_planning_init(config_object):
     """
     initialize the path planner by creating the reference frame and converting waypoints and obstacles to x,y
     coordinates in that reference frame. The reference frame is created in such a way that one x,y corresponds to one
@@ -255,7 +262,7 @@ def path_planning_init():
         length_waypoints = int(len(waypoints))
         length_obstacles = int(len(obstacles))
         # check if data has been read
-        if length_waypoints > 0 and longitude > 0 and latitude > 0:
+        if length_waypoints > 0 and longitude > 0 and latitude > 0 and length_obstacles > 0:
             # create np.array 2xN for waypoints and obstacles
             waypoint_xy_array = np.zeros(shape=(int(length_waypoints / 2), 2))
             obstacles_xy_array = np.zeros(shape=(int(length_obstacles / 2), 2))
@@ -266,24 +273,62 @@ def path_planning_init():
     ref0_pos = latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
     ref1_pos = latlng_to_global_xy_ref(lat_1, lon_1, lat_0, lat_1)
     # create two the object for the two reference points
-    p_0 = ReferencePoint(0, 100, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
-    p_1 = ReferencePoint(100, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
+    p_0 = ReferencePoint(0, config_object.local_coord_scale, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
+    p_1 = ReferencePoint(config_object.local_coord_scale, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     # calculates the local x,y for the waypoints in the frame of the reference points
     j = 0
     for i in range(int(length_waypoints / 2)):
         waypoints_xy = latlng_to_screen_xy(waypoints[j], waypoints[j + 1], p_0, p_1)
-        waypoint_xy_array[i, 0] = waypoints_xy[0]
-        waypoint_xy_array[i, 1] = waypoints_xy[1]
+        waypoint_xy_array[i, 0] = round(waypoints_xy[0])
+        waypoint_xy_array[i, 1] = round(waypoints_xy[1])
         j = j + 2
     j = 0
     # calculates the local x,y for the obstacles in the frame of the reference points
     for i in range(int(length_obstacles / 2)):
         obstacles_xy_1d = latlng_to_screen_xy(obstacles[j], obstacles[j + 1], p_0, p_1)
-        obstacles_xy_array[i, 0] = obstacles_xy_1d[0]
-        obstacles_xy_array[i, 1] = obstacles_xy_1d[1]
+        obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
+        obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
         j = j + 2
 
     return waypoint_xy_array, obstacles_xy_array, p_0, p_1
+
+
+def closest_waypoint(pos, circle_points):
+    closest_index = distance.cdist([pos], circle_points).argmin()
+    return closest_index
+
+
+def circle_waypoint(potential_field_object, waypoint, p_0, p_1):
+    global latitude
+    global longitude
+    position_v = latlng_to_screen_xy(latitude, longitude, p_0, p_1)
+    circle_points = potential_field_object.generate_circle_waypoints(waypoint)
+    closest_index = closest_waypoint(position_v, circle_points)
+    for i in range(closest_index):
+        circle_points.append(circle_points[i])
+    for i in range(closest_index):
+        circle_points.pop(0)
+        i += 1
+    goal = circle_points[0]
+    # while time < time limit
+    #   update position
+    #   if np.linalg.norm(pos_v - goal) < 1:
+    #       goal = next waypoint
+    #   calculate angle
+    rospy.loginfo("closest_index {}".format(closest_index))
+    rospy.loginfo("circle_points {}".format(circle_points))
+
+
+def calculate_profile(potential_field_object, position_v, obstacles_array, goal):
+    # creates a profile around square around the position of the vessel in which potential will be calculated
+    profile, list_len = potential_field_object.create_profile(pos_v=position_v)
+    # calculates the total potential in each point
+    profile = potential_field_object.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
+                                                               heading)
+    # calculates the index of the position in the profile with the lowest potential and the angle from the vessel
+    # position to that point
+    min_angle, min_index = potential_field_object.find_global_minima_angle(profile)
+    return min_angle
 
 
 def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_heading, goal_index, config_object):
@@ -308,28 +353,22 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
     # create potential field object
     potential_field_object = pfa.PotentialField(config_object.profile_diameter, config_object.obstacle_weight,
                                                 config_object.d_inf, config_object.goal_weight, config_object.p_ngz,
-                                                config_object.p_hyst, config_object.g_v, lin_velocity, w_speed)
+                                                config_object.p_hyst, config_object.g_v, lin_velocity, w_speed,
+                                                config_object.waypoint_radius, config_object.num_circle_point)
 
+    if waypoint_index_control > len(waypoint_array) - 1:
+        waypoint_index_control = len(waypoint_array) - 1
     goal = waypoint_array[waypoint_index_control]
 #    goal = waypoint_array[goal_index]
-    rospy.loginfo(heading)
 
-    goal[0] = int(round(goal[0]))
-    goal[1] = int(round(goal[1]))
+    rospy.loginfo("goal {}".format(goal))
     position_v = [int(round(position_v[0])), int(round(position_v[1]))]
-    # creates a profile around square around the position of the vessel in which potential will be calculated
-    profile, list_len = potential_field_object.create_profile(pos_v=position_v)
-    # calculates the total potential in each point
-    profile = potential_field_object.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
-                                                               heading)
-    # calculates the index of the position in the profile with the lowest potential and the angle from the vessel
-    # position to that point
-    min_angle, min_index = potential_field_object.find_global_minima_angle(profile)
 
-    desired_heading_angle = min_angle
+    min_angle = calculate_profile(potential_field_object, position_v, obstacles_array, goal)
+    # circle around waypoint
+    circle_waypoint(potential_field_object, [0, 0],  p_0, p_1)
     # publish the calculated angle
-    pub_heading.publish(desired_heading_angle)
-
+    pub_heading.publish(min_angle)
     """
     import matplotlib.pyplot as plt
     profile_matrix = potential_field_object.reshape_profile(profile)
@@ -342,26 +381,27 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
 if __name__ == '__main__':
     waypoint_index = 0
     try:
-        # read the parameters form the config.yaml file
-        config_object_main = ConfigClass()
         # initialize subscribers
         path_planner_subscriber()
         # initialize publisher
         pub_heading_main = rospy.Publisher('/path_planner/course', std_msgs.msg.Float64, queue_size=10)
+        # read the parameters form the config.yaml file
+        config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
-        waypoint_xy, obstacles_xy, p0, p1 = path_planning_init()
+        waypoint_xy, obstacles_xy, p0, p1 = path_planning_init(config_object_main)
+
         rate = rospy.Rate(1)  # profile_diameter: 50
         while not rospy.is_shutdown():
             # calculate the desired course of the vessel
             pos_v, goal_main, waypoint_array_len = path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1,
                                                                               pub_heading_main, waypoint_index,
                                                                               config_object_main)
-            """ 
+            """
             if np.linalg.norm(pos_v - goal_main) < 1:
                 waypoint_index = waypoint_index + 1
                 if waypoint_index == waypoint_array_len:
                     break
-            """
+"""
             rate.sleep()
     except rospy.ROSInterruptException:
         pass
