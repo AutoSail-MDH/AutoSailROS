@@ -41,12 +41,13 @@ class SubscriberValues:
         self.current_course = math.atan2(y, x)
 
 
+# Dynamic reconfiguration
 def dynamic_reconf_callback(config, level):
     global rc_pid, rudder_angle_limit, lower_velocity_threshold, upper_velocity_threshold, values
     rc_pid.kp = config.kp
     rc_pid.ki = config.ki
     rc_pid.kd = config.kd
-    rudder_angle_limit = config.rudder_limit*math.pi/180
+    rc_pid.set_limits((-config.rudder_limit*math.pi/180, config.rudder_limit*math.pi/180))
     upper_velocity_threshold = config.upper_threshold
     lower_velocity_threshold = config.lower_threshold
     if level == 1:
@@ -58,10 +59,7 @@ def dynamic_reconf_callback(config, level):
 
 if __name__ == "__main__":
     rospy.init_node("rudder_controller")
-    kp = rospy.get_param("~pid_coefficients/kp", 1)
-    ki = rospy.get_param("~pid_coefficients/ki", 0.1)
-    kd = rospy.get_param("~pid_coefficients/kd", 0.05)
-    rc_pid = pid.PID(kp=kp, ki=ki, kd=kd)
+    rc_pid = pid.PID()
     values = SubscriberValues()
 
     # Constants

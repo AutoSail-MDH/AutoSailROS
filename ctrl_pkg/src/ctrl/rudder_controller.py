@@ -9,13 +9,12 @@ heading_latch = True
 def calculate_rudder_angle(pid_corrected_heading, rudder_limit):
     """
     Calculates the angle of the rudder given
-    :param current_heading:
-    :param pid_corrected_heading:
-    :param rudder_limit:
-    :param velocity:
-    :return:
+    :param pid_corrected_heading: The change in heading, as given by the PID, in radians
+    :param rudder_limit: The maximum angle of the rudder in radian
+    :return: The desired angle the rudder
     """
-    # If the boat is going in the wrong direction, use max rudder angle, else use
+    # Clam the value between the max and min values of the rudder.
+    # The rudder angle is the inverse of the direction of the vessel.
     return max(min(-pid_corrected_heading, rudder_limit), -rudder_limit)
 
 

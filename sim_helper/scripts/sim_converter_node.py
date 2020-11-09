@@ -12,8 +12,8 @@ twist_pub = rospy.Publisher("gps/fix_velocity", TwistWithCovarianceStamped, queu
 wind_pub = rospy.Publisher("wind/apparent_rad", Float64, queue_size=1)
 pos_pub = rospy.Publisher("gps/fix", NavSatFix, queue_size=1)
 rudder_pub = rospy.Publisher("/rudder_position/command", Float64, queue_size=1)
+sail_pub = rospy.Publisher("/main_sail_position/command", Float64, queue_size=1)
 # GPS fix position, imu quartenions, wind speed
-
 
 
 def model_state_callback(data):
@@ -33,8 +33,12 @@ def model_state_callback(data):
     twist_pub.publish(twist_msg)
 
 
+wind_angle = 0
+
+
 def wind_callback(data):
     global wind_pub
+    global wind_angle
     wind_angle = math.atan2(data.vector.y, data.vector.x)
     wind_pub.publish(wind_angle)
 
@@ -47,6 +51,13 @@ def rudder_callback(data):
     desired_rudder_angle = data.data
 
 
+def sail_callback(data):
+    global wind_angle
+    proposed_sail_angle = data.data
+    sail_angle = -max(min(proposed_sail_angle, wind_angle), -proposed_sail_angle)
+    sail_pub.publish(sail_angle)
+
+
 if __name__ == "__main__":
     rospy.init_node("sim_converter")
 
@@ -56,6 +67,8 @@ if __name__ == "__main__":
     rospy.Subscriber(name="wind/apparent", data_class=Vector3Stamped,
                      callback=wind_callback, queue_size=1)
     rospy.Subscriber(name="rudder_controller/rudder_angle", data_class=Float64, callback=rudder_callback, queue_size=1)
+    rospy.Subscriber(name="sail_controller/sail_angle", data_class=Float64, callback=sail_callback, queue_size=1)
+
     r = rospy.Rate(260)
     current_rudder_angle = 0.
     onedeginrad = math.pi/180.
