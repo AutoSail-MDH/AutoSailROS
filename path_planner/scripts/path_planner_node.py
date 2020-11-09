@@ -6,12 +6,17 @@ import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
 from scipy.spatial import distance
-
 from path_planner import potential_field_algorithm as pfa
 
+from path_planner.msg import waypointmsg
+from path_planner.msg import waypoint_array_msg
+from path_planner.msg import obstaclemsg
+from path_planner.msg import obstacles_array_msg
+
+
 # global variables updated by the callback functions via the subscribers
-waypoints = np.array([])
-obstacles = np.array([])
+waypoints = 0
+obstacles = 0
 longitude = 0.0
 latitude = 0.0
 lin_velocity = 0.0
@@ -19,6 +24,12 @@ heading = np.array([0., 0.])
 w_speed = 0
 w_theta = 0
 waypoint_index_control = 0
+obstacle_mutex = 0
+waypoint_mutex = 0
+velocity_mutex = 0
+heading_mutex = 0
+position_mutex = 0
+wind_mutex = 0
 
 radius = 6371  # Earth Radius in KM
 
@@ -130,7 +141,9 @@ def waypoint_callback(data):
     :return: Nothing
     """
     global waypoints
+    global waypoint_mutex
     waypoints = data.data
+    waypoint_mutex = 1
 
 
 def wind_sensor_callback(data):
@@ -141,8 +154,10 @@ def wind_sensor_callback(data):
     """
     global w_speed
     global w_theta
+    global wind_mutex
     w_speed = data.data[0]
     w_theta = data.data[1]
+    wind_mutex = 1
 
 
 def gps_position_callback(data):
@@ -153,8 +168,10 @@ def gps_position_callback(data):
     """
     global longitude
     global latitude
+    global position_mutex
     longitude = data.longitude
     latitude = data.latitude
+    position_mutex = 1
 
 
 def gps_velocity_callback(data):
@@ -164,9 +181,11 @@ def gps_velocity_callback(data):
     :return: Nothing
     """
     global lin_velocity
+    global velocity_mutex
     lin_velocity_x = data.twist.twist.linear.x
     lin_velocity_y = data.twist.twist.linear.y
     lin_velocity = math.sqrt((lin_velocity_x ** 2) + (lin_velocity_y ** 2))
+    velocity_mutex = 1
 
 
 def imu_heading_callback_partner(data):
@@ -187,11 +206,13 @@ def imu_heading_callback(data):
     :return: Nothing
     """
     global heading
+    global heading_mutex
     heading_quaternion = geometry_msgs.msg.QuaternionStamped()
     heading_quaternion.quaternion = data.quaternion
     pitch, yaw = quaternion_to_euler_yaw(heading_quaternion)
     heading[0] = np.cos(yaw)*np.cos(pitch)
     heading[1] = np.sin(yaw)*np.cos(pitch)
+    heading_mutex = 1
 
 
 def obstacles_callback(data):
@@ -201,7 +222,9 @@ def obstacles_callback(data):
     :return: Nothing
     """
     global obstacles
+    global obstacle_mutex
     obstacles = data.data
+    obstacle_mutex = 1
 
 
 def waypoint_index_callback(data):
@@ -237,12 +260,12 @@ def path_planner_subscriber():
     # create node for the path planner
     rospy.init_node('path_planner')
     # start the subscribers for all sensors
-    rospy.Subscriber("path_planner/waypoints", std_msgs.msg.Float64MultiArray, waypoint_callback)
+    rospy.Subscriber("path_planner/waypoints", waypoint_array_msg, waypoint_callback)
     rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, gps_position_callback)
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
     rospy.Subscriber("/filter/quaternion", geometry_msgs.msg.QuaternionStamped, imu_heading_callback)
     rospy.Subscriber("/wind_sensor", std_msgs.msg.Float64MultiArray, wind_sensor_callback)
-    rospy.Subscriber("/path_planner/obstacles", std_msgs.msg.Float64MultiArray, obstacles_callback)
+    rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback)
     rospy.Subscriber("waypoint/index", std_msgs.msg.Int64, waypoint_index_callback)
 
 
@@ -255,19 +278,29 @@ def path_planning_init(config_object):
     """
     waypoint_xy_array = np.zeros(0)
     obstacles_xy_array = np.zeros(0)
-    length_waypoints = int(len(waypoints))
-    length_obstacles = int(len(obstacles))
-    # waits until waypoint, obstacles and position data has been read from the topics
+    global waypoints
+    global position_mutex
+    global velocity_mutex
+    global heading_mutex
+    global obstacle_mutex
+    global waypoint_mutex
+    length_obstacles = 0
+    length_waypoints = 0
+
+    # length_obstacles = int(len(obstacles))
+    # waits until obstacles and position data has been read from the topics
     while not rospy.is_shutdown():
-        length_waypoints = int(len(waypoints))
-        length_obstacles = int(len(obstacles))
         # check if data has been read
-        if length_waypoints > 0 and longitude > 0 and latitude > 0 and length_obstacles > 0:
+        if position_mutex == 1 and obstacle_mutex == 1 and waypoint_mutex == 1 and velocity_mutex == 1 and\
+                heading_mutex == 1 and wind_mutex == 1:
+            length_obstacles = len(obstacles)
+            length_waypoints = len(waypoints)
             # create np.array 2xN for waypoints and obstacles
-            waypoint_xy_array = np.zeros(shape=(int(length_waypoints / 2), 2))
-            obstacles_xy_array = np.zeros(shape=(int(length_obstacles / 2), 2))
+            waypoint_xy_array = np.zeros(shape=(length_waypoints, 3))
+            obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
             break
-    # calculates position for two reference point 100m at 0 and 90 deg from the position
+
+    # calculates position for two reference point 100m at 0 and 90 deg from the position  heading_mutex == 1 and
     [lat_0, lon_0, lat_1, lon_1] = calculate_reference_points(latitude, longitude)
     # calculate the global x,y for the reference points
     ref0_pos = latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
@@ -276,25 +309,23 @@ def path_planning_init(config_object):
     p_0 = ReferencePoint(0, config_object.local_coord_scale, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
     p_1 = ReferencePoint(config_object.local_coord_scale, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     # calculates the local x,y for the waypoints in the frame of the reference points
-    j = 0
-    for i in range(int(length_waypoints / 2)):
-        waypoints_xy = latlng_to_screen_xy(waypoints[j], waypoints[j + 1], p_0, p_1)
+
+    for i in range(length_waypoints):
+        waypoints_xy = latlng_to_screen_xy(waypoints[i].latitude, waypoints[i].longitude, p_0, p_1)
         waypoint_xy_array[i, 0] = round(waypoints_xy[0])
         waypoint_xy_array[i, 1] = round(waypoints_xy[1])
-        j = j + 2
-    j = 0
+        waypoint_xy_array[i, 2] = waypoints[i].id
     # calculates the local x,y for the obstacles in the frame of the reference points
-    for i in range(int(length_obstacles / 2)):
-        obstacles_xy_1d = latlng_to_screen_xy(obstacles[j], obstacles[j + 1], p_0, p_1)
+    for i in range(length_obstacles):
+        obstacles_xy_1d = latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
         obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
         obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
-        j = j + 2
 
     return waypoint_xy_array, obstacles_xy_array, p_0, p_1
 
 
 def closest_waypoint(pos, circle_points):
-    closest_index = distance.cdist([pos], circle_points).argmin()
+    closest_index = distance.cdist([pos[0], pos[1]], circle_points).argmin()
     return closest_index
 
 
@@ -310,13 +341,13 @@ def circle_waypoint(potential_field_object, waypoint, p_0, p_1):
         circle_points.pop(0)
         i += 1
     goal = circle_points[0]
+#    rospy.loginfo("goal_circle {}".format(goal))
+#    rospy.loginfo("circle_points {}".format(circle_points))
     # while time < time limit
     #   update position
     #   if np.linalg.norm(pos_v - goal) < 1:
     #       goal = next waypoint
     #   calculate angle
-    rospy.loginfo("closest_index {}".format(closest_index))
-    rospy.loginfo("circle_points {}".format(circle_points))
 
 
 def calculate_profile(potential_field_object, position_v, obstacles_array, goal):
@@ -328,7 +359,7 @@ def calculate_profile(potential_field_object, position_v, obstacles_array, goal)
     # calculates the index of the position in the profile with the lowest potential and the angle from the vessel
     # position to that point
     min_angle, min_index = potential_field_object.find_global_minima_angle(profile)
-    return min_angle
+    return min_angle, profile
 
 
 def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_heading, goal_index, config_object):
@@ -348,6 +379,7 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
     global latitude
     global longitude
     global waypoint_index_control
+    min_angle = 0
     # calculates the local x,y for the position in the frame of the reference points
     position_v = latlng_to_screen_xy(latitude, longitude, p_0, p_1)
     # create potential field object
@@ -359,14 +391,17 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
     if waypoint_index_control > len(waypoint_array) - 1:
         waypoint_index_control = len(waypoint_array) - 1
     goal = waypoint_array[waypoint_index_control]
+    goal_pos = goal[0:2]
 #    goal = waypoint_array[goal_index]
-
-    rospy.loginfo("goal {}".format(goal))
     position_v = [int(round(position_v[0])), int(round(position_v[1]))]
 
-    min_angle = calculate_profile(potential_field_object, position_v, obstacles_array, goal)
+    if goal[2] == 0:
+        rospy.loginfo("calculate_profile IF")
+        min_angle, profile = calculate_profile(potential_field_object, position_v, obstacles_array, goal_pos)
     # circle around waypoint
-    circle_waypoint(potential_field_object, [0, 0],  p_0, p_1)
+    if goal[2] == 1:
+        rospy.loginfo("circle_waypoint IF")
+        circle_waypoint(potential_field_object, [0, 0],  p_0, p_1)
     # publish the calculated angle
     pub_heading.publish(min_angle)
     """
@@ -388,20 +423,23 @@ if __name__ == '__main__':
         # read the parameters form the config.yaml file
         config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
+
         waypoint_xy, obstacles_xy, p0, p1 = path_planning_init(config_object_main)
 
         rate = rospy.Rate(1)  # profile_diameter: 50
         while not rospy.is_shutdown():
+
             # calculate the desired course of the vessel
             pos_v, goal_main, waypoint_array_len = path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1,
                                                                               pub_heading_main, waypoint_index,
                                                                               config_object_main)
             """
-            if np.linalg.norm(pos_v - goal_main) < 1:
-                waypoint_index = waypoint_index + 1
-                if waypoint_index == waypoint_array_len:
-                    break
-"""
+                        if np.linalg.norm(pos_v - goal_main) < 1:
+                            waypoint_index = waypoint_index + 1
+                            if waypoint_index == waypoint_array_len:
+                                break
+            """
+
             rate.sleep()
     except rospy.ROSInterruptException:
         pass

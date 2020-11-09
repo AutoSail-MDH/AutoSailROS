@@ -50,11 +50,13 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+ add_message_files(
+   FILES
+   waypointmsg.msg
+   waypoint_array_msg.msg
+   obstaclemsg.msg
+   obstacles_array_msg.msg
+ )
 
 ## Generate services in the 'srv' folder
  #add_service_files(
@@ -70,10 +72,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -109,6 +111,7 @@ catkin_package(
 #  LIBRARIES path_planner
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+CATKIN_DEPENDS message_runtime
 )
 
 ###########
@@ -215,5 +218,9 @@ install(DIRECTORY config/
 )
 install(DIRECTORY launch/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+    PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY msg/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/msg
     PATTERN ".svn" EXCLUDE
 )
