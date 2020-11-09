@@ -1,7 +1,7 @@
 # --- Global Configs ---
-queue_size: 1
+queue_size: 10
 
-rate: 10
+rate: 100
 
 # --- Sail Configs ---
 sail_limits: 80 #1.3962634  # 80 degree

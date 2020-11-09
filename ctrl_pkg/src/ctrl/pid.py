@@ -10,7 +10,7 @@ class PID:
         self.error = 0
 
         # Check if setpoint is in the first revolution, else make it so
-        if 0 <= setpoint < 2 * math.pi:
+        if -math.pi <= setpoint < math.pi:
             self._setpoint = setpoint
         else:
             self._setpoint = math.atan2(math.sin(setpoint), math.cos(setpoint))
@@ -64,7 +64,7 @@ class PID:
 
     @setpoint.setter
     def setpoint(self, new_setpoint):
-        if not (0 <= new_setpoint < 2*math.pi):
+        if not (-math.pi <= new_setpoint < math.pi):
             self._setpoint = math.atan2(math.sin(new_setpoint), math.cos(new_setpoint))
         else:
             self._setpoint = new_setpoint

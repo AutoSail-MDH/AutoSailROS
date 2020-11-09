@@ -38,7 +38,7 @@ class SubscriberValues:
         x = data.twist.twist.linear.x
         y = data.twist.twist.linear.y
         self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
-        self.current_course = math.atan2(math.sin(y), math.cos(x))
+        self.current_course = math.atan2(y, x)
 
 
 def dynamic_reconf_callback(config, level):
