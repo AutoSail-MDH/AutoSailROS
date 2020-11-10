@@ -222,5 +222,5 @@ install(DIRECTORY launch/
 )
 if(CATKIN_ENABLE_TESTING)
    find_package(rostest REQUIRED)
-  add_rostest(tests/rostest.test)
+  add_rostest(test/rostest.test)
 endif()

@@ -207,9 +207,9 @@ def imu_heading_callback(data):
     """
     global heading
     global heading_mutex
-    heading_quaternion = geometry_msgs.msg.QuaternionStamped()
-    heading_quaternion.quaternion = data.quaternion
-    pitch, yaw = quaternion_to_euler_yaw(heading_quaternion)
+    heading_quaternion = sensor_msgs.msg.Imu()
+    heading_quaternion.orientation = data.orientation
+    pitch, yaw = quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading[0] = np.cos(yaw)*np.cos(pitch)
     heading[1] = np.sin(yaw)*np.cos(pitch)
     heading_mutex = 1
@@ -242,7 +242,7 @@ def quaternion_to_euler_yaw(heading_quaternion):
     method for converting quaternion to euler
     :return: euler yaw
     """
-    q = heading_quaternion.quaternion
+    q = heading_quaternion
     pitch = np.arcsin(2*(q.w*q.y - q.z*q.x))
     yaw = np.arctan2(2*(q.w*q.z + q.x*q.y), 1 - 2*(q.y**2 + q.z**2))
     return pitch, yaw
@@ -263,7 +263,7 @@ def path_planner_subscriber():
     rospy.Subscriber("path_planner/waypoints", waypoint_array_msg, waypoint_callback)
     rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, gps_position_callback)
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
-    rospy.Subscriber("/filter/quaternion", geometry_msgs.msg.QuaternionStamped, imu_heading_callback)
+    rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, imu_heading_callback)
     rospy.Subscriber("/wind_sensor", std_msgs.msg.Float64MultiArray, wind_sensor_callback)
     rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback)
     rospy.Subscriber("waypoint/index", std_msgs.msg.Int64, waypoint_index_callback)
@@ -291,7 +291,7 @@ def path_planning_init(config_object):
     # waits until obstacles and position data has been read from the topics
     while not rospy.is_shutdown():
         # check if data has been read
-        if position_mutex == 1 and obstacle_mutex == 1 and waypoint_mutex == 1 and velocity_mutex == 1 and\
+        if position_mutex == 1 and waypoint_mutex == 1 and velocity_mutex == 1 and\
                 heading_mutex == 1 and wind_mutex == 1:
             length_obstacles = np.size(obstacles)
             length_waypoints = np.size(waypoints)
@@ -316,12 +316,18 @@ def path_planning_init(config_object):
         waypoint_xy_array[i, 1] = round(waypoints_xy[1])
         waypoint_xy_array[i, 2] = waypoints[i].id
     # calculates the local x,y for the obstacles in the frame of the reference points
-    for i in range(length_obstacles):
-        obstacles_xy_1d = latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
-        obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
-        obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
+    if obstacle_mutex == 1:
+        for i in range(length_obstacles):
+            obstacles_xy_1d = latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
+            obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
+            obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
 
-    return waypoint_xy_array, obstacles_xy_array, p_0, p_1
+    potential_field_object = pfa.PotentialField(config_object.profile_diameter, config_object.obstacle_weight,
+                                                config_object.d_inf, config_object.goal_weight, config_object.p_ngz,
+                                                config_object.p_hyst, config_object.g_v, lin_velocity, w_speed,
+                                                config_object.waypoint_radius, config_object.num_circle_point)
+
+    return waypoint_xy_array, obstacles_xy_array, p_0, p_1, potential_field_object
 
 
 def closest_waypoint(pos, circle_points):
@@ -354,9 +360,18 @@ def circle_waypoint(potential_field_object, waypoint, p_0, p_1):
     #   if np.linalg.norm(pos_v - goal) < 1:
     #       goal = next waypoint
     #   calculate angle
+    # publish desired angle
 
 
 def calculate_profile(potential_field_object, position_v, obstacles_array, goal):
+    """
+    creates the profile and calculates the desired heading
+    :param potential_field_object: the object containing all the config values and the potential field algorithms.
+    :param position_v: the position of the vessel
+    :param obstacles_array: an array of the xy coordinates for the obstacle
+    :param goal: xy position of the goal
+    :return: minimum angle and the profile
+    """
     # creates a profile around square around the position of the vessel in which potential will be calculated
     profile, list_len = potential_field_object.create_profile(pos_v=position_v)
     # calculates the total potential in each point
@@ -368,9 +383,11 @@ def calculate_profile(potential_field_object, position_v, obstacles_array, goal)
     return min_angle, profile
 
 
-def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_heading, goal_index, config_object):
+def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_heading, goal_index,
+                               potential_field_object):
     """
     calculates the desired heading of the vessel
+    :param potential_field_object: The object containing the potential field mehtods and configs
     :param config_object: object of the parameters form the config file
     :param pub_heading: publisher for the heading
     :param goal_index: index of current goal
@@ -389,10 +406,8 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
     # calculates the local x,y for the position in the frame of the reference points
     position_v = latlng_to_screen_xy(latitude, longitude, p_0, p_1)
     # create potential field object
-    potential_field_object = pfa.PotentialField(config_object.profile_diameter, config_object.obstacle_weight,
-                                                config_object.d_inf, config_object.goal_weight, config_object.p_ngz,
-                                                config_object.p_hyst, config_object.g_v, lin_velocity, w_speed,
-                                                config_object.waypoint_radius, config_object.num_circle_point)
+    potential_field_object.v_v = lin_velocity
+    potential_field_object.w_speed = w_speed
 
     if waypoint_index_control > len(waypoint_array) - 1:
         waypoint_index_control = len(waypoint_array) - 1
@@ -430,7 +445,7 @@ if __name__ == '__main__':
         config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
 
-        waypoint_xy, obstacles_xy, p0, p1 = path_planning_init(config_object_main)
+        waypoint_xy, obstacles_xy, p0, p1, potential_field_object_main = path_planning_init(config_object_main)
 
         rate = rospy.Rate(1)  # profile_diameter: 50
         while not rospy.is_shutdown():
@@ -438,7 +453,8 @@ if __name__ == '__main__':
             # calculate the desired course of the vessel
             pos_v, goal_main, waypoint_array_len = path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1,
                                                                               pub_heading_main, waypoint_index,
-                                                                              config_object_main)
+                                                                              config_object_main,
+                                                                              potential_field_object_main)
             """
                         if np.linalg.norm(pos_v - goal_main) < 1:
                             waypoint_index = waypoint_index + 1
