@@ -18,7 +18,7 @@ def path_planner_partner_publisher():
     pub_waypoints = rospy.Publisher('path_planner/waypoints', waypoint_array_msg, queue_size=10)
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
-    pub_gps_heading = rospy.Publisher('/filter/quaternion', geometry_msgs.msg.QuaternionStamped, queue_size=10)
+    pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
     pub_wind_sensor = rospy.Publisher('/wind_sensor', std_msgs.msg.Float64MultiArray, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
     rospy.init_node('path_planner_partner')
@@ -75,15 +75,15 @@ def path_planner_partner_publisher():
     velocity.twist.twist.linear.x = 2
     velocity.twist.twist.linear.y = 2
     # gps heading
-    heading = geometry_msgs.msg.QuaternionStamped()
-    heading.quaternion.x = 1
-    heading.quaternion.y = 2
+    heading = sensor_msgs.msg.Imu()
+    heading.orientation.x = 1
+    heading.orientation.y = 2
     # wind sensor
     wind_data = std_msgs.msg.Float64MultiArray()
     wind_data.data = [20, 3.142]  # 5.498 0.7854
     while not rospy.is_shutdown():
         pub_waypoints.publish(waypoint_array)
-        pub_obstacles.publish(obstacle_array)
+        # pub_obstacles.publish(obstacle_array)
         pub_gps_position.publish(fix)
         pub_gps_velocity.publish(velocity)
         pub_gps_heading.publish(heading)
