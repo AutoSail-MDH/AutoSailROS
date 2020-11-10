@@ -5,9 +5,9 @@ from path_planner import potential_relative_goal_obsticle as prgo
 import unittest
 
 
-class TestStringMethods(unittest.TestCase):
+class TestPotentialRelativeGoalObstacle(unittest.TestCase):
 
-    def test_upper(self):
+    def test_parematers_work_correctly(self):
         obstacle = np.array([])
         obstacle_weight = 0
         d_inf = 0
@@ -31,6 +31,6 @@ class TestStringMethods(unittest.TestCase):
 
 if __name__ == '__main__':
     import rosunit
-    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestStringMethods)
+    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestPotentialRelativeGoalObstacle)
 
     #  unittest.main()

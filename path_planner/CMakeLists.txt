@@ -220,7 +220,7 @@ install(DIRECTORY launch/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
     PATTERN ".svn" EXCLUDE
 )
-install(DIRECTORY msg/
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/msg
-    PATTERN ".svn" EXCLUDE
-)
+if(CATKIN_ENABLE_TESTING)
+   find_package(rostest REQUIRED)
+  add_rostest(tests/rostest.test)
+endif()
