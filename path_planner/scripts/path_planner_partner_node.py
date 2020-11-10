@@ -65,8 +65,7 @@ def path_planner_partner_publisher():
     mat_waypoint.longitude = 16.561035
     mat_waypoint.id = 1
     waypoint_array.data.append(mat_waypoint)
-    # gps position 59.617595, 16.561043 59.617459, 16.560839IndexError: list assignment index out of range
-
+    # gps position
     fix = sensor_msgs.msg.NavSatFix()
     fix.latitude = 59.617459
     fix.longitude = 16.560839
