@@ -293,8 +293,8 @@ def path_planning_init(config_object):
         # check if data has been read
         if position_mutex == 1 and obstacle_mutex == 1 and waypoint_mutex == 1 and velocity_mutex == 1 and\
                 heading_mutex == 1 and wind_mutex == 1:
-            length_obstacles = len(obstacles)
-            length_waypoints = len(waypoints)
+            length_obstacles = np.size(obstacles)
+            length_waypoints = np.size(waypoints)
             # create np.array 2xN for waypoints and obstacles
             waypoint_xy_array = np.zeros(shape=(length_waypoints, 3))
             obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
@@ -325,7 +325,13 @@ def path_planning_init(config_object):
 
 
 def closest_waypoint(pos, circle_points):
-    closest_index = distance.cdist([pos[0], pos[1]], circle_points).argmin()
+    """
+    pos_vessel = np.ndarray(shape=(2, 2))
+    pos_vessel[0][0] = pos[0]
+    pos_vessel[0][1] = pos[1]
+    """
+    rospy.loginfo("pos {}".format(pos))
+    closest_index = distance.cdist([pos], circle_points).argmin()
     return closest_index
 
 
@@ -341,8 +347,8 @@ def circle_waypoint(potential_field_object, waypoint, p_0, p_1):
         circle_points.pop(0)
         i += 1
     goal = circle_points[0]
-#    rospy.loginfo("goal_circle {}".format(goal))
-#    rospy.loginfo("circle_points {}".format(circle_points))
+    rospy.loginfo("goal_circle {}".format(goal))
+    rospy.loginfo("circle_points {}".format(circle_points))
     # while time < time limit
     #   update position
     #   if np.linalg.norm(pos_v - goal) < 1:

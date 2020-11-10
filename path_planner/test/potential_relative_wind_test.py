@@ -4,14 +4,15 @@ from path_planner import *
 from path_planner import potential_relative_wind as prw
 import unittest
 
-class TestStringMethods(unittest.TestCase):
+
+class TestPotentialWindCases(unittest.TestCase):
     p_ngz = 20
     p_hyst = 5
     g_v = 1
     v_v = 4
     w_speed = 4
 
-    def test_case_1(self):
+    def case_1_potential_nogo_zone(self):
         p_ngz = 20
         p_hyst = 5
         g_v = 1
@@ -108,7 +109,7 @@ class TestStringMethods(unittest.TestCase):
 
 
 
-    def test_case_2(self):
+    def case_2_hystersis_potential(self):
         p_ngz = 20
         p_hyst = 5
         g_v = 1
@@ -292,7 +293,7 @@ class TestStringMethods(unittest.TestCase):
         case = prw.wind_potential_calculation(p_ngz, p_hyst, g_v, v_v, w_speed, w_theta, p, heading)
         self.assertEqual("case2", case)
 
-    def test_case_3(self):
+    def case_3_non_hystersis_potential(self):
         p_ngz = 20
         p_hyst = 5
         g_v = 1
@@ -482,5 +483,5 @@ class TestStringMethods(unittest.TestCase):
 
 if __name__ == '__main__':
     import rosunit
-    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestStringMethods)
+    rosunit.unitrun("path_planner", "potential_relative_goal_obsticle_test", TestPotentialWindCases)
     #  unittest.main()
