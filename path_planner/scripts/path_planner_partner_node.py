@@ -83,7 +83,7 @@ def path_planner_partner_publisher():
     wind_data.data = [20, 3.142]  # 5.498 0.7854
     while not rospy.is_shutdown():
         pub_waypoints.publish(waypoint_array)
-        # pub_obstacles.publish(obstacle_array)
+        pub_obstacles.publish(obstacle_array)
         pub_gps_position.publish(fix)
         pub_gps_velocity.publish(velocity)
         pub_gps_heading.publish(heading)

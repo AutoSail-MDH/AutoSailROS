@@ -388,7 +388,6 @@ def path_planning_calc_heading(waypoint_array, obstacles_array, p_0, p_1, pub_he
     """
     calculates the desired heading of the vessel
     :param potential_field_object: The object containing the potential field mehtods and configs
-    :param config_object: object of the parameters form the config file
     :param pub_heading: publisher for the heading
     :param goal_index: index of current goal
     :param waypoint_array: np.array of waypoints in x,y reference frame
@@ -453,7 +452,6 @@ if __name__ == '__main__':
             # calculate the desired course of the vessel
             pos_v, goal_main, waypoint_array_len = path_planning_calc_heading(waypoint_xy, obstacles_xy, p0, p1,
                                                                               pub_heading_main, waypoint_index,
-                                                                              config_object_main,
                                                                               potential_field_object_main)
             """
                         if np.linalg.norm(pos_v - goal_main) < 1:
