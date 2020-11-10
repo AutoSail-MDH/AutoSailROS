@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # Initialize variables
     values = SubscriberValues()
-    predefined_rate = rospy.get_param("~rate", 60)
+    predefined_rate = rospy.get_param("~rate", 100)
     rate = rospy.Rate(predefined_rate)
     sail_limits = rospy.get_param("~sail_limits", math.pi / 5.2) * math.pi / 180
     queue_size = rospy.get_param("~queue_size", 1)

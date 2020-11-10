@@ -70,7 +70,7 @@ if __name__ == "__main__":
     lower_velocity_threshold = rospy.get_param("~rudder_lower_threshold", 0.5)
 
     # Set update frequency
-    refresh_rate = rospy.get_param("~rate", 60)
+    refresh_rate = rospy.get_param("~rate", 100)
     r = rospy.Rate(refresh_rate)
 
     # Dynamic reconfigure

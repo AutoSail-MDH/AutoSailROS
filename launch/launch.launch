@@ -1,9 +1,3 @@
 <launch>
-
-    <node pkg="ctrl_pkg" name="sail_controller" type="sail_node_pid.py">
-      <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
-   </node>
-   <node pkg="ctrl_pkg" name="rudder_controller" type="rudder_node.py">
-      <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
-   </node>
+    <include file="$(find ctrl_pkg)/launch/node.launch"/>
 </launch>
