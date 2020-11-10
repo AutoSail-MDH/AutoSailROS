@@ -52,8 +52,8 @@ def dynamic_reconf_callback(config, level):
     lower_velocity_threshold = config.lower_threshold
     if level == 1:
         values.desired_course = config.setpoint*math.pi/180
-    rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={rudder_limit},\
-     upper={upper_threshold}, lower={lower_threshold}, setpoint={setpoint}""".format(**config))
+    #rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={rudder_limit},\
+    # upper={upper_threshold}, lower={lower_threshold}, setpoint={setpoint}""" .format(**config))
     return config
 
 
