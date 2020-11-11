@@ -1,5 +1,7 @@
 import numpy as np
 import math
+from scipy.spatial import distance
+import rospy
 
 
 class PointClass:
@@ -38,7 +40,9 @@ class PotentialField:
                               [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
 
     def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed,
-                 waypoint_radius, num_circle_point):
+                 waypoint_radius, num_circle_point, radius_earth, w_theta, latitude, longitude, waypoint_index_control,
+                 heading, obstacles, obstacle_mutex, waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
+                 wind_mutex):
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
         self.d_inf = d_inf
@@ -50,6 +54,21 @@ class PotentialField:
         self.w_speed = w_speed
         self.waypoint_radius = waypoint_radius
         self.num_circle_point = num_circle_point
+        self.radius_earth = radius_earth
+
+        self.w_theta = w_theta
+        self.latitude = latitude
+        self.longitude = longitude
+        self.waypoint_index_control = waypoint_index_control
+        self.heading = heading
+        self.obstacles = obstacles
+
+        self.obstacle_mutex = obstacle_mutex
+        self.waypoint_mutex = waypoint_mutex
+        self.velocity_mutex = velocity_mutex
+        self.heading_mutex = heading_mutex
+        self.position_mutex = position_mutex
+        self.wind_mutex = wind_mutex
 
     def find_nearest(self, array, value):
         """
@@ -68,13 +87,13 @@ class PotentialField:
 
     def rotate_point(self, x, y, r):
         self.is_not_used()
-        rx = (x*math.cos(r)) - (y*math.sin(r))
-        ry = (y*math.cos(r)) + (x*math.sin(r))
+        rx = (x * math.cos(r)) - (y * math.sin(r))
+        ry = (y * math.cos(r)) + (x * math.sin(r))
         return rx, ry
 
     def generate_circle_waypoints(self, center):
         # calculate the angle between the points
-        point_angle = (2*math.pi) / self.num_circle_point
+        point_angle = (2 * math.pi) / self.num_circle_point
         points = []
         for i in range(self.num_circle_point):
             # create x,y at the circumference with angle point_angle * i
@@ -120,7 +139,7 @@ class PotentialField:
         # ensures that the dimension of the profile is odd
         if (dim % 2) == 0:
             dim = dim + 1
-        radius = (dim-1)/2
+        radius = (dim - 1) / 2
         l_range = np.linspace(-radius, radius, dim)
         list_len = dim * dim - 1
         zero = np.array((0, 0))
@@ -174,7 +193,7 @@ class PotentialField:
         :param p: The x,y coordinate of the point being calculated.
         :return: The potential in one point relative the goal.
         """
-        return self.goal_weight*np.linalg.norm(p-goal)
+        return self.goal_weight * np.linalg.norm(p - goal)
 
     def wind_potential_calculation(self, w_theta, p, heading):
         """
@@ -295,7 +314,7 @@ class PotentialField:
         y_main_loop.append(position_v[1])
         while 1:
             # check if the point is within 5m of the current goal
-            if np.linalg.norm(position_v-goal) < 5:
+            if np.linalg.norm(position_v - goal) < 5:
                 return x_main_loop, y_main_loop
             # create profile
             profile, list_len = self.create_profile(pos_v=position_v)
@@ -313,3 +332,206 @@ class PotentialField:
             heading[0] = profile[min_index].l_kx
             heading[1] = profile[min_index].l_ky
             i = i + 1
+
+    def calculate_profile(self, position_v, obstacles_array, goal, w_theta):
+        """
+        creates the profile and calculates the desired heading
+        :param w_theta: wind angle
+        :param position_v: the position of the vessel
+        :param obstacles_array: an array of the xy coordinates for the obstacle
+        :param goal: xy position of the goal
+        :return: minimum angle and the profile
+        """
+        # creates a profile around square around the position of the vessel in which potential will be calculated
+        profile, list_len = self.create_profile(pos_v=position_v)
+        # calculates the total potential in each point
+        profile = self.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
+                                                 self.heading)
+        # calculates the index of the position in the profile with the lowest potential and the angle from the vessel
+        # position to that point
+        min_angle, min_index = self.find_global_minima_angle(profile)
+        return min_angle, profile
+
+    def closest_waypoint(self, pos, circle_points):
+        """
+        finds the index of the waypoint closest to the vessel
+        :param pos: position of the vessel
+        :param circle_points: waypoints in the circle
+        :return:
+        """
+        """
+        pos_vessel = np.ndarray(shape=(2, 2))
+        pos_vessel[0][0] = pos[0]
+        pos_vessel[0][1] = pos[1]
+        """
+        self.is_not_used()
+        rospy.loginfo("pos {}".format(pos))
+        closest_index = distance.cdist([pos], circle_points, 'euclidean').argmin()
+        return closest_index
+
+    def circle_waypoint(self, waypoint, p_0, p_1, latitude, longitude):
+        position_v = self.latlng_to_screen_xy(latitude, longitude, p_0, p_1)
+        circle_points = self.generate_circle_waypoints(waypoint)
+        closest_index = self.closest_waypoint(position_v, circle_points)
+        for i in range(closest_index):
+            circle_points.append(circle_points[i])
+        for i in range(closest_index):
+            circle_points.pop(0)
+            i += 1
+        goal = circle_points[0]
+        rospy.loginfo("goal_circle {}".format(goal))
+        rospy.loginfo("circle_points {}".format(circle_points))
+        # while time < time limit
+        #   update position
+        #   if np.linalg.norm(pos_v - goal) < 1:
+        #       goal = next waypoint
+        #   calculate angle
+        # publish desired angle
+
+    def latlng_to_global_xy(self, lat, lng, p_0, p_1):
+        """
+        converts latitude, longitude to global x,y coordinates for any point
+        :param lat: latitude of the point
+        :param lng: longitude of the point
+        :param p_0: ReferencePoint 0
+        :param p_1: ReferencePoint 1
+        :return: global x,y coordinates for the point
+        """
+        self.is_not_used()
+        x = self.radius_earth * lng * math.cos((p_0.lat + p_1.lat) / 2)
+        y = self.radius_earth * lat
+        return [x, y]
+
+    def latlng_to_screen_xy(self, lat, lng, p_0, p_1):
+        """
+        convert latitude, longitude for a point to x,y in the reference frame
+        :param lat: latitude for the point being converted
+        :param lng: longitude for the point being converted
+        :param p_0: reference point 0
+        :param p_1: reference point 1
+        :return: x,y coordinates for the point in the reference frame
+        """
+        pos = self.latlng_to_global_xy(lat, lng, p_0, p_1)
+        per_x = ((pos[0] - p_0.pos_x) / (p_1.pos_x - p_0.pos_x))
+        per_y = ((pos[1] - p_0.pos_y) / (p_1.pos_y - p_0.pos_y))
+
+        return p_0.scrX + (p_1.scrX - p_0.scrX) * per_x, p_0.scrY + (p_1.scrY - p_0.scrY) * per_y
+
+    def obstacle_calc(self, p_0, p_1, obstacles):
+        """
+        calculates the local x,y for the obstacles in the frame of the reference points
+        :param p_0: reference point 0
+        :param p_1: reference point 1
+        :param obstacles: array of obstacles
+        :return:
+        """
+        self.is_not_used()
+        length_obstacles = np.size(obstacles)
+        obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
+        for i in range(length_obstacles):
+            obstacles_xy_1d = self.latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
+            obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
+            obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
+        return obstacles_xy_array
+
+    def calculate_reference_points(self, lat, lon):
+        """
+        creates two reference points 100m from the position of the vessel at o and 90 deg
+        :param lat: latitude of the vessel
+        :param lon: longitude of the vessel
+        :return: latitude and longitude for the two ref points.
+        """
+        self.is_not_used()
+        # the angle to the reference points from vessel position
+        bearing_0 = np.deg2rad(0)
+        bearing_1 = np.deg2rad(90)
+        distance_0 = 0.1  # 100 meter in km
+        distance_1 = 0.1  # 100 meter in km
+        lat_rad = math.radians(lat)
+        lon_rad = math.radians(lon)
+        # calculate the latitude longitude of the reference points
+        lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / self.radius_earth) +
+                          math.cos(lat_rad) * math.sin(distance_0 / self.radius_earth) * math.cos(bearing_0))
+        lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / self.radius_earth) * math.cos(lat_rad),
+                                     math.cos(distance_0 / self.radius_earth) - math.sin(lat_rad) * math.sin(lat_1))
+
+        lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / self.radius_earth) +
+                          math.cos(lat_rad) * math.sin(distance_1 / self.radius_earth) * math.cos(bearing_1))
+        lon_2 = lon_rad + math.atan2(math.sin(bearing_1) * math.sin(distance_1 / self.radius_earth) * math.cos(lat_rad),
+                                     math.cos(distance_1 / self.radius_earth) - math.sin(lat_rad) * math.sin(lat_2))
+        # convert the reference points from rad to degrees
+        lat_1 = math.degrees(lat_1)
+        lon_1 = math.degrees(lon_1)
+        lat_2 = math.degrees(lat_2)
+        lon_2 = math.degrees(lon_2)
+        return [lat_1, lon_1, lat_2, lon_2]
+
+    def latlng_to_global_xy_ref(self, lat, lng, p0_lat, p1_lat):
+        """
+        converts latitude, longitude to global x,y coordinates for the two reference points.
+        :param lat: latitude for the ref point being converted
+        :param lng: latitude for the ref point being converted
+        :param p0_lat: latitude for the first ref point
+        :param p1_lat: latitude for the second ref point
+        :return:
+        """
+        x = self.radius_earth * lng * math.cos((p0_lat + p1_lat) / 2)
+        y = self.radius_earth * lat
+        return [x, y]
+
+    def plot_heat_map(self, profile):
+        """
+        method used to plot the heat map
+        profile: profile for the vessel
+        :return:
+        """
+        self.is_not_used()
+        import matplotlib.pyplot as plt
+        profile_matrix = self.reshape_profile(profile)
+        plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
+        plt.show()
+
+    def path_planning_calc_heading(self, waypoint_array, p_0, p_1, pub_heading, goal_index):
+        """
+        calculates the desired heading of the vessel
+        :param pub_heading: publisher for the heading
+        :param goal_index: index of current goal
+        :param waypoint_array: np.array of waypoints in x,y reference frame
+        :param p_0: reference point 0
+        :param p_1: reference point 1
+        :return: desired heading
+        """
+        profile = 0
+        min_angle = 0
+        # calculates the local x,y for the position in the frame of the reference points
+        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, p_0, p_1)
+        # create potential field object
+
+        if self.waypoint_index_control > len(waypoint_array) - 1:
+            self.waypoint_index_control = len(waypoint_array) - 1
+        goal = waypoint_array[self.waypoint_index_control]
+        # goal = waypoint_array[goal_index]
+        goal_pos = goal[0:2]
+
+        position_v = [int(round(position_v[0])), int(round(position_v[1]))]
+        # calculates the local x,y for the obstacles in the frame of the reference points
+        if self.obstacle_mutex == 1:
+            obstacles_array = self.obstacle_calc(p_0, p_1, self.obstacles)
+        else:
+            obstacles_array = np.array([])
+        if goal[2] == 0:
+            rospy.loginfo("calculate_profile IF")
+            min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
+                                                        self.w_theta)
+        # circle around waypoint
+        if goal[2] == 1:
+            rospy.loginfo("circle_waypoint Circle")
+            self.circle_waypoint([0, 0], p_0, p_1, self.latitude, self.longitude)
+            min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
+                                                        self.w_theta)
+        # publish the calculated angle
+        pub_heading.publish(min_angle)
+
+        # self.plot_heat_map(profile)
+
+        return position_v, goal, len(waypoint_array)
