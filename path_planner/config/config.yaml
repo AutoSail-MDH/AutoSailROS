@@ -8,3 +8,4 @@ g_v: 10 # scalar multiplied to the velocity consideration
 local_coord_scale: 100 # how many x,y there are per 100m i.e 100 = each x,y coordinate is one meter
 waypoint_radius: 10
 num_circle_point: 8
+radius_earth: 6371

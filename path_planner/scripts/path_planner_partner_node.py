@@ -4,6 +4,7 @@ import rospy
 import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
+import numpy as np
 from path_planner.msg import waypointmsg
 from path_planner.msg import waypoint_array_msg
 from path_planner.msg import obstaclemsg
@@ -71,15 +72,15 @@ def path_planner_partner_publisher():
     fix.longitude = 16.560839
     # gps velocity
     velocity = geometry_msgs.msg.TwistWithCovarianceStamped()
-    velocity.twist.twist.linear.x = 2
-    velocity.twist.twist.linear.y = 2
+    velocity.twist.twist.linear.x = 0
+    velocity.twist.twist.linear.y = -20
     # gps heading
     heading = sensor_msgs.msg.Imu()
     heading.orientation.x = 1
-    heading.orientation.y = 2
+    heading.orientation.y = 1
     # wind sensor
     wind_data = std_msgs.msg.Float64MultiArray()
-    wind_data.data = [20, 3.142]  # 5.498 0.7854
+    wind_data.data = [20, 20]  # 5.498 3.142
     while not rospy.is_shutdown():
         pub_waypoints.publish(waypoint_array)
         pub_obstacles.publish(obstacle_array)
