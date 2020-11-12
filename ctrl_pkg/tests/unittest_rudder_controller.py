@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # Standard libs
-import sys
 import unittest
 import math
 import time
@@ -30,11 +29,11 @@ def is_converged(_list, conv_point, error_margin=1e-3):
     :param _list: The list of the previous headings
     :param conv_point: The point of convolution
     :param error_margin: How far from the point of convolution the heading is allowed to be
-    :return: True if the past 20 values is within the error margin, else False
+    :return: True if the past 100 values is within the error margin, else False
     """
     for i in _list[-100:]:
-        list_item = abs(i - conv_point)
-        if list_item > error_margin:
+        error = abs(i - conv_point)
+        if error > error_margin:
             return False
     return True
 
@@ -49,14 +48,17 @@ def run_convergence(pid, heading, _time=None, start_time=None, setpoint=None):
     :param setpoint: Used for plotting. e.g. list = []
     """
     last_time = time.time()
-    start_time = last_time
+    if start_time is None:
+        start_time = time.time()
     while not is_converged(_list=heading, conv_point=pid.setpoint):
 
         # Run PID and get new heading
         pid_adjusted_heading = pid(heading[-1])
         _now = time.time()
-        heading += [(heading[-1] + new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now - last_time))
-                    % (2 * math.pi)]
+        _new_heading = (heading[-1] + new_heading(pid_adjusted_heading=pid_adjusted_heading, dt=_now - last_time))
+        if not -math.pi < _new_heading <= math.pi:
+            _new_heading = math.atan2(math.sin(_new_heading), math.cos(_new_heading))
+        heading += [_new_heading]
 
         # Used for plotting
         if _time is not None and start_time is not None:
@@ -96,7 +98,6 @@ class TestRudder(unittest.TestCase):
         self.assertEqual(self.pid.last_control_signal, 0)
 
     def test_PID_convergence(self):
-        last_time = time.time()
         heading = [0.0]
 
         self.pid.setpoint = 3 * math.pi
@@ -143,23 +144,23 @@ class TestRudder(unittest.TestCase):
 
     def test_PID_controller_switch(self):
         velocity = 1
-        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity, lower_threshold=2, upper_threshold=5)
         self.assertTrue(heading_latch)
 
         velocity = 4
-        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity, lower_threshold=2, upper_threshold=5)
         self.assertTrue(heading_latch)
 
         velocity = 8
-        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity, lower_threshold=2, upper_threshold=5)
         self.assertFalse(heading_latch)
 
         velocity = 4
-        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity, lower_threshold=2, upper_threshold=5)
         self.assertFalse(heading_latch)
 
         velocity = 1
-        heading_latch = rc.is_heading_setpoint(velocity=velocity)
+        heading_latch = rc.is_heading_setpoint(velocity=velocity, lower_threshold=2, upper_threshold=5)
         self.assertTrue(heading_latch)
 
     def test_rudder_angle_calculation(self):
@@ -234,7 +235,6 @@ if __name__ == "__main__":
     # Plot the PID
     # plot = Plotting()
     # plot.plot()
-    import rostest
     import rosunit
 
     # unittest.main()
