@@ -17,12 +17,7 @@ from ctrl_pkg.cfg import SailControllerConfig
 # Class for saving values from the subscriptions
 class SubscriberValues:
     def __init__(self):
-        self.wind_angle = 0.0
         self.roll_angle = 0.0
-
-    def callback_wind_angle(self, data):
-        if data.data is not None:
-            self.wind_angle = data.data
 
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
@@ -59,9 +54,7 @@ if __name__ == "__main__":
     sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     # Subscribers
-    rospy.Subscriber(name="wind/apparent", data_class=std_msgs.msg.Float64, callback=values.callback_wind_angle,
-                     queue_size=queue_size)
-    rospy.Subscriber(name="gps/navheading", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
+    rospy.Subscriber(name="imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
                      queue_size=queue_size)
 
     # Initialize PID

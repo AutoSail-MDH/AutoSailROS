@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # Subscribers
     rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
                      callback=values.callback_desired_course, queue_size=queue_size)  # The desired course
-    rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
+    rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu,
                      callback=values.callback_current_heading, queue_size=queue_size)  # The heading
     rospy.Subscriber(name="/gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
                      callback=values.callback_velocity, queue_size=queue_size)  # The velocity and course
