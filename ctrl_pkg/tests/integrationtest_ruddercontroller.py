@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import unittest
 import rospy
 from scipy.spatial.transform import Rotation
@@ -61,4 +63,4 @@ class TestRudder(unittest.TestCase):
 
 if __name__ == "__main__":
     import rostest
-    rostest.rosrun("ctrl_pkg", "unittest_rudder_controller", TestRudder)
+    rostest.rosrun("ctrl_pkg", "libtest_rudder", TestRudder)
