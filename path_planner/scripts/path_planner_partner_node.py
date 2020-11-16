@@ -55,16 +55,15 @@ def path_planner_partner_publisher():
     mat_obstacle.longitude = 16.560759
     obstacle_array.data.append(mat_obstacle)
     mat_waypoint = waypointmsg()
-    # 59.617829, 16.560237
     mat_waypoint.latitude = 59.617829
     mat_waypoint.longitude = 16.560237
-    mat_waypoint.id = 0
+    mat_waypoint.id = 1
     waypoint_array = waypoint_array_msg()
     waypoint_array.data.append(mat_waypoint)
     mat_waypoint = waypointmsg()
     mat_waypoint.latitude = 59.618133
     mat_waypoint.longitude = 16.561035
-    mat_waypoint.id = 1
+    mat_waypoint.id = 0
     waypoint_array.data.append(mat_waypoint)
     # gps position
     fix = sensor_msgs.msg.NavSatFix()

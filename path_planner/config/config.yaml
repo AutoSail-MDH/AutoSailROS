@@ -6,6 +6,10 @@ p_ngz: 50 # the potential added to a point inside the no-go zones
 p_hyst: 10 # the extra potential added to a point behind the vessel i.e the coast of tacking
 g_v: 10 # scalar multiplied to the velocity consideration
 local_coord_scale: 100 # how many x,y there are per 100m i.e 100 = each x,y coordinate is one meter
-waypoint_radius: 10
-num_circle_point: 8
-radius_earth: 6371
+waypoint_radius: 10 # radius for waypoint in which the vessel should circle
+num_circle_point: 8 # number of waypoints generated around a circle waypoint
+radius_earth: 6371 # radius of the earth in km
+default_waypoint_id: 0 # id for normal waypoints
+waypoints_to_circle_id: 1 # id for waypoints that should be circled
+waypoints_in_circle_id: 2 # id for waypoints in a circle
+circle_time_limit: 30 # limit for circling a waypoint in sec
