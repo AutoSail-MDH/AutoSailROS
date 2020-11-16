@@ -2,6 +2,7 @@
 import rospy
 import numpy as np
 import math
+import time
 import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
@@ -58,6 +59,10 @@ class ConfigClass:
         self.waypoint_radius = rospy.get_param("~waypoint_radius")
         self.num_circle_point = rospy.get_param("~num_circle_point")
         self.radius_earth = rospy.get_param("~radius_earth")
+        self.default_waypoint_id = rospy.get_param("~default_waypoint_id")
+        self.waypoints_to_circle_id = rospy.get_param("~waypoints_to_circle_id")
+        self.waypoints_in_circle_id = rospy.get_param("~waypoints_in_circle_id")
+        self.circle_time_limit = rospy.get_param("~circle_time_limit")
 
 
 def waypoint_callback(data):
@@ -215,7 +220,9 @@ def path_planning_init(config_object):
                                                 config_object.radius_earth, w_theta, latitude, longitude,
                                                 waypoint_index_control, heading, obstacles, obstacle_mutex,
                                                 waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
-                                                wind_mutex)
+                                                wind_mutex, config_object.default_waypoint_id,
+                                                config_object_main.waypoints_to_circle_id,
+                                                config_object.waypoints_in_circle_id, 0, 0, 0, 0)
     # calculates position for two reference point 100m at 0 and 90 deg from the position  heading_mutex == 1 and
     [lat_0, lon_0, lat_1, lon_1] = potential_field_object.calculate_reference_points(latitude, longitude)
     # calculate the global x,y for the reference points
@@ -235,6 +242,16 @@ def path_planning_init(config_object):
     return waypoint_xy_array, p_0, p_1, potential_field_object
 
 
+def update_variables():
+    global w_speed, w_theta, latitude, longitude, waypoint_index_control, heading, obstacles, obstacle_mutex
+    global waypoint_mutex, velocity_mutex, heading_mutex, position_mutex, wind_mutex
+
+    potential_field_object_main.update_global_variable(w_speed, w_theta, latitude, longitude,
+                                                       waypoint_index_control, heading, obstacles,
+                                                       obstacle_mutex, waypoint_mutex, velocity_mutex,
+                                                       heading_mutex, position_mutex, wind_mutex)
+
+
 if __name__ == '__main__':
     waypoint_index = 0
     try:
@@ -246,33 +263,68 @@ if __name__ == '__main__':
         config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
         waypoint_xy, p0, p1, potential_field_object_main = path_planning_init(config_object_main)
-
         rate = rospy.Rate(1)  # profile_diameter: 50
+        potential_field_object_main.update_waypoints_ref(waypoint_xy, p0, p1, pub_heading_main)
+        # current loop
+        goal = waypoint_xy[0]
+        # ------final loop--------
+        # ------pseudo code start------
+        # calculate desired angle
+        # while not rospy.is_shutdown():
+        #   update global variables
+        #   update goal
+        #   if waypoint circle waypoint?
+        #       create circle
+        #       goal_circle = circle_waypoint[closest_circle]
+        #       while time limit
+        #           update global variables
+        #           update x,y position
+        #           if pos - goal < condition
+        #               goal_circle = circle_waypoint[next_index] # make circle_waypoint loop array
+        #           calculate desired angle
+        #           publish desired angle
+        #       goal = waypoint[next_index]
+        #   calculate desired angle # publish desired angle
+        #   if pos - goal < condition
+        #       if goal != waypoint[last_index]
+        #           goal = waypoint[next_index]
+        #       else:
+        #           blow_up_vessel()
+        #   rate.sleep()
+        # ------pseudo code end------
+
+        potential_field_object_main.update_waypoints_ref(waypoint_xy, p0, p1, pub_heading_main)
         while not rospy.is_shutdown():
-            potential_field_object_main.w_speed = w_speed
-            potential_field_object_main.w_theta = w_theta
-            potential_field_object_main.latitude = latitude
-            potential_field_object_main.longitude = longitude
-            potential_field_object_main.waypoint_index_control = waypoint_index_control
-            potential_field_object_main.heading = heading
-            potential_field_object_main.obstacles = obstacles
-
-            potential_field_object_main.obstacle_mutex = obstacle_mutex
-            potential_field_object_main.waypoint_mutex = waypoint_mutex
-            potential_field_object_main.velocity_mutex = velocity_mutex
-            potential_field_object_main.heading_mutex = heading_mutex
-            potential_field_object_main.position_mutex = position_mutex
-            potential_field_object_main.wind_mutex = wind_mutex
-
-            # calculate the desired course of the vessel
-            pos_v, goal_main, waypoint_array_len = potential_field_object_main.path_planning_calc_heading(
-                waypoint_xy,
-                p0, p1,
-                pub_heading_main,
-                waypoint_index)
-
-            if np.linalg.norm(pos_v - goal_main[0:2]) < 1:
-                waypoint_index = waypoint_index + 1
+            update_variables()
+            goal = waypoint_xy[waypoint_index]
+            # if waypoint circle waypoint?
+            if goal[2] == config_object_main.waypoints_to_circle_id:
+                start = time.time()
+                elapsed = 0
+                circle_waypoints = potential_field_object_main.circle_waypoint(goal, p0, p1)
+                goal_circle = circle_waypoints[0]
+                # while time limit
+                while elapsed < config_object_main.circle_time_limit:
+                    update_variables()
+                    pos_v_xy = potential_field_object_main.latlng_to_screen_xy(latitude, longitude, p0, p1)
+                    if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 10000:
+                        if goal_circle == circle_waypoints[config_object_main.num_circle_point - 1]:
+                            goal_circle = circle_waypoints[0]
+                        else:
+                            goal_circle = circle_waypoints[circle_waypoints.index(goal_circle) + 1]
+                    pos_v_xy, goal_circle, waypoint_array_len = potential_field_object_main.path_planning_calc_heading(
+                                                                                                        goal_circle)
+                    elapsed = time.time() - start
+                waypoint_index += 1
+                goal = waypoint_xy[waypoint_index]
+            pos_v_xy, goal, waypoint_array_len = potential_field_object_main.path_planning_calc_heading(goal)
+            if (np.diff([pos_v_xy, goal[0:2]]) ** 2).sum() < 5:
+                if goal != waypoint_xy[waypoint_array_len - 1]:
+                    waypoint_index += 1
+                    goal = waypoint_xy[waypoint_index]
+                else:
+                    print("Path complete")
             rate.sleep()
+
     except rospy.ROSInterruptException:
         pass

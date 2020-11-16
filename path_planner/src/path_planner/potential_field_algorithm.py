@@ -42,7 +42,8 @@ class PotentialField:
     def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed,
                  waypoint_radius, num_circle_point, radius_earth, w_theta, latitude, longitude, waypoint_index_control,
                  heading, obstacles, obstacle_mutex, waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
-                 wind_mutex):
+                 wind_mutex, default_waypoint_id, waypoints_to_circle_id, waypoints_in_circle_id, waypoint_array,
+                 p0, p1, pub_heading):
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
         self.d_inf = d_inf
@@ -70,6 +71,15 @@ class PotentialField:
         self.position_mutex = position_mutex
         self.wind_mutex = wind_mutex
 
+        self.default_waypoint_id = default_waypoint_id
+        self.waypoints_to_circle_id = waypoints_to_circle_id
+        self.waypoints_in_circle_id = waypoints_in_circle_id
+
+        self.waypoint_array = waypoint_array
+        self.p0 = p0
+        self.p1 = p1
+        self.pub_heading = pub_heading
+
     def find_nearest(self, array, value):
         """
         round wind speed to closest hole number 4,6,8,10,12,14,16,20,25
@@ -90,18 +100,6 @@ class PotentialField:
         rx = (x * math.cos(r)) - (y * math.sin(r))
         ry = (y * math.cos(r)) + (x * math.sin(r))
         return rx, ry
-
-    def generate_circle_waypoints(self, center):
-        # calculate the angle between the points
-        point_angle = (2 * math.pi) / self.num_circle_point
-        points = []
-        for i in range(self.num_circle_point):
-            # create x,y at the circumference with angle point_angle * i
-            (p_x, p_y) = self.rotate_point(0, self.waypoint_radius, point_angle * i)
-            p_x += center[0]
-            p_y += center[1]
-            points.append((round(p_x), round(p_y)))
-        return points
 
     def speed_polar_diagram_calculation(self, w_theta):
         """
@@ -262,7 +260,7 @@ class PotentialField:
 
     def reshape_profile(self, profile):
         """
-        Rechapes the porifle into a matrix for the heat map plot.
+        Rechapes the profile into a matrix for the heat map plot.
         :param profile: The points in the area being considered
         :return: The profile as a matrix.
         """
@@ -352,6 +350,18 @@ class PotentialField:
         min_angle, min_index = self.find_global_minima_angle(profile)
         return min_angle, profile
 
+    def generate_circle_waypoints(self, center):
+        # calculate the angle between the points
+        point_angle = (2 * math.pi) / self.num_circle_point
+        points = []
+        for i in range(self.num_circle_point):
+            # create x,y at the circumference with angle point_angle * i
+            (p_x, p_y) = self.rotate_point(0, self.waypoint_radius, point_angle * i)
+            p_x += center[0]
+            p_y += center[1]
+            points.append((round(p_x), round(p_y)))
+        return points
+
     def closest_waypoint(self, pos, circle_points):
         """
         finds the index of the waypoint closest to the vessel
@@ -369,8 +379,8 @@ class PotentialField:
         closest_index = distance.cdist([pos], circle_points, 'euclidean').argmin()
         return closest_index
 
-    def circle_waypoint(self, waypoint, p_0, p_1, latitude, longitude):
-        position_v = self.latlng_to_screen_xy(latitude, longitude, p_0, p_1)
+    def circle_waypoint(self, waypoint, p_0, p_1):
+        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, p_0, p_1)
         circle_points = self.generate_circle_waypoints(waypoint)
         closest_index = self.closest_waypoint(position_v, circle_points)
         for i in range(closest_index):
@@ -378,15 +388,9 @@ class PotentialField:
         for i in range(closest_index):
             circle_points.pop(0)
             i += 1
-        goal = circle_points[0]
-        rospy.loginfo("goal_circle {}".format(goal))
+        # goal = circle_points[0]
         rospy.loginfo("circle_points {}".format(circle_points))
-        # while time < time limit
-        #   update position
-        #   if np.linalg.norm(pos_v - goal) < 1:
-        #       goal = next waypoint
-        #   calculate angle
-        # publish desired angle
+        return circle_points
 
     def latlng_to_global_xy(self, lat, lng, p_0, p_1):
         """
@@ -491,47 +495,57 @@ class PotentialField:
         plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
         plt.show()
 
-    def path_planning_calc_heading(self, waypoint_array, p_0, p_1, pub_heading, goal_index):
+    def path_planning_calc_heading(self, goal):
         """
         calculates the desired heading of the vessel
+        :param goal:
         :param pub_heading: publisher for the heading
         :param goal_index: index of current goal
-        :param waypoint_array: np.array of waypoints in x,y reference frame
-        :param p_0: reference point 0
-        :param p_1: reference point 1
         :return: desired heading
         """
-        profile = 0
-        min_angle = 0
         # calculates the local x,y for the position in the frame of the reference points
-        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, p_0, p_1)
+        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, self.p0, self.p1)
         # create potential field object
-
-        if self.waypoint_index_control > len(waypoint_array) - 1:
-            self.waypoint_index_control = len(waypoint_array) - 1
-        goal = waypoint_array[self.waypoint_index_control]
+        """
+        if self.waypoint_index_control > len(self.waypoint_array) - 1:
+            self.waypoint_index_control = len(self.waypoint_array) - 1
+        goal = self.waypoint_array[self.waypoint_index_control] """
         # goal = waypoint_array[goal_index]
         goal_pos = goal[0:2]
-
         position_v = [int(round(position_v[0])), int(round(position_v[1]))]
         # calculates the local x,y for the obstacles in the frame of the reference points
         if self.obstacle_mutex == 1:
-            obstacles_array = self.obstacle_calc(p_0, p_1, self.obstacles)
+            obstacles_array = self.obstacle_calc(self.p0, self.p1, self.obstacles)
         else:
             obstacles_array = np.array([])
-        if goal[2] == 0:
-            rospy.loginfo("calculate_profile IF")
-            min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
-                                                        self.w_theta)
-        # circle around waypoint
-        if goal[2] == 1:
-            rospy.loginfo("circle_waypoint Circle")
-            self.circle_waypoint([0, 0], p_0, p_1, self.latitude, self.longitude)
-            min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
-                                                        self.w_theta)
+        min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
+                                                    self.w_theta)
         # publish the calculated angle
-        pub_heading.publish(min_angle)
-
+        self.pub_heading.publish(min_angle)
+        # plot a heat map of the profile for the vessel
         # self.plot_heat_map(profile)
 
-        return position_v, goal, len(waypoint_array)
+        return position_v, goal, len(self.waypoint_array)
+
+    def update_global_variable(self, w_speed, w_theta, latitude, longitude, waypoint_index_control, heading, obstacles,
+                               obstacle_mutex, waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
+                               wind_mutex):
+        self.w_speed = w_speed
+        self.w_theta = w_theta
+        self.latitude = latitude
+        self.longitude = longitude
+        self.waypoint_index_control = waypoint_index_control
+        self.heading = heading
+        self.obstacles = obstacles
+        self.obstacle_mutex = obstacle_mutex
+        self.waypoint_mutex = waypoint_mutex
+        self.velocity_mutex = velocity_mutex
+        self.heading_mutex = heading_mutex
+        self.position_mutex = position_mutex
+        self.wind_mutex = wind_mutex
+
+    def update_waypoints_ref(self, waypoint_array, p0, p1, pub_heading):
+        self.waypoint_array = waypoint_array
+        self.p0 = p0
+        self.p1 = p1
+        self.pub_heading = pub_heading
