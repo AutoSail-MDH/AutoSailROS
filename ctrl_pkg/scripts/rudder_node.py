@@ -47,13 +47,14 @@ def dynamic_reconf_callback(config, level):
     rc_pid.kp = config.kp
     rc_pid.ki = config.ki
     rc_pid.kd = config.kd
-    rc_pid.set_limits((-config.rudder_limit*math.pi/180, config.rudder_limit*math.pi/180))
+    rudder_angle_limit = config.rudder_limit * math.pi / 180
+    rc_pid.set_limits((-rudder_angle_limit, rudder_angle_limit))
     upper_velocity_threshold = config.upper_threshold
     lower_velocity_threshold = config.lower_threshold
     if level == 1:
         values.desired_course = config.setpoint*math.pi/180
     #rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={rudder_limit},\
-    # upper={upper_threshold}, lower={lower_threshold}, setpoint={setpoint}""" .format(**config))
+    #    upper={upper_threshold}, lower={lower_threshold}, setpoint={setpoint}""" .format(**config))
     return config
 
 
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     # Subscribers
     rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
                      callback=values.callback_desired_course, queue_size=queue_size)  # The desired course
-    rospy.Subscriber(name="/gps/navheading", data_class=sensor_msgs.msg.Imu,
+    rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu,
                      callback=values.callback_current_heading, queue_size=queue_size)  # The heading
     rospy.Subscriber(name="/gps/fix_velocity", data_class=geometry_msgs.msg.TwistWithCovarianceStamped,
                      callback=values.callback_velocity, queue_size=queue_size)  # The velocity and course
@@ -87,7 +88,6 @@ if __name__ == "__main__":
     # Publishers
     rudder_angle = rospy.Publisher(name="/rudder_controller/rudder_angle", data_class=std_msgs.msg.Float64,
                                    queue_size=queue_size)
-    pid_pub = rospy.Publisher("/rudder_controller/pid", std_msgs.msg.Float64, queue_size=queue_size)
 
     while not rospy.is_shutdown():
         # Update the course given by the path planner
@@ -113,7 +113,6 @@ if __name__ == "__main__":
         rospy.loginfo_throttle(0.1, "Rudder angle: %f", new_rudder_angle*180/math.pi)
 
         # Publish the rudder angle
-        pid_pub.publish(pid_heading)
         rudder_angle.publish(new_rudder_angle)
 
         # Keep sync with the ROS frequency
