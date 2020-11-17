@@ -5,6 +5,7 @@ import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
 import numpy as np
+from marti_nav_msgs.msg import RoutePoint, Route
 from path_planner.msg import waypointmsg
 from path_planner.msg import waypoint_array_msg
 from path_planner.msg import obstaclemsg
@@ -16,7 +17,7 @@ def path_planner_partner_publisher():
     A partner node for path_planner_node meant to simulate the nodes the path planner communicates with
     :return: Nothing
     """
-    pub_waypoints = rospy.Publisher('path_planner/waypoints', waypoint_array_msg, queue_size=10)
+    pub_waypoints = rospy.Publisher('path_planner/waypoints', Route, queue_size=10)
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
     pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
@@ -54,6 +55,7 @@ def path_planner_partner_publisher():
     mat_obstacle.latitude = 59.617313
     mat_obstacle.longitude = 16.560759
     obstacle_array.data.append(mat_obstacle)
+    """
     mat_waypoint = waypointmsg()
     mat_waypoint.latitude = 59.617829
     mat_waypoint.longitude = 16.560237
@@ -65,6 +67,14 @@ def path_planner_partner_publisher():
     mat_waypoint.longitude = 16.561035
     mat_waypoint.id = 0
     waypoint_array.data.append(mat_waypoint)
+    """
+    waypoint_array = Route()
+    waypoint = RoutePoint()
+    waypoint.pose.position.x = 16.560237
+    waypoint.pose.position.y = 59.617829
+    waypoint.id = "0"
+    waypoint_array.route_points.append(waypoint)
+
     # gps position
     fix = sensor_msgs.msg.NavSatFix()
     fix.latitude = 59.617459
@@ -72,14 +82,14 @@ def path_planner_partner_publisher():
     # gps velocity
     velocity = geometry_msgs.msg.TwistWithCovarianceStamped()
     velocity.twist.twist.linear.x = 0
-    velocity.twist.twist.linear.y = -20
+    velocity.twist.twist.linear.y = 5
     # gps heading
     heading = sensor_msgs.msg.Imu()
     heading.orientation.x = 1
     heading.orientation.y = 1
     # wind sensor
     wind_data = std_msgs.msg.Float64MultiArray()
-    wind_data.data = [20, 20]  # 5.498 3.142
+    wind_data.data = [6, 6]  # 5.498 3.142
     while not rospy.is_shutdown():
         pub_waypoints.publish(waypoint_array)
         pub_obstacles.publish(obstacle_array)

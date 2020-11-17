@@ -6,6 +6,7 @@ import time
 import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
+from marti_nav_msgs.msg import RoutePoint, Route
 from scipy.spatial import distance
 from path_planner import potential_field_algorithm as pfa
 
@@ -73,7 +74,7 @@ def waypoint_callback(data):
     """
     global waypoints
     global waypoint_mutex
-    waypoints = data.data
+    waypoints = data.route_points
     waypoint_mutex = 1
 
 
@@ -91,7 +92,8 @@ def wind_sensor_callback(data):
     global lin_velocity_y
 
     if velocity_mutex == 1:
-        true_wind_ = [data.data[0] + lin_velocity_x, data.data[1] + lin_velocity_y]
+        true_wind_ = [data.data[0] * 1.94384449 + lin_velocity_x, data.data[1] * 1.94384449
+                      + lin_velocity_y]
         w_theta = np.arctan2(true_wind_[1], true_wind_[0]) + np.pi
         w_speed = np.linalg.norm(true_wind_)
         wind_mutex = 1
@@ -121,8 +123,8 @@ def gps_velocity_callback(data):
     global lin_velocity_x
     global lin_velocity_y
     global velocity_mutex
-    lin_velocity_x = data.twist.twist.linear.x
-    lin_velocity_y = data.twist.twist.linear.y
+    lin_velocity_x = data.twist.twist.linear.x * 1.94384449
+    lin_velocity_y = data.twist.twist.linear.y * 1.94384449
     lin_velocity = math.sqrt((lin_velocity_x ** 2) + (lin_velocity_y ** 2))
     velocity_mutex = 1
 
@@ -184,7 +186,7 @@ def path_planner_subscriber():
     # create node for the path planner
     rospy.init_node('path_planner')
     # start the subscribers for all sensors
-    rospy.Subscriber("path_planner/waypoints", waypoint_array_msg, waypoint_callback)
+    rospy.Subscriber("path_planner/waypoints", Route, waypoint_callback)
     rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, gps_position_callback)
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
     rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, imu_heading_callback)
@@ -223,7 +225,7 @@ def path_planning_init(config_object):
                                                 wind_mutex, config_object.default_waypoint_id,
                                                 config_object_main.waypoints_to_circle_id,
                                                 config_object.waypoints_in_circle_id, 0, 0, 0, 0)
-    # calculates position for two reference point 100m at 0 and 90 deg from the position  heading_mutex == 1 and
+    # calculates position for two reference point 100m at 0 and 90 deg from the position
     [lat_0, lon_0, lat_1, lon_1] = potential_field_object.calculate_reference_points(latitude, longitude)
     # calculate the global x,y for the reference points
     ref0_pos = potential_field_object.latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
@@ -233,7 +235,7 @@ def path_planning_init(config_object):
     p_1 = ReferencePoint(config_object.local_coord_scale, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     # calculates the local x,y for the waypoints in the frame of the reference points
     for i in range(length_waypoints):
-        waypoints_xy = potential_field_object.latlng_to_screen_xy(waypoints[i].latitude, waypoints[i].longitude, p_0,
+        waypoints_xy = potential_field_object.latlng_to_screen_xy(waypoints[i].pose.position.y, waypoints[i].pose.position.x, p_0,
                                                                   p_1)
         waypoint_xy_array[i, 0] = round(waypoints_xy[0])
         waypoint_xy_array[i, 1] = round(waypoints_xy[1])
@@ -292,7 +294,6 @@ if __name__ == '__main__':
         #           blow_up_vessel()
         #   rate.sleep()
         # ------pseudo code end------
-
         potential_field_object_main.update_waypoints_ref(waypoint_xy, p0, p1, pub_heading_main)
         while not rospy.is_shutdown():
             update_variables()
@@ -307,7 +308,7 @@ if __name__ == '__main__':
                 while elapsed < config_object_main.circle_time_limit:
                     update_variables()
                     pos_v_xy = potential_field_object_main.latlng_to_screen_xy(latitude, longitude, p0, p1)
-                    if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 10000:
+                    if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 10000:  # set limit in meter
                         if goal_circle == circle_waypoints[config_object_main.num_circle_point - 1]:
                             goal_circle = circle_waypoints[0]
                         else:
