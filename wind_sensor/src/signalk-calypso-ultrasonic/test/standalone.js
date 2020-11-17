@@ -3,7 +3,7 @@ const { Ultrasonic } = require('../')()
 const ultrasonic = new Ultrasonic({
   setRate: 4, // Hz
   setCompass: 1, // Turn on compass/9DOF sensor
-  maxRetries: 10
+  maxRetries: Infinity
 })
 
 ultrasonic.on('delta', delta => handleMessage(delta))
@@ -11,5 +11,5 @@ ultrasonic.on('delta', delta => handleMessage(delta))
 ultrasonic.start()
 
 function handleMessage (msg) {
-  console.log('GOT MESSAGE: ' + JSON.stringify(msg))
+  console.log(JSON.stringify(msg))
 }

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import sys
 from subprocess import Popen, PIPE
 import json
-from types import SimpleNamespace
 
 data = []
 wind_sensor = Popen(['node', '../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
@@ -16,12 +14,15 @@ while True:
 
     # after a full reading
     if out == b'\n':
-        data.append(str(buffer))
-        print(data)
+        #data.append(str(buffer))
+        x = json.loads(buffer.decode("utf-8"))
+        print(x["updates"][0]["values"][0]["path"])
         buffer = b''
     else:
-       buffer += out
+        buffer += out
 
-    #x = json.loads(data, object_hook=lambda d: SimpleNamespace(**d))
 
-    #print(x.environment.wind.angleApparent)
+
+
+
+
