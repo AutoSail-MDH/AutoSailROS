@@ -369,7 +369,7 @@ class PotentialField:
         min_angle, profile = self._calculate_profile(position_v, obstacles_array, goal_pos,
                                                      w_theta, heading, w_speed, v_v)
         # plot a heat map of the profile for the vessel
-        # self.plot_heat_map(profile)
+        self.plot_heat_map(profile)
 
         return min_angle
 

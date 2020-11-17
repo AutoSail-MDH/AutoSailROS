@@ -72,7 +72,7 @@ def path_planner_partner_publisher():
     waypoint = RoutePoint()
     waypoint.pose.position.x = 16.560237
     waypoint.pose.position.y = 59.617829
-    waypoint.id = "1"
+    waypoint.id = "0"
     waypoint_array.route_points.append(waypoint)
     waypoint = RoutePoint()
     waypoint.pose.position.x = 16.560237
@@ -86,7 +86,7 @@ def path_planner_partner_publisher():
     fix.longitude = 16.560839
     # gps velocity
     velocity = geometry_msgs.msg.TwistWithCovarianceStamped()
-    velocity.twist.twist.linear.x = 0
+    velocity.twist.twist.linear.x = 2
     velocity.twist.twist.linear.y = 0
     # gps heading
     heading = sensor_msgs.msg.Imu()
@@ -94,8 +94,8 @@ def path_planner_partner_publisher():
     heading.orientation.y = 1
     # wind sensor geometry_msgs.msg.Vector3Stamped
     wind_data = geometry_msgs.msg.Vector3Stamped()
-    wind_data.vector.x = 0
-    wind_data.vector.y = 20
+    wind_data.vector.x = 6
+    wind_data.vector.y = -6
     while not rospy.is_shutdown():
         pub_waypoints.publish(waypoint_array)
         pub_obstacles.publish(obstacle_array)

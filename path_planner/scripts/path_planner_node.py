@@ -200,9 +200,9 @@ def path_planning_init(config_object):
         # check if data has been read
         if position_mutex == 1 and waypoint_mutex == 1 and velocity_mutex == 1 and \
                 heading_mutex == 1 and wind_mutex == 1:
-            length_waypoints = np.size(waypoints)
+            # length_waypoints = np.size(waypoints)
             # create np.array 2xN for waypoints and obstacles
-            waypoint_xy_array = np.zeros(shape=(length_waypoints, 3))
+            # waypoint_xy_array = np.zeros(shape=(length_waypoints, 3))
             break
     potential_field_object = pfa.PotentialField(config_object.profile_diameter, config_object.obstacle_weight,
                                                 config_object.d_inf, config_object.goal_weight, config_object.p_ngz,
@@ -216,14 +216,15 @@ def path_planning_init(config_object):
     p_0 = ReferencePoint(0, config_object.local_coord_scale, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
     p_1 = ReferencePoint(config_object.local_coord_scale, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     # calculates the local x,y for the waypoints in the frame of the reference points
+    """    
     for i in range(length_waypoints):
         waypoints_xy = pl.latlng_to_screen_xy(waypoints[i].pose.position.y, waypoints[i].pose.position.x, p_0,
                                               p_1)
         waypoint_xy_array[i, 0] = round(waypoints_xy[0])
         waypoint_xy_array[i, 1] = round(waypoints_xy[1])
-        waypoint_xy_array[i, 2] = waypoints[i].id
+        waypoint_xy_array[i, 2] = waypoints[i].id"""
 
-    return waypoint_xy_array, p_0, p_1, potential_field_object
+    return p_0, p_1, potential_field_object
 
 
 if __name__ == '__main__':
@@ -236,10 +237,11 @@ if __name__ == '__main__':
         # read the parameters form the config.yaml file
         config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
-        waypoint_xy, p0, p1, potential_field_object_main = path_planning_init(config_object_main)
+        p0, p1, potential_field_object_main = path_planning_init(config_object_main)
         rate = rospy.Rate(1)  # profile_diameter: 50
         potential_field_object_main.update_waypoints_ref(p0, p1)
         # current loop
+        waypoint_xy = pl.calc_waypoints(p0, p1, waypoints)
         goal = waypoint_xy[0]
         # ------final loop--------
         # ------pseudo code start------
@@ -268,6 +270,7 @@ if __name__ == '__main__':
         # ------pseudo code end------
         potential_field_object_main.update_waypoints_ref(p0, p1)
         while not rospy.is_shutdown():
+            waypoint_xy = pl.calc_waypoints(p0, p1, waypoints)
             goal = waypoint_xy[waypoint_index]
             pos_v_xy = pl.latlng_to_screen_xy(latitude, longitude, p0, p1)
             # if waypoint circle waypoint?
@@ -278,6 +281,7 @@ if __name__ == '__main__':
                 goal_circle = circle_waypoints[0]
                 # while time limit
                 while elapsed < config_object_main.circle_time_limit and not rospy.is_shutdown():
+                    waypoint_xy = pl.calc_waypoints(p0, p1, waypoints)
                     pos_v_xy = pl.latlng_to_screen_xy(latitude, longitude, p0, p1)
                     if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 5:  # set limit in meter
                         if goal_circle == circle_waypoints[config_object_main.num_circle_point - 1]:

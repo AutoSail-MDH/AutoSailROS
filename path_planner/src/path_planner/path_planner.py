@@ -111,6 +111,14 @@ def circle_waypoint(latitude, longitude, waypoint, p_0, p_1):
     return circle_points
 
 
+def calc_waypoints(p_0, p_1, waypoints):
+    waypoint_xy_array = [] #np.zeros(shape=(length_waypoints, 3))
+    for waypoint in waypoints:
+        waypoints_xy = latlng_to_screen_xy(waypoint.pose.position.y, waypoint.pose.position.x, p_0, p_1)
+        waypoint_xy_array.append([round(waypoints_xy[0]), round(waypoints_xy[1]), waypoint.id])
+    return waypoint_xy_array
+
+
 """
     def calculate_segment(self, position_v, obstacle, goal, w_theta, heading):
 
