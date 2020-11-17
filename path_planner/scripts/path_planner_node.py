@@ -279,26 +279,27 @@ if __name__ == '__main__':
                 # while time limit
                 while elapsed < config_object_main.circle_time_limit and not rospy.is_shutdown():
                     pos_v_xy = pl.latlng_to_screen_xy(latitude, longitude, p0, p1)
-                    if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 10000:  # set limit in meter
+                    if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 5:  # set limit in meter
                         if goal_circle == circle_waypoints[config_object_main.num_circle_point - 1]:
                             goal_circle = circle_waypoints[0]
                         else:
                             goal_circle = circle_waypoints[circle_waypoints.index(goal_circle) + 1]
-                    min_angle, goal_circle = potential_field_object_main. \
+                    min_angle = potential_field_object_main. \
                         path_planning_calc_heading(goal_circle, heading, w_speed, w_theta, pos_v_xy, obstacles,
                                                    lin_velocity)
                     # publish the calculated angle
                     pub_heading.publish(min_angle)
                     elapsed = time.time() - start
-                if goal != waypoint_xy[len(waypoint_xy) - 1]:
+                if (goal != waypoint_xy[len(waypoint_xy) - 1]).all():
                     waypoint_index += 1
                     goal = waypoint_xy[waypoint_index]
-            min_angle, goal = potential_field_object_main.path_planning_calc_heading(goal, heading, w_speed, w_theta,
-                                                                                     pos_v_xy, obstacles, lin_velocity)
+            min_angle = potential_field_object_main.path_planning_calc_heading(goal, heading, w_speed, w_theta,
+                                                                                        pos_v_xy, obstacles,
+                                                                                        lin_velocity)
             # publish the calculated angle
             pub_heading.publish(min_angle)
             if (np.diff([pos_v_xy, goal[0:2]]) ** 2).sum() < 5:
-                if goal != waypoint_xy[len(waypoint_xy) - 1]:
+                if (goal != waypoint_xy[len(waypoint_xy) - 1]).all():
                     waypoint_index += 1
                     goal = waypoint_xy[waypoint_index]
                 else:
