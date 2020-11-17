@@ -523,7 +523,7 @@ class PotentialField:
         # publish the calculated angle
         self.pub_heading.publish(min_angle)
         # plot a heat map of the profile for the vessel
-        # self.plot_heat_map(profile)
+        self.plot_heat_map(profile)
 
         return position_v, goal, len(self.waypoint_array)
 

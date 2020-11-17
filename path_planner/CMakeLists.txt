@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   sensor_msgs
   geometry_msgs
+  marti_nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -56,6 +57,7 @@ find_package(catkin REQUIRED COMPONENTS
    waypoint_array_msg.msg
    obstaclemsg.msg
    obstacles_array_msg.msg
+
  )
 
 ## Generate services in the 'srv' folder
