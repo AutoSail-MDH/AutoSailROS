@@ -7,7 +7,7 @@ from gazebo_msgs.msg import ModelStates
 from geometry_msgs.msg import TwistWithCovarianceStamped, Vector3Stamped
 from sensor_msgs.msg import Imu, NavSatFix
 
-imu_pub = rospy.Publisher("gps/navheading", Imu, queue_size=1)
+imu_pub = rospy.Publisher("/imu/data", Imu, queue_size=1)
 twist_pub = rospy.Publisher("gps/fix_velocity", TwistWithCovarianceStamped, queue_size=1)
 wind_pub = rospy.Publisher("wind/apparent_rad", Float64, queue_size=1)
 pos_pub = rospy.Publisher("gps/fix", NavSatFix, queue_size=1)

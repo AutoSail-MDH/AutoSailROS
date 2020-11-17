@@ -54,7 +54,7 @@ if __name__ == "__main__":
     sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     # Subscribers
-    rospy.Subscriber(name="gps/navheading", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
+    rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
                      queue_size=queue_size)
 
     # Initialize PID
