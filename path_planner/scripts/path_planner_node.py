@@ -9,6 +9,7 @@ import geometry_msgs.msg
 from marti_nav_msgs.msg import RoutePoint, Route
 from scipy.spatial import distance
 from path_planner import potential_field_algorithm as pfa
+from path_planner import path_planner as pl
 
 from path_planner.msg import waypointmsg
 from path_planner.msg import waypoint_array_msg
@@ -59,7 +60,6 @@ class ConfigClass:
         self.local_coord_scale = rospy.get_param("~local_coord_scale")
         self.waypoint_radius = rospy.get_param("~waypoint_radius")
         self.num_circle_point = rospy.get_param("~num_circle_point")
-        self.radius_earth = rospy.get_param("~radius_earth")
         self.default_waypoint_id = rospy.get_param("~default_waypoint_id")
         self.waypoints_to_circle_id = rospy.get_param("~waypoints_to_circle_id")
         self.waypoints_in_circle_id = rospy.get_param("~waypoints_in_circle_id")
@@ -92,7 +92,7 @@ def wind_sensor_callback(data):
     global lin_velocity_y
 
     if velocity_mutex == 1:
-        true_wind_ = [data.data[0] * 1.94384449 + lin_velocity_x, data.data[1] * 1.94384449
+        true_wind_ = [data.vector.x * 1.94384449 + lin_velocity_x, data.vector.y * 1.94384449
                       + lin_velocity_y]
         w_theta = np.arctan2(true_wind_[1], true_wind_[0]) + np.pi
         w_speed = np.linalg.norm(true_wind_)
@@ -139,21 +139,10 @@ def imu_heading_callback(data):
     global heading_mutex
     heading_quaternion = sensor_msgs.msg.Imu()
     heading_quaternion.orientation = data.orientation
-    pitch, yaw = quaternion_to_euler_yaw(heading_quaternion.orientation)
+    pitch, yaw = pl.quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading[0] = np.cos(yaw) * np.cos(pitch)
     heading[1] = np.sin(yaw) * np.cos(pitch)
     heading_mutex = 1
-
-
-def quaternion_to_euler_yaw(heading_quaternion):
-    """
-    method for converting quaternion to euler
-    :return: euler yaw
-    """
-    q = heading_quaternion
-    pitch = np.arcsin(2 * (q.w * q.y - q.z * q.x))
-    yaw = np.arctan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
-    return pitch, yaw
 
 
 def obstacles_callback(data):
@@ -190,7 +179,7 @@ def path_planner_subscriber():
     rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, gps_position_callback)
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
     rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, imu_heading_callback)
-    rospy.Subscriber("/wind_sensor", std_msgs.msg.Float64MultiArray, wind_sensor_callback)
+    rospy.Subscriber("/wind_sensor", geometry_msgs.msg.Vector3Stamped, wind_sensor_callback)
     rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback)
     rospy.Subscriber("waypoint/index", std_msgs.msg.Int64, waypoint_index_callback)
 
@@ -217,41 +206,24 @@ def path_planning_init(config_object):
             break
     potential_field_object = pfa.PotentialField(config_object.profile_diameter, config_object.obstacle_weight,
                                                 config_object.d_inf, config_object.goal_weight, config_object.p_ngz,
-                                                config_object.p_hyst, config_object.g_v, lin_velocity, w_speed,
-                                                config_object.waypoint_radius, config_object.num_circle_point,
-                                                config_object.radius_earth, w_theta, latitude, longitude,
-                                                waypoint_index_control, heading, obstacles, obstacle_mutex,
-                                                waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
-                                                wind_mutex, config_object.default_waypoint_id,
-                                                config_object_main.waypoints_to_circle_id,
-                                                config_object.waypoints_in_circle_id, 0, 0, 0, 0)
+                                                config_object.p_hyst, config_object.g_v, 0, 0)
     # calculates position for two reference point 100m at 0 and 90 deg from the position
     [lat_0, lon_0, lat_1, lon_1] = potential_field_object.calculate_reference_points(latitude, longitude)
     # calculate the global x,y for the reference points
-    ref0_pos = potential_field_object.latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
-    ref1_pos = potential_field_object.latlng_to_global_xy_ref(lat_1, lon_1, lat_0, lat_1)
+    ref0_pos = pl.latlng_to_global_xy_ref(lat_0, lon_0, lat_0, lat_1)
+    ref1_pos = pl.latlng_to_global_xy_ref(lat_1, lon_1, lat_0, lat_1)
     # create two the object for the two reference points
     p_0 = ReferencePoint(0, config_object.local_coord_scale, lat_0, lon_0, ref0_pos[0], ref0_pos[1])
     p_1 = ReferencePoint(config_object.local_coord_scale, 0, lat_1, lon_1, ref1_pos[0], ref1_pos[1])
     # calculates the local x,y for the waypoints in the frame of the reference points
     for i in range(length_waypoints):
-        waypoints_xy = potential_field_object.latlng_to_screen_xy(waypoints[i].pose.position.y, waypoints[i].pose.position.x, p_0,
-                                                                  p_1)
+        waypoints_xy = pl.latlng_to_screen_xy(waypoints[i].pose.position.y, waypoints[i].pose.position.x, p_0,
+                                              p_1)
         waypoint_xy_array[i, 0] = round(waypoints_xy[0])
         waypoint_xy_array[i, 1] = round(waypoints_xy[1])
         waypoint_xy_array[i, 2] = waypoints[i].id
 
     return waypoint_xy_array, p_0, p_1, potential_field_object
-
-
-def update_variables():
-    global w_speed, w_theta, latitude, longitude, waypoint_index_control, heading, obstacles, obstacle_mutex
-    global waypoint_mutex, velocity_mutex, heading_mutex, position_mutex, wind_mutex
-
-    potential_field_object_main.update_global_variable(w_speed, w_theta, latitude, longitude,
-                                                       waypoint_index_control, heading, obstacles,
-                                                       obstacle_mutex, waypoint_mutex, velocity_mutex,
-                                                       heading_mutex, position_mutex, wind_mutex)
 
 
 if __name__ == '__main__':
@@ -260,13 +232,13 @@ if __name__ == '__main__':
         # initialize subscribers
         path_planner_subscriber()
         # initialize publisher
-        pub_heading_main = rospy.Publisher('/path_planner/course', std_msgs.msg.Float64, queue_size=10)
+        pub_heading = rospy.Publisher('/path_planner/course', std_msgs.msg.Float64, queue_size=10)
         # read the parameters form the config.yaml file
         config_object_main = ConfigClass()
         # initialize waypoint, obstacles and the reference frame
         waypoint_xy, p0, p1, potential_field_object_main = path_planning_init(config_object_main)
         rate = rospy.Rate(1)  # profile_diameter: 50
-        potential_field_object_main.update_waypoints_ref(waypoint_xy, p0, p1, pub_heading_main)
+        potential_field_object_main.update_waypoints_ref(p0, p1)
         # current loop
         goal = waypoint_xy[0]
         # ------final loop--------
@@ -294,33 +266,39 @@ if __name__ == '__main__':
         #           blow_up_vessel()
         #   rate.sleep()
         # ------pseudo code end------
-        potential_field_object_main.update_waypoints_ref(waypoint_xy, p0, p1, pub_heading_main)
+        potential_field_object_main.update_waypoints_ref(p0, p1)
         while not rospy.is_shutdown():
-            update_variables()
             goal = waypoint_xy[waypoint_index]
+            pos_v_xy = pl.latlng_to_screen_xy(latitude, longitude, p0, p1)
             # if waypoint circle waypoint?
             if goal[2] == config_object_main.waypoints_to_circle_id:
                 start = time.time()
                 elapsed = 0
-                circle_waypoints = potential_field_object_main.circle_waypoint(goal, p0, p1)
+                circle_waypoints = pl.circle_waypoint(latitude, longitude, goal, p0, p1)
                 goal_circle = circle_waypoints[0]
                 # while time limit
-                while elapsed < config_object_main.circle_time_limit:
-                    update_variables()
-                    pos_v_xy = potential_field_object_main.latlng_to_screen_xy(latitude, longitude, p0, p1)
+                while elapsed < config_object_main.circle_time_limit and not rospy.is_shutdown():
+                    pos_v_xy = pl.latlng_to_screen_xy(latitude, longitude, p0, p1)
                     if (np.diff([pos_v_xy, goal_circle[0:2]]) ** 2).sum() < 10000:  # set limit in meter
                         if goal_circle == circle_waypoints[config_object_main.num_circle_point - 1]:
                             goal_circle = circle_waypoints[0]
                         else:
                             goal_circle = circle_waypoints[circle_waypoints.index(goal_circle) + 1]
-                    pos_v_xy, goal_circle, waypoint_array_len = potential_field_object_main.path_planning_calc_heading(
-                                                                                                        goal_circle)
+                    min_angle, goal_circle = potential_field_object_main. \
+                        path_planning_calc_heading(goal_circle, heading, w_speed, w_theta, pos_v_xy, obstacles,
+                                                   lin_velocity)
+                    # publish the calculated angle
+                    pub_heading.publish(min_angle)
                     elapsed = time.time() - start
-                waypoint_index += 1
-                goal = waypoint_xy[waypoint_index]
-            pos_v_xy, goal, waypoint_array_len = potential_field_object_main.path_planning_calc_heading(goal)
+                if goal != waypoint_xy[len(waypoint_xy) - 1]:
+                    waypoint_index += 1
+                    goal = waypoint_xy[waypoint_index]
+            min_angle, goal = potential_field_object_main.path_planning_calc_heading(goal, heading, w_speed, w_theta,
+                                                                                     pos_v_xy, obstacles, lin_velocity)
+            # publish the calculated angle
+            pub_heading.publish(min_angle)
             if (np.diff([pos_v_xy, goal[0:2]]) ** 2).sum() < 5:
-                if goal != waypoint_xy[waypoint_array_len - 1]:
+                if goal != waypoint_xy[len(waypoint_xy) - 1]:
                     waypoint_index += 1
                     goal = waypoint_xy[waypoint_index]
                 else:

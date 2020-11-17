@@ -1,7 +1,10 @@
 import numpy as np
 import math
 from scipy.spatial import distance
+from path_planner import path_planner as pl
 import rospy
+
+radius_earth = 6371
 
 
 class PointClass:
@@ -39,11 +42,19 @@ class PotentialField:
                               [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
                               [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
 
-    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, v_v, w_speed,
-                 waypoint_radius, num_circle_point, radius_earth, w_theta, latitude, longitude, waypoint_index_control,
-                 heading, obstacles, obstacle_mutex, waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
-                 wind_mutex, default_waypoint_id, waypoints_to_circle_id, waypoints_in_circle_id, waypoint_array,
-                 p0, p1, pub_heading):
+    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, p0, p1):
+        """
+
+        :param diameter: diameter of profile
+        :param obstacle_weight: weight of obstacles when calculating potential
+        :param d_inf: distance of influence for the obstacles
+        :param goal_weight: weight of goal when calculating potential
+        :param p_ngz: potential for no go zone
+        :param p_hyst: added potential for hysteris points
+        :param g_v: scalar weight for the effect of the velocity of the vessel
+        :param p0: reference point 0
+        :param p1: reference point 1
+        """
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
         self.d_inf = d_inf
@@ -51,34 +62,9 @@ class PotentialField:
         self.p_ngz = p_ngz
         self.p_hyst = p_hyst
         self.g_v = g_v
-        self.v_v = v_v
-        self.w_speed = w_speed
-        self.waypoint_radius = waypoint_radius
-        self.num_circle_point = num_circle_point
-        self.radius_earth = radius_earth
 
-        self.w_theta = w_theta
-        self.latitude = latitude
-        self.longitude = longitude
-        self.waypoint_index_control = waypoint_index_control
-        self.heading = heading
-        self.obstacles = obstacles
-
-        self.obstacle_mutex = obstacle_mutex
-        self.waypoint_mutex = waypoint_mutex
-        self.velocity_mutex = velocity_mutex
-        self.heading_mutex = heading_mutex
-        self.position_mutex = position_mutex
-        self.wind_mutex = wind_mutex
-
-        self.default_waypoint_id = default_waypoint_id
-        self.waypoints_to_circle_id = waypoints_to_circle_id
-        self.waypoints_in_circle_id = waypoints_in_circle_id
-
-        self.waypoint_array = waypoint_array
         self.p0 = p0
         self.p1 = p1
-        self.pub_heading = pub_heading
 
     def find_nearest(self, array, value):
         """
@@ -87,27 +73,17 @@ class PotentialField:
         :param value: The value being rounded
         :return: The rounded wind speed
         """
-        self.is_not_used()
         array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
         return array[idx]
 
-    def is_not_used(self):
-        pass
-
-    def rotate_point(self, x, y, r):
-        self.is_not_used()
-        rx = (x * math.cos(r)) - (y * math.sin(r))
-        ry = (y * math.cos(r)) + (x * math.sin(r))
-        return rx, ry
-
-    def speed_polar_diagram_calculation(self, w_theta):
+    def _speed_polar_diagram_calculation(self, w_theta, w_speed):
         """
         Calculates the maximum velocity and no-go zones.
         :param w_theta: Wind angle
         :return: Maximum possible velocity, no-go zones and wind angle.
         """
-        w_speed_polar_diagram = self.w_speed
+        w_speed_polar_diagram = w_speed
         # wind speed < 4 set to 4
         if w_speed_polar_diagram < 4:
             w_speed_polar_diagram = 4
@@ -124,7 +100,7 @@ class PotentialField:
         max_vel = max(np.amax(self.speed_diagram[:, w_speed_index], axis=1))
         return [max_vel, max(self.up_beat[w_speed_index]), max(self.dn_beat[w_speed_index]), w_theta]
 
-    def create_profile(self, pos_v):
+    def _create_profile(self, pos_v):
         """
         Creates a list for all points in determined area around the boat with  local, global coordinates and the
          potential for that points.
@@ -156,7 +132,7 @@ class PotentialField:
 
         return profile_, list_len
 
-    def potential_relative_obstacle_calculation_j(self, obstacle, p):
+    def _potential_relative_obstacle_calculation_j(self, obstacle, p):
         """
         Calculates the potential for a single point relative one obstacle.
         :param obstacle: x,y coordinates for one obstacle.
@@ -171,7 +147,7 @@ class PotentialField:
         elif np.linalg.norm(p - obstacle) > self.d_inf:
             return 0
 
-    def potential_relative_obstacle_calculation(self, obstacle, p):
+    def _potential_relative_obstacle_calculation(self, obstacle, p):
         """
         A summation of the potential in one point for all the obstacles.
         :param obstacle: x,y coordinates for one obstacle.
@@ -181,10 +157,10 @@ class PotentialField:
         u_o = 0
         obstacle_shape = obstacle.shape
         for i in range(obstacle_shape[0]):
-            u_o = self.potential_relative_obstacle_calculation_j(obstacle[i, :], p) + u_o
+            u_o = self._potential_relative_obstacle_calculation_j(obstacle[i, :], p) + u_o
         return u_o
 
-    def potential_relative_goal_calculation(self, goal, p):
+    def _potential_relative_goal_calculation(self, goal, p):
         """
         The potential for one point relative the goal.
         :param goal: x,y coordinate for hte goal.
@@ -193,7 +169,7 @@ class PotentialField:
         """
         return self.goal_weight * np.linalg.norm(p - goal)
 
-    def wind_potential_calculation(self, w_theta, p, heading):
+    def _wind_potential_calculation(self, w_theta, p, heading, w_speed, v_v):
         """
         Calculates the potential for a point relative the wind
         :param w_theta: Wind angle
@@ -202,7 +178,7 @@ class PotentialField:
         :return:
         """
         # calculate max velocity, no-go zones and wind angle
-        [max_vel, up_beat, dn_beat, w_theta] = self.speed_polar_diagram_calculation(w_theta)
+        [max_vel, up_beat, dn_beat, w_theta] = self._speed_polar_diagram_calculation(w_theta, w_speed)
         no_go = np.array([np.deg2rad(up_beat), np.deg2rad(dn_beat)])
         # calculates the angle of the point and the heading
         point_angle = np.arctan2(p[1], p[0])
@@ -230,11 +206,11 @@ class PotentialField:
             return self.p_ngz
         if (rel_heading_angle < no_go[1] < rel_point_angle) or (
                 rel_heading_angle > no_go[1] > rel_point_angle):
-            return self.p_hyst + self.g_v * ((self.v_v - max_vel) / max_vel)
+            return self.p_hyst + self.g_v * ((v_v - max_vel) / max_vel)
         else:
-            return self.g_v * ((self.v_v - max_vel) / max_vel)
+            return self.g_v * ((v_v - max_vel) / max_vel)
 
-    def calculate_total_potential(self, profile, list_len, obstacle, goal, w_theta, heading):
+    def _calculate_total_potential(self, profile, list_len, obstacle, goal, w_theta, heading, w_speed, v_v):
         """
         Summarizes all the potentials in one point
         :param profile: The points in the area being considered
@@ -250,15 +226,15 @@ class PotentialField:
         for i in range(list_len + 1):
             p[0] = profile[i].g_kx
             p[1] = profile[i].g_ky
-            u_o = self.potential_relative_obstacle_calculation(obstacle, p)
-            u_g = self.potential_relative_goal_calculation(goal, p)
+            u_o = self._potential_relative_obstacle_calculation(obstacle, p)
+            u_g = self._potential_relative_goal_calculation(goal, p)
             p[0] = profile[i].l_kx
             p[1] = profile[i].l_ky
-            u_w = self.wind_potential_calculation(w_theta, p, heading)
+            u_w = self._wind_potential_calculation(w_theta, p, heading, w_speed, v_v)
             profile[i].u = u_o + u_g + u_w + profile[i].u
         return profile
 
-    def reshape_profile(self, profile):
+    def _reshape_profile(self, profile):
         """
         Rechapes the profile into a matrix for the heat map plot.
         :param profile: The points in the area being considered
@@ -274,64 +250,26 @@ class PotentialField:
                 g = g + 1
         return profile_matrix
 
-    def find_global_minima_angle(self, profile):
+    def _find_global_minima_angle(self, profile):
         """
         Finds the minimum potential in the profile.
         :param profile:The points in the area being considered
         :return: The angle and index to/of the minimum potential in the profile.
         """
-        min_index = self.find_global_minima_index(profile)
+        min_index = self._find_global_minima_index(profile)
         angle = np.arctan2(profile[min_index].l_ky, profile[min_index].l_kx)
         return angle, min_index
 
-    def find_global_minima_index(self, profile):
+    def _find_global_minima_index(self, profile):
         """
         Finds the index for the minimum potential
         :param profile:The points in the area being considered
         :return: The index of the minimum potential
         """
-        self.is_not_used()
         potential = [obj.u for obj in profile]
         return potential.index(min(potential))
 
-    def calculate_segment(self, position_v, obstacle, goal, w_theta, heading):
-        """
-        The function calculates and saves the global x,y coordinates for all points the vessel travels through to one
-        waypoint.
-        :param position_v: The current position of the vessel.
-        :param obstacle: A numpy array of all the obstacles.
-        :param goal: The position of the goal i.e current waypoint
-        :param w_theta: The wind angle
-        :param heading: The heading of the vessel
-        :return: The x,y coordinates for all points from the start of the calculation to the goal.
-        """
-        i = 0
-        x_main_loop = []
-        y_main_loop = []
-        x_main_loop.append(position_v[0])
-        y_main_loop.append(position_v[1])
-        while 1:
-            # check if the point is within 5m of the current goal
-            if np.linalg.norm(position_v - goal) < 5:
-                return x_main_loop, y_main_loop
-            # create profile
-            profile, list_len = self.create_profile(pos_v=position_v)
-            # calculate total potential
-            profile = self.calculate_total_potential(profile, list_len, obstacle, goal, w_theta, heading)
-            # find min angle and index
-            min_angle, min_index = self.find_global_minima_angle(profile)
-            # save the global x,y position of the vessel
-            x_main_loop.append(profile[min_index].g_kx)
-            y_main_loop.append(profile[min_index].g_ky)
-            # move the vessel to the point with the lowest potential
-            position_v[0] = profile[min_index].g_kx
-            position_v[1] = profile[min_index].g_ky
-            # update the heading
-            heading[0] = profile[min_index].l_kx
-            heading[1] = profile[min_index].l_ky
-            i = i + 1
-
-    def calculate_profile(self, position_v, obstacles_array, goal, w_theta):
+    def _calculate_profile(self, position_v, obstacles_array, goal, w_theta, heading, w_speed, v_v):
         """
         creates the profile and calculates the desired heading
         :param w_theta: wind angle
@@ -341,87 +279,16 @@ class PotentialField:
         :return: minimum angle and the profile
         """
         # creates a profile around square around the position of the vessel in which potential will be calculated
-        profile, list_len = self.create_profile(pos_v=position_v)
+        profile, list_len = self._create_profile(pos_v=position_v)
         # calculates the total potential in each point
-        profile = self.calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
-                                                 self.heading)
+        profile = self._calculate_total_potential(profile, list_len, obstacles_array, goal, w_theta,
+                                                  heading, w_speed, v_v)
         # calculates the index of the position in the profile with the lowest potential and the angle from the vessel
         # position to that point
-        min_angle, min_index = self.find_global_minima_angle(profile)
+        min_angle, min_index = self._find_global_minima_angle(profile)
         return min_angle, profile
 
-    def generate_circle_waypoints(self, center):
-        # calculate the angle between the points
-        point_angle = (2 * math.pi) / self.num_circle_point
-        points = []
-        for i in range(self.num_circle_point):
-            # create x,y at the circumference with angle point_angle * i
-            (p_x, p_y) = self.rotate_point(0, self.waypoint_radius, point_angle * i)
-            p_x += center[0]
-            p_y += center[1]
-            points.append((round(p_x), round(p_y)))
-        return points
-
-    def closest_waypoint(self, pos, circle_points):
-        """
-        finds the index of the waypoint closest to the vessel
-        :param pos: position of the vessel
-        :param circle_points: waypoints in the circle
-        :return:
-        """
-        """
-        pos_vessel = np.ndarray(shape=(2, 2))
-        pos_vessel[0][0] = pos[0]
-        pos_vessel[0][1] = pos[1]
-        """
-        self.is_not_used()
-        rospy.loginfo("pos {}".format(pos))
-        closest_index = distance.cdist([pos], circle_points, 'euclidean').argmin()
-        return closest_index
-
-    def circle_waypoint(self, waypoint, p_0, p_1):
-        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, p_0, p_1)
-        circle_points = self.generate_circle_waypoints(waypoint)
-        closest_index = self.closest_waypoint(position_v, circle_points)
-        for i in range(closest_index):
-            circle_points.append(circle_points[i])
-        for i in range(closest_index):
-            circle_points.pop(0)
-            i += 1
-        # goal = circle_points[0]
-        rospy.loginfo("circle_points {}".format(circle_points))
-        return circle_points
-
-    def latlng_to_global_xy(self, lat, lng, p_0, p_1):
-        """
-        converts latitude, longitude to global x,y coordinates for any point
-        :param lat: latitude of the point
-        :param lng: longitude of the point
-        :param p_0: ReferencePoint 0
-        :param p_1: ReferencePoint 1
-        :return: global x,y coordinates for the point
-        """
-        self.is_not_used()
-        x = self.radius_earth * lng * math.cos((p_0.lat + p_1.lat) / 2)
-        y = self.radius_earth * lat
-        return [x, y]
-
-    def latlng_to_screen_xy(self, lat, lng, p_0, p_1):
-        """
-        convert latitude, longitude for a point to x,y in the reference frame
-        :param lat: latitude for the point being converted
-        :param lng: longitude for the point being converted
-        :param p_0: reference point 0
-        :param p_1: reference point 1
-        :return: x,y coordinates for the point in the reference frame
-        """
-        pos = self.latlng_to_global_xy(lat, lng, p_0, p_1)
-        per_x = ((pos[0] - p_0.pos_x) / (p_1.pos_x - p_0.pos_x))
-        per_y = ((pos[1] - p_0.pos_y) / (p_1.pos_y - p_0.pos_y))
-
-        return p_0.scrX + (p_1.scrX - p_0.scrX) * per_x, p_0.scrY + (p_1.scrY - p_0.scrY) * per_y
-
-    def obstacle_calc(self, p_0, p_1, obstacles):
+    def _obstacle_calc(self, p_0, p_1, obstacles):
         """
         calculates the local x,y for the obstacles in the frame of the reference points
         :param p_0: reference point 0
@@ -429,11 +296,10 @@ class PotentialField:
         :param obstacles: array of obstacles
         :return:
         """
-        self.is_not_used()
         length_obstacles = np.size(obstacles)
         obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
         for i in range(length_obstacles):
-            obstacles_xy_1d = self.latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
+            obstacles_xy_1d = pl.latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
             obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
             obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
         return obstacles_xy_array
@@ -445,7 +311,6 @@ class PotentialField:
         :param lon: longitude of the vessel
         :return: latitude and longitude for the two ref points.
         """
-        self.is_not_used()
         # the angle to the reference points from vessel position
         bearing_0 = np.deg2rad(0)
         bearing_1 = np.deg2rad(90)
@@ -454,15 +319,15 @@ class PotentialField:
         lat_rad = math.radians(lat)
         lon_rad = math.radians(lon)
         # calculate the latitude longitude of the reference points
-        lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / self.radius_earth) +
-                          math.cos(lat_rad) * math.sin(distance_0 / self.radius_earth) * math.cos(bearing_0))
-        lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / self.radius_earth) * math.cos(lat_rad),
-                                     math.cos(distance_0 / self.radius_earth) - math.sin(lat_rad) * math.sin(lat_1))
+        lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / radius_earth) +
+                          math.cos(lat_rad) * math.sin(distance_0 / radius_earth) * math.cos(bearing_0))
+        lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / radius_earth) * math.cos(lat_rad),
+                                     math.cos(distance_0 / radius_earth) - math.sin(lat_rad) * math.sin(lat_1))
 
-        lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / self.radius_earth) +
-                          math.cos(lat_rad) * math.sin(distance_1 / self.radius_earth) * math.cos(bearing_1))
-        lon_2 = lon_rad + math.atan2(math.sin(bearing_1) * math.sin(distance_1 / self.radius_earth) * math.cos(lat_rad),
-                                     math.cos(distance_1 / self.radius_earth) - math.sin(lat_rad) * math.sin(lat_2))
+        lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / radius_earth) +
+                          math.cos(lat_rad) * math.sin(distance_1 / radius_earth) * math.cos(bearing_1))
+        lon_2 = lon_rad + math.atan2(math.sin(bearing_1) * math.sin(distance_1 / radius_earth) * math.cos(lat_rad),
+                                     math.cos(distance_1 / radius_earth) - math.sin(lat_rad) * math.sin(lat_2))
         # convert the reference points from rad to degrees
         lat_1 = math.degrees(lat_1)
         lon_1 = math.degrees(lon_1)
@@ -470,82 +335,38 @@ class PotentialField:
         lon_2 = math.degrees(lon_2)
         return [lat_1, lon_1, lat_2, lon_2]
 
-    def latlng_to_global_xy_ref(self, lat, lng, p0_lat, p1_lat):
-        """
-        converts latitude, longitude to global x,y coordinates for the two reference points.
-        :param lat: latitude for the ref point being converted
-        :param lng: latitude for the ref point being converted
-        :param p0_lat: latitude for the first ref point
-        :param p1_lat: latitude for the second ref point
-        :return:
-        """
-        x = self.radius_earth * lng * math.cos((p0_lat + p1_lat) / 2)
-        y = self.radius_earth * lat
-        return [x, y]
-
     def plot_heat_map(self, profile):
         """
         method used to plot the heat map
         profile: profile for the vessel
         :return:
         """
-        self.is_not_used()
         import matplotlib.pyplot as plt
-        profile_matrix = self.reshape_profile(profile)
+        profile_matrix = self._reshape_profile(profile)
         plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
         plt.show()
 
-    def path_planning_calc_heading(self, goal):
+    def path_planning_calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """
         calculates the desired heading of the vessel
         :param goal:
-        :param pub_heading: publisher for the heading
-        :param goal_index: index of current goal
         :return: desired heading
         """
-        # calculates the local x,y for the position in the frame of the reference points
-        position_v = self.latlng_to_screen_xy(self.latitude, self.longitude, self.p0, self.p1)
         # create potential field object
-        """
-        if self.waypoint_index_control > len(self.waypoint_array) - 1:
-            self.waypoint_index_control = len(self.waypoint_array) - 1
-        goal = self.waypoint_array[self.waypoint_index_control] """
-        # goal = waypoint_array[goal_index]
         goal_pos = goal[0:2]
         position_v = [int(round(position_v[0])), int(round(position_v[1]))]
         # calculates the local x,y for the obstacles in the frame of the reference points
-        if self.obstacle_mutex == 1:
-            obstacles_array = self.obstacle_calc(self.p0, self.p1, self.obstacles)
+        if obstacles:
+            obstacles_array = self._obstacle_calc(self.p0, self.p1, obstacles)
         else:
             obstacles_array = np.array([])
-        min_angle, profile = self.calculate_profile(position_v, obstacles_array, goal_pos,
-                                                    self.w_theta)
-        # publish the calculated angle
-        self.pub_heading.publish(min_angle)
+        min_angle, profile = self._calculate_profile(position_v, obstacles_array, goal_pos,
+                                                     w_theta, heading, w_speed, v_v)
         # plot a heat map of the profile for the vessel
         self.plot_heat_map(profile)
 
-        return position_v, goal, len(self.waypoint_array)
+        return min_angle, goal
 
-    def update_global_variable(self, w_speed, w_theta, latitude, longitude, waypoint_index_control, heading, obstacles,
-                               obstacle_mutex, waypoint_mutex, velocity_mutex, heading_mutex, position_mutex,
-                               wind_mutex):
-        self.w_speed = w_speed
-        self.w_theta = w_theta
-        self.latitude = latitude
-        self.longitude = longitude
-        self.waypoint_index_control = waypoint_index_control
-        self.heading = heading
-        self.obstacles = obstacles
-        self.obstacle_mutex = obstacle_mutex
-        self.waypoint_mutex = waypoint_mutex
-        self.velocity_mutex = velocity_mutex
-        self.heading_mutex = heading_mutex
-        self.position_mutex = position_mutex
-        self.wind_mutex = wind_mutex
-
-    def update_waypoints_ref(self, waypoint_array, p0, p1, pub_heading):
-        self.waypoint_array = waypoint_array
+    def update_waypoints_ref(self, p0, p1):
         self.p0 = p0
         self.p1 = p1
-        self.pub_heading = pub_heading
