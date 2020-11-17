@@ -349,7 +349,13 @@ class PotentialField:
     def path_planning_calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """
         calculates the desired heading of the vessel
-        :param goal:
+        :param heading: heading of vessel
+        :param w_speed: wind speed
+        :param v_v: vessel velocity
+        :param obstacles: arrar of obstacles
+        :param position_v: position of vessel
+        :param w_theta: angle of the wind
+        :param goal: postition of gaol
         :return: desired heading
         """
         # create potential field object
