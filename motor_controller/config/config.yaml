@@ -1,0 +1,3 @@
+# --- Config ---
+queue_size: 10
+usbport: "/dev/ttyACM0"
