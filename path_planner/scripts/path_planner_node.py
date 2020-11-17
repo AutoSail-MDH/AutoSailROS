@@ -302,6 +302,8 @@ if __name__ == '__main__':
                                                                                         lin_velocity)
             # publish the calculated angle
             pub_heading.publish(min_angle)
+            rospy.loginfo("Vessel position {}".format(pos_v_xy))
+            rospy.loginfo("Goal position {}".format(goal))
             if (np.diff([pos_v_xy, goal[0:2]]) ** 2).sum() < 5:
                 if (goal != waypoint_xy[len(waypoint_xy) - 1]).all():
                     waypoint_index += 1
