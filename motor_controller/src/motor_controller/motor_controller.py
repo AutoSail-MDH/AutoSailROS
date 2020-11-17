@@ -1,12 +1,26 @@
 #!/usr/bin/env python
 
 import serial
+import serial.tools.list_ports
 import time
 
 class MotorController:
 
-    def __init__(self, usbport):
-        self.sc = serial.Serial(usbport, timeout=1)
+    def __init__(self):
+        ports = list(serial.tools.list_ports.comports())
+        port = None
+        for p in ports:
+            if p[1].startswith("Pololu"):
+                pnr = int(p[0][-1])
+                if port is None or pnr < int(port[-1]):
+                    port = p[0]
+        print(port)
+        while True:
+            try:
+                self.sc = serial.Serial(port, timeout=1)
+            except serial.SerialException:
+                continue
+            break
 
     def close_servo(self):
         """
@@ -78,12 +92,11 @@ class MotorController:
         self.sc.write(data)
         """
 
-"""
+
 if __name__ == "__main__":
-    usbport = '/dev/ttyACM2'
-    mm = MotorController(usbport)
-    mm.setPosition(0, 2000)
-    pos = mm.getPosition(0)
+    mm = MotorController()
+    mm.set_position(0, 1000)
+    pos = mm.get_position(0)
     print(f"Servo position: {pos}")
-"""
+    mm.sc.close()
 

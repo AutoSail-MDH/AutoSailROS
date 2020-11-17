@@ -10,8 +10,7 @@ class TestMotorController(TestCase):
     def setUp(self):
         self.patcher = mock.patch('motor_controller.motor_controller.serial.Serial')
         self.mock_serial = self.patcher.start().return_value
-        usbport = "/dev/ttyACM0"
-        self.sc = MotorController(usbport)
+        self.sc = MotorController()
 
     def test_set_position(self):
         """
