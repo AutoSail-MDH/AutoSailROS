@@ -13,6 +13,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   sensor_msgs
+  marti_nav_msgs
+  marti_common_msgs
+  tf
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -163,6 +167,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
    scripts/sim_converter_node.py
+   scripts/boat_tf_broadcaster.py
+   scripts/route_planner_service.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
