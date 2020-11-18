@@ -44,17 +44,17 @@ if __name__ == "__main__":
     values = SubscriberValues()
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
-    sail_limits = rospy.get_param("~sail_limits", math.pi / 5.2) * math.pi / 180
+    sail_limits = rospy.get_param("~sail_limits", 80) * math.pi / 180
     queue_size = rospy.get_param("~queue_size", 1)
     servo_scalar = rospy.get_param("~sail_servo_scalar", 20.25)
-    max_roll = rospy.get_param("~max_roll", math.pi / 6) * math.pi / 180
+    max_roll = rospy.get_param("~max_roll", 30) * math.pi / 180
 
     # Publishers
     sail_angle = rospy.Publisher("sail_controller/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
     sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
 
     # Subscribers
-    rospy.Subscriber(name="imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
+    rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
                      queue_size=queue_size)
 
     # Initialize PID
