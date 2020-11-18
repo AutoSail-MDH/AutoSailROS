@@ -1,6 +1,6 @@
 <!-- to tests run: rostest ctrl_pkg rostest.tests -->
 <launch>
-    <node pkg="ctrl_pkg" name="sail_node" type="sail_node.py">
+    <node pkg="ctrl_pkg" name="sail_node" type="sail_node_pid.py">
         <rosparam command="load" file="$(find ctrl_pkg)/config/config.yaml"/>
     </node>
     <node name="rudder_node" pkg="ctrl_pkg" type="rudder_node.py" >
