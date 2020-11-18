@@ -25,12 +25,12 @@ class SubscriberValues:
         self.velocity = 0
 
     def callback_desired_course(self, data):
-        self.desired_course = data.data
+        self.desired_course = - data.data
 
     def callback_current_heading(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
+        yaw = math.atan2(2 * (q.w * (-q.z) + q.y * q.x), 1 - 2 * (q.x ** 2 + (-q.z) ** 2))
 
         self.current_heading = yaw
 
