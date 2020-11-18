@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 
-from subprocess import Popen, PIPE
+# Standard libs
 import json
-import time
 
-data = []
+# Third party libs
+from subprocess import Popen, PIPE
+
+
 wind_sensor = Popen(['node', '../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
 buffer = b''
-
-# wait 5 seconds to fill index
-time.sleep(3)
 
 while True:
 
@@ -20,50 +19,105 @@ while True:
     if out == b'\n':
         x = json.loads(buffer.decode("utf-8"))
 
-        # EnvOutTmp
-        print(x["updates"][0]["values"][0]["path"], " :\t",
-              x["updates"][0]["values"][0]["value"])
+        try:
+            # EnvironmentOutsideTemperature
+            out_temp_path = x["updates"][0]["values"][0]["path"]
+            out_temp_val = x["updates"][0]["values"][0]["value"]
+            print(out_temp_path, " :\t", out_temp_val)
+        except IndexError:
+            out_temp_path = ''
+            out_temp_val = ''
 
-        # EnvWindAngleApp
-        print(x["updates"][0]["values"][1]["path"], "  :\t",
-              x["updates"][0]["values"][1]["value"])
+        try:
+            # EnvironmentWindAngleApparent
+            wind_angle_path = x["updates"][0]["values"][1]["path"]
+            wind_angle_val = x["updates"][0]["values"][1]["value"]
+            print(wind_angle_path, "  :\t", wind_angle_val)
+        except IndexError:
+            wind_angle_path = ''
+            wind_angle_val = ''
 
-        # EnvWindSpeedApp
-        print(x["updates"][0]["values"][2]["path"], "  :\t",
-              x["updates"][0]["values"][2]["value"])
+        try:
+            # EnvironmentWindSpeedApparent
+            wind_speed_path = x["updates"][0]["values"][2]["path"]
+            wind_speed_val = x["updates"][0]["values"][2]["value"]
+            print(wind_speed_path, "  :\t", wind_speed_val)
+        except IndexError:
+            wind_speed_path = ''
+            wind_speed_val = ''
 
-        # ElecBattName
-        print(x["updates"][0]["values"][3]["path"], "  :\t",
-              x["updates"][0]["values"][3]["value"])
+        try:
+            # ElectricityBatteryName
+            battery_name_path = x["updates"][0]["values"][3]["path"]
+            battery_name_val = x["updates"][0]["values"][3]["value"]
+            print(battery_name_path, "  :\t", battery_name_val)
+        except IndexError:
+            battery_name_path = ''
+            battery_name_val = ''
 
-        # ElecBattLoc
-        print(x["updates"][0]["values"][4]["path"], "  :\t",
-              x["updates"][0]["values"][4]["value"])
+        try:
+            # ElectricityBatteryLoc
+            battery_loc_path = x["updates"][0]["values"][4]["path"]
+            battery_loc_val = x["updates"][0]["values"][4]["value"]
+            print(battery_loc_path, "  :\t", battery_loc_val)
+        except IndexError:
+            battery_loc_path = ''
+            battery_loc_val = ''
 
-        # ElecBattCapacity
-        print(x["updates"][0]["values"][5]["path"], "  :\t",
-              x["updates"][0]["values"][5]["value"])
+        try:
+            # ElectricityBatteryCapacity
+            battery_cap_path = x["updates"][0]["values"][5]["path"]
+            battery_cap_val = x["updates"][0]["values"][5]["value"]
+            print(battery_cap_path, "  :\t", battery_cap_val)
 
-        # # NavAttRoll
-        # print(x["updates"][0]["values"][6]["path"], "  :\t",
-        #       x["updates"][0]["values"][6]["value"])
+        except IndexError:
+            battery_cap_path = ''
+            battery_cap_val = ''
 
-        # # NavAttPitch
-        # print(x["updates"][0]["values"][7]["path"], "  :\t",
-        #       x["updates"][0]["values"][7]["value"])
-        #
-        # # NavAttYaw
-        # print(x["updates"][0]["values"][8]["path"], "  :\t",
-        #       x["updates"][0]["values"][8]["value"])
-        #
-        # # NavAttHeadingMagnetic
-        # print(x["updates"][0]["values"][9]["path"], "  :\t",
-        #       x["updates"][0]["values"][9]["value"])
+        try:
+            # NavigationAttitudeRoll
+            att_roll_path = x["updates"][0]["values"][6]["path"]
+            att_roll_val = x["updates"][0]["values"][6]["value"]
+            print(att_roll_path, "  :\t", att_roll_val)
+        except IndexError:
+            att_roll_path = ''
+            att_roll_val = ''
+
+        try:
+            # NavigationAttitudePitch
+            att_pitch_path = x["updates"][0]["values"][7]["path"]
+            att_pitch_val = x["updates"][0]["values"][7]["value"]
+            print(att_pitch_path, "  :\t", att_pitch_val)
+        except IndexError:
+            att_pitch_path = ''
+            att_pitch_val = ''
+
+        try:
+            # NavigationAttitudeYaw
+            att_yaw_path = x["updates"][0]["values"][8]["path"]
+            att_yaw_val = x["updates"][0]["values"][8]["value"]
+            print(att_yaw_path, "  :\t", att_yaw_val)
+        except IndexError:
+            att_yaw_path = ''
+            att_yaw_val = ''
+
+        try:
+            # NavigationAttitudeHeadingMagnetic
+            head_mag_path = x["updates"][0]["values"][9]["path"]
+            head_mag_val = x["updates"][0]["values"][9]["value"]
+            print(head_mag_path, "  :\t", head_mag_val)
+        except IndexError:
+            head_mag_path = ''
+            head_mag_val = ''
 
         buffer = b''
 
     else:
         buffer += out
+
+
+
+
 
 
 
