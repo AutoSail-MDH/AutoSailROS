@@ -7,7 +7,7 @@ from subprocess import Popen, PIPE
 class WindSensor:
 
     def __init__(self):
-        self.wind_sensor = Popen(['node', './signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
+        self.wind_sensor = Popen(['node', '../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.buffer = b''
 
     def read_sensor(self, wind_sensor, buffer):

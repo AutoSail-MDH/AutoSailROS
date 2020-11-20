@@ -2,7 +2,7 @@
 
 import rospy
 import std_msgs.msg
-from wind_sensor.src import WindSensor
+from wind_sensor.wind_sensor import WindSensor
 
 
 def wind_sensor_talker():
