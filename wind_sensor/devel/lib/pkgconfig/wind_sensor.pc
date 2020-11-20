@@ -1,8 +1,0 @@
-prefix=/home/asb6/PycharmProjects/AutoSailROS/wind_sensor/devel
-
-Name: wind_sensor
-Description: Description of wind_sensor
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

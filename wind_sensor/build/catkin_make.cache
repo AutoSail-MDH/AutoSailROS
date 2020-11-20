@@ -1,2 +1,0 @@
-wind_sensor
--DCATKIN_DEVEL_PREFIX=/home/asb6/PycharmProjects/AutoSailROS/wind_sensor/devel -DCMAKE_INSTALL_PREFIX=/home/asb6/PycharmProjects/AutoSailROS/wind_sensor/install -G Unix Makefiles
