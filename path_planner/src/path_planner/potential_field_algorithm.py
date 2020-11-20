@@ -3,6 +3,7 @@ import math
 from scipy.spatial import distance
 from path_planner import path_planner as pl
 import rospy
+import time
 
 radius_earth = 6371
 
@@ -248,6 +249,7 @@ class PotentialField:
             for i in range(self.diameter):
                 profile_matrix[self.diameter - 1 - i, j] = profile[g].u
                 g = g + 1
+        profile_matrix = np.flip(np.flip(np.transpose(profile_matrix), 0), 1)
         return profile_matrix
 
     def _find_global_minima_angle(self, profile):
@@ -304,37 +306,6 @@ class PotentialField:
             obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
         return obstacles_xy_array
 
-    def calculate_reference_points(self, lat, lon):
-        """
-        creates two reference points 100m from the position of the vessel at o and 90 deg
-        :param lat: latitude of the vessel
-        :param lon: longitude of the vessel
-        :return: latitude and longitude for the two ref points.
-        """
-        # the angle to the reference points from vessel position
-        bearing_0 = np.deg2rad(0)
-        bearing_1 = np.deg2rad(90)
-        distance_0 = 0.1  # 100 meter in km
-        distance_1 = 0.1  # 100 meter in km
-        lat_rad = math.radians(lat)
-        lon_rad = math.radians(lon)
-        # calculate the latitude longitude of the reference points
-        lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / radius_earth) +
-                          math.cos(lat_rad) * math.sin(distance_0 / radius_earth) * math.cos(bearing_0))
-        lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / radius_earth) * math.cos(lat_rad),
-                                     math.cos(distance_0 / radius_earth) - math.sin(lat_rad) * math.sin(lat_1))
-
-        lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / radius_earth) +
-                          math.cos(lat_rad) * math.sin(distance_1 / radius_earth) * math.cos(bearing_1))
-        lon_2 = lon_rad + math.atan2(math.sin(bearing_1) * math.sin(distance_1 / radius_earth) * math.cos(lat_rad),
-                                     math.cos(distance_1 / radius_earth) - math.sin(lat_rad) * math.sin(lat_2))
-        # convert the reference points from rad to degrees
-        lat_1 = math.degrees(lat_1)
-        lon_1 = math.degrees(lon_1)
-        lat_2 = math.degrees(lat_2)
-        lon_2 = math.degrees(lon_2)
-        return [lat_1, lon_1, lat_2, lon_2]
-
     def plot_heat_map(self, profile):
         """
         method used to plot the heat map
@@ -344,18 +315,20 @@ class PotentialField:
         import matplotlib.pyplot as plt
         profile_matrix = self._reshape_profile(profile)
         plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
+        plt.ion()
         plt.show()
+        plt.pause(0.001)
 
-    def path_planning_calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
+    def calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """
         calculates the desired heading of the vessel
         :param heading: heading of vessel
         :param w_speed: wind speed
         :param v_v: vessel velocity
-        :param obstacles: arrar of obstacles
+        :param obstacles: array of obstacles
         :param position_v: position of vessel
         :param w_theta: angle of the wind
-        :param goal: postition of gaol
+        :param goal: position of gaol
         :return: desired heading
         """
         # create potential field object
@@ -369,7 +342,7 @@ class PotentialField:
         min_angle, profile = self._calculate_profile(position_v, obstacles_array, goal_pos,
                                                      w_theta, heading, w_speed, v_v)
         # plot a heat map of the profile for the vessel
-        self.plot_heat_map(profile)
+        # self.plot_heat_map(profile)
 
         return min_angle
 
