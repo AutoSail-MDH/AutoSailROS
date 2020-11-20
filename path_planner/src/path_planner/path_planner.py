@@ -1,11 +1,22 @@
 import numpy as np
 import math
 from scipy.spatial import distance
+from pymap3d.ned import geodetic2ned
 
 
 radius_earth = 6371
 waypoint_radius = 10
 num_circle_point = 8
+
+
+class ReferencePoint:
+    def __init__(self, scr_x, scr_y, lat, lng, pos_x, pos_y):
+        self.scrX = scr_x
+        self.scrY = scr_y
+        self.lat = lat
+        self.lng = lng
+        self.pos_x = pos_x
+        self.pos_y = pos_y
 
 
 def quaternion_to_euler_yaw(heading_quaternion):
@@ -15,11 +26,11 @@ def quaternion_to_euler_yaw(heading_quaternion):
     """
     q = heading_quaternion
     pitch = np.arcsin(2 * (q.w * q.y - q.z * q.x))
-    yaw = np.arctan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
+    yaw = - np.arctan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
     return pitch, yaw
 
 
-def latlng_to_global_xy_ref(lat, lng, p0_lat, p1_lat):
+def latlng_to_global_xy_ref(lat, lng, p0_lat, p0_lng):
     """
     converts latitude, longitude to global x,y coordinates for the two reference points.
     :param lat: latitude for the ref point being converted
@@ -28,8 +39,9 @@ def latlng_to_global_xy_ref(lat, lng, p0_lat, p1_lat):
     :param p1_lat: latitude for the second ref point
     :return:
     """
-    x = radius_earth * lng * math.cos((p0_lat + p1_lat) / 2)
-    y = radius_earth * lat
+    [x, y, d] = geodetic2ned(lat, lng, 0, p0_lat, p0_lng, 0)
+    # y = radius_earth * lng * math.cos((p0_lat + p1_lat) / 2)
+    # x = radius_earth * lat
     return [x, y]
 
 
@@ -42,9 +54,9 @@ def latlng_to_global_xy(lat, lng, p_0, p_1):
     :param p_1: ReferencePoint 1
     :return: global x,y coordinates for the point
     """
-    x = radius_earth * lng * math.cos((p_0.lat + p_1.lat) / 2)
-    y = radius_earth * lat
-    return [x, y]
+    # y = radius_earth * lng * math.cos((p_0.lat + p_1.lat) / 2)
+    # x = radius_earth * lat
+    return latlng_to_global_xy_ref(lat, lng, p_0.lat, p_0.lng)
 
 
 def latlng_to_screen_xy(lat, lng, p_0, p_1):
@@ -114,10 +126,41 @@ def circle_waypoint(latitude, longitude, waypoint, p_0, p_1):
 def calc_waypoints(p_0, p_1, waypoints):
     waypoint_xy_array = [] # np.zeros(shape=(length_waypoints, 3))
     for waypoint in waypoints:
-        waypoints_xy = latlng_to_screen_xy(waypoint.pose.position.y, waypoint.pose.position.x, p_0, p_1)
+        waypoints_xy = latlng_to_global_xy(waypoint.pose.position.y, waypoint.pose.position.x, p_0, p_1)
         waypoint_xy_array.append([round(waypoints_xy[0]), round(waypoints_xy[1]), waypoint.id])
     return waypoint_xy_array
 
+
+def calculate_reference_points(lat, lon):
+    """
+    creates two reference points 100m from the position of the vessel at o and 90 deg
+    :param lat: latitude of the vessel
+    :param lon: longitude of the vessel
+    :return: latitude and longitude for the two ref points.
+    """
+    # the angle to the reference points from vessel position
+    bearing_0 = np.deg2rad(0)
+    bearing_1 = np.deg2rad(90)
+    distance_0 = 0.1  # 100 meter in km
+    distance_1 = 0.1  # 100 meter in km
+    lat_rad = math.radians(lat)
+    lon_rad = math.radians(lon)
+    # calculate the latitude longitude of the reference points
+    lat_1 = math.asin(math.sin(lat_rad) * math.cos(distance_0 / radius_earth) +
+                      math.cos(lat_rad) * math.sin(distance_0 / radius_earth) * math.cos(bearing_0))
+    lon_1 = lon_rad + math.atan2(math.sin(bearing_0) * math.sin(distance_0 / radius_earth) * math.cos(lat_rad),
+                                 math.cos(distance_0 / radius_earth) - math.sin(lat_rad) * math.sin(lat_1))
+
+    lat_2 = math.asin(math.sin(lat_rad) * math.cos(distance_1 / radius_earth) +
+                      math.cos(lat_rad) * math.sin(distance_1 / radius_earth) * math.cos(bearing_1))
+    lon_2 = lon_rad + math.atan2(math.sin(bearing_1) * math.sin(distance_1 / radius_earth) * math.cos(lat_rad),
+                                 math.cos(distance_1 / radius_earth) - math.sin(lat_rad) * math.sin(lat_2))
+    # convert the reference points from rad to degrees
+    lat_1 = math.degrees(lat_1)
+    lon_1 = math.degrees(lon_1)
+    lat_2 = math.degrees(lat_2)
+    lon_2 = math.degrees(lon_2)
+    return [lat_1, lon_1, lat_2, lon_2]
 
 """
     def calculate_segment(self, position_v, obstacle, goal, w_theta, heading):

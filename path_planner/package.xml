@@ -60,6 +60,7 @@
   <exec_depend>std_msgs</exec_depend>
   <build_depend>python3-empy</build_depend>
   <exec_depend>python3-empy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
