@@ -2,11 +2,11 @@
 
 import rospy
 import std_msgs.msg
-from wind_sensor.src.wind_sensor.wind_sensor import WindSensor
+from wind_sensor.src import WindSensor
 
 
 def wind_sensor_talker():
-    pub = rospy.Publisher("wind_sensor/wind_angle", std_msgs.msg.String, queue_size=10)
+    pub = rospy.Publisher("wind_sensor1/wind_angle", std_msgs.msg.String, queue_size=10)
     rospy.init_node("wind_sensor_talker", anonymous=True)
     rate = rospy.Rate(1)
 
