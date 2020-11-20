@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import serial, time, subprocess
+import serial
 import serial.tools.list_ports
 import time
 
@@ -17,10 +17,7 @@ class MotorController:
         print(port)
         while True:
             try:
-                bashCmd = ["fuser", "-k", port]
-                process = subprocess.Popen(bashCmd, stdout=subprocess.PIPE)
-                output, error = process.communicate()
-                self.sc = serial.Serial(port, timeout=None)
+                self.sc = serial.Serial(port, timeout=1)
             except serial.SerialException:
                 continue
             break
@@ -101,7 +98,7 @@ class MotorController:
 
 if __name__ == "__main__":
     mm = MotorController()
-    mm.set_position(0, 2000)
+    mm.set_position(0, 1000)
     pos = mm.get_position(0)
     print(f"Servo position: {pos}")
     mm.sc.close()
