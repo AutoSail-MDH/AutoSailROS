@@ -2,24 +2,27 @@
 
 import json
 from subprocess import Popen, PIPE
+import sys
+import os
 
 
 class WindSensor:
 
     def __init__(self):
-        self.wind_sensor = Popen(['node', '../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
+        self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.buffer = b''
 
-    def read_sensor(self, wind_sensor, buffer):
+    def read_sensor(self):
 
         while True:
 
             # read sensor data one char at the time
-            out = wind_sensor.stdout.read(1)
+            out = self.wind_sensor.stdout.read(1)
 
             # read to EOL of stdout
             if out == b'\n':
-                x = json.loads(buffer.decode("utf-8"))
+
+                x = json.loads(self.buffer.decode("utf-8")[13:])
 
                 try:
                     # EnvironmentOutsideTemperature
@@ -112,15 +115,15 @@ class WindSensor:
                     head_mag_path = ''
                     head_mag_val = ''
 
-                buffer = b''
+                self.buffer = b''
 
             else:
-                buffer += out
+                self.buffer += out
 
 
 if __name__ == "__main__":
     ws = WindSensor()
-    ws.read_sensor(ws.wind_sensor, ws.buffer)
+    ws.read_sensor()
 
 
 

@@ -18,8 +18,5 @@
     "@abandonware/noble": "^1.9.2-1",
     "debug": "^4.0.1",
     "moment": "^2.24.0"
-  },
-  "devDependencies": {
-    "electron-rebuild": "^2.3.2"
   }
 }

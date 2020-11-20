@@ -11,5 +11,5 @@ ultrasonic.on('delta', delta => handleMessage(delta))
 ultrasonic.start()
 
 function handleMessage (msg) {
-  console.log(JSON.stringify(msg))
+  console.log('GOT MESSAGE: ' + JSON.stringify(msg))
 }
