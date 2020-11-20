@@ -8,13 +8,11 @@ import sensor_msgs.msg
 import geometry_msgs.msg
 from marti_nav_msgs.msg import RoutePoint, Route
 from scipy.spatial import distance
-from path_planner import potential_field_algorithm as pfa
+from path_planner.potential_field_algorithm import PotentialField
 from path_planner import path_planner as pl
 
-from path_planner.msg import waypointmsg
-from path_planner.msg import waypoint_array_msg
-from path_planner.msg import obstaclemsg
-from path_planner.msg import obstacles_array_msg
+
+#from path_planner.msg import obstacles_array_msg
 
 # global variables updated by the callback functions via the subscribers
 waypoints = 0
@@ -180,7 +178,7 @@ def path_planner_subscriber():
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, gps_velocity_callback)
     rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, imu_heading_callback)
     rospy.Subscriber("/wind_sensor", geometry_msgs.msg.Vector3Stamped, wind_sensor_callback)
-    rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback)
+    #rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback)
     rospy.Subscriber("waypoint/index", std_msgs.msg.Int64, waypoint_index_callback)
 
 

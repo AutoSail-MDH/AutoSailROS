@@ -22,6 +22,9 @@ class MotorController:
                 continue
             break
 
+    def __del__(self):
+        self.close_servo()
+
     def close_servo(self):
         """
         Closes the serial communication and sets both our servos to their default position.
