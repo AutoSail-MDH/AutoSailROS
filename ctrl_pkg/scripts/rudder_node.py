@@ -30,7 +30,7 @@ class SubscriberValues:
     def callback_current_heading(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        yaw = math.atan2(2 * (q.w * (-q.z) + q.y * q.x), 1 - 2 * (q.x ** 2 + (-q.z) ** 2))
+        yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
 
         self.current_heading = yaw
 
@@ -98,10 +98,10 @@ if __name__ == "__main__":
         # Change between the course controller and the heading controller
         if rc.is_heading_setpoint(velocity=values.velocity, upper_threshold=upper_velocity_threshold,
                                   lower_threshold=lower_velocity_threshold):
-            rospy.loginfo("Current heading: %f", values.current_heading)
+            rospy.loginfo("Current heading: %f", math.degrees(values.current_heading))
             pid_heading = rc_pid(control_signal=values.current_heading)
         else:
-            rospy.loginfo("Current course: %f", values.current_course)
+            rospy.loginfo("Current course: %f", math.degrees(values.current_course))
             pid_heading = rc_pid(control_signal=values.current_course)
         new_rudder_angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_heading,
                                                      rudder_limit=rudder_angle_limit)
