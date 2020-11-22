@@ -25,7 +25,7 @@ class SubscriberValues:
         self.velocity = 0
 
     def callback_desired_course(self, data):
-        self.desired_course = - data.data
+        self.desired_course = data.data
 
     def callback_current_heading(self, data):
         # transform the quaternion to an Euler angle
