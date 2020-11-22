@@ -43,7 +43,7 @@ class PotentialField:
                               [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
                               [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
 
-    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, p0, p1):
+    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v):
         """
 
         :param diameter: diameter of profile
@@ -53,8 +53,6 @@ class PotentialField:
         :param p_ngz: potential for no go zone
         :param p_hyst: added potential for hysteris points
         :param g_v: scalar weight for the effect of the velocity of the vessel
-        :param p0: reference point 0
-        :param p1: reference point 1
         """
         self.diameter = diameter
         self.obstacle_weight = obstacle_weight
@@ -63,9 +61,6 @@ class PotentialField:
         self.p_ngz = p_ngz
         self.p_hyst = p_hyst
         self.g_v = g_v
-
-        self.p0 = p0
-        self.p1 = p1
 
     def find_nearest(self, array, value):
         """
@@ -290,21 +285,21 @@ class PotentialField:
         min_angle, min_index = self._find_global_minima_angle(profile)
         return min_angle, profile
 
-    def _obstacle_calc(self, p_0, p_1, obstacles):
-        """
-        calculates the local x,y for the obstacles in the frame of the reference points
-        :param p_0: reference point 0
-        :param p_1: reference point 1
-        :param obstacles: array of obstacles
-        :return:
-        """
-        length_obstacles = np.size(obstacles)
-        obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
-        for i in range(length_obstacles):
-            obstacles_xy_1d = pl.latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
-            obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
-            obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
-        return obstacles_xy_array
+    # def _obstacle_calc(self, p_0, p_1, obstacles):
+    #     """
+    #     calculates the local x,y for the obstacles in the frame of the reference points
+    #     :param p_0: reference point 0
+    #     :param p_1: reference point 1
+    #     :param obstacles: array of obstacles
+    #     :return:
+    #     """
+    #     length_obstacles = np.size(obstacles)
+    #     obstacles_xy_array = np.zeros(shape=(length_obstacles, 2))
+    #     for i in range(length_obstacles):
+    #         obstacles_xy_1d = pl.latlng_to_screen_xy(obstacles[i].latitude, obstacles[i].longitude, p_0, p_1)
+    #         obstacles_xy_array[i, 0] = round(obstacles_xy_1d[0])
+    #         obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
+    #     return obstacles_xy_array
 
     def plot_heat_map(self, profile):
         """
@@ -335,17 +330,10 @@ class PotentialField:
         goal_pos = goal[0:2]
         position_v = [int(round(position_v[0])), int(round(position_v[1]))]
         # calculates the local x,y for the obstacles in the frame of the reference points
-        if obstacles:
-            obstacles_array = self._obstacle_calc(self.p0, self.p1, obstacles)
-        else:
-            obstacles_array = np.array([])
-        min_angle, profile = self._calculate_profile(position_v, obstacles_array, goal_pos,
+        obstacles = np.array(obstacles)
+        min_angle, profile = self._calculate_profile(position_v, obstacles, goal_pos,
                                                      w_theta, heading, w_speed, v_v)
         # plot a heat map of the profile for the vessel
-        # self.plot_heat_map(profile)
+        self.plot_heat_map(profile)
 
         return min_angle
-
-    def update_waypoints_ref(self, p0, p1):
-        self.p0 = p0
-        self.p1 = p1
