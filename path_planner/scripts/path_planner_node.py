@@ -54,14 +54,7 @@ def waypoint_callback(data):
     :param data: td_msgs.msg.Float64MultiArray with waypoint latitude, longitude
     """
     global waypoints, waypoint_index, lon0, lat0
-    waypoints = []
-    if lat0 is None or lon0 is None:
-        rospy.logerr("No reference point set")
-        return
-    for w in data.route_points:
-        [x, y, _] = geodetic2ned(w.pose.position.y, w.pose.position.x, 0, lat0, lon0, 0)
-        waypoints.append([x, y, w.id])
-    #waypoints = data.route_points
+    waypoints = data.route_points
     waypoint_index = 0
 
 
@@ -85,11 +78,8 @@ def gps_position_callback(data):
     reads the gps/fix topic and saves the latitude, longitude for the vessel as global variables
     :param data: sensor_msgs.msg.NavSatFix with latitude. longitude
     """
-    global current_position, lat0, lon0
-    if lat0 is None:
-        lat0 = data.latitude
-        lon0 = data.longitude
-    current_position = geodetic2ned(data.latitude, data.longitude, 0, lat0, lon0, 0)[:2]
+    global current_position
+    current_position = data
 
 
 def gps_velocity_callback(data):
@@ -162,9 +152,9 @@ if __name__ == '__main__':
 
     rate = rospy.Rate(1)
     # current loop
-    goal = waypoints[0]
     while not rospy.is_shutdown():
-        goal = waypoints[waypoint_index]
+        goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x, 0,
+                            current_position.latitude, current_position.longitude, 0)
         # if waypoint circle waypoint?
         # if goal[2] == config.waypoints_to_circle_id:
         #     start = time.time()
@@ -189,10 +179,10 @@ if __name__ == '__main__':
         #     if goal != waypoint_xy[-1]:
         #         waypoint_index += 1
         #         goal = waypoint_xy[waypoint_index]
-        min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, current_position, obstacles, velocity) + math.pi
+        min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
-        pub_heading.publish(min_angle)
+        pub_heading.publish(-min_angle)
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
         if np.linalg.norm(np.subtract(current_position, goal[0:2])) < 5:
