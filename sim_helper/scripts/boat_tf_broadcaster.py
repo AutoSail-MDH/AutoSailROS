@@ -7,7 +7,7 @@ from nav_msgs.msg import Odometry
 
 def handle_boat_pose(msg):
     br = tf.TransformBroadcaster()
-    br.sendTransform((msg.pose.pose.position.x, msg.pose.pose.position.y, 0),
+    br.sendTransform((-msg.pose.pose.position.y, msg.pose.pose.position.x, 0),
                      tf.transformations.quaternion_from_euler(0, 0, 0),
                      rospy.Time.now(),
                      'boat',
