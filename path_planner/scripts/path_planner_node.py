@@ -20,7 +20,7 @@ waypoints = []
 obstacles = []
 lat0 = None
 lon0 = None
-current_position = []
+current_position = None
 velocity = None
 heading = []  # np.array([0., 0.])
 heading_yaw = None
@@ -132,7 +132,7 @@ def path_planner_init():
     # waits until obstacles and position data has been read from the topics
     while not rospy.is_shutdown():
         # check if data has been read
-        if waypoints and w_theta is not None and current_position and heading and w_speed is not None:
+        if waypoints and w_theta is not None and current_position is not None and heading and w_speed is not None:
             break
 
 
@@ -185,8 +185,8 @@ if __name__ == '__main__':
         pub_heading.publish(-min_angle)
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
-        if np.linalg.norm(np.subtract(current_position, goal[0:2])) < 5:
-            if goal != waypoints[-1]:
+        if np.linalg.norm(goal[0:2]) < 5:
+            if goal != [waypoints[-1].pose.position.y, waypoints[waypoint_index].pose.position.x]:
                 waypoint_index += 1
                 goal = waypoints[waypoint_index]
                 rospy.logwarn("Next waypoint %d", waypoint_index)
