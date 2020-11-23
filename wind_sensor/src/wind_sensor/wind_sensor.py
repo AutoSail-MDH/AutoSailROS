@@ -15,6 +15,7 @@ class WindSensor:
 
     def read_sensor(self):
         wind_angle_val = None
+        wind_speed_val = None
         out = b''
         while out != b'\n':
             # read sensor data one char at the time
