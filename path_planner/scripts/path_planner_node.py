@@ -10,6 +10,8 @@ import message_filters
 from pymap3d.ned import geodetic2ned
 from marti_nav_msgs.msg import RoutePoint, Route
 from scipy.spatial import distance
+from dynamic_reconfigure.server import Server
+from path_planner.cfg import PathPlannerConfig
 from path_planner.potential_field_algorithm import PotentialField
 from path_planner.path_planner import *
 
@@ -30,6 +32,7 @@ lin_velocity = []
 
 radius = 6371  # Earth Radius in KM
 
+
 class Config:
     def __init__(self):
         self.profile_diameter = rospy.get_param("~profile_diameter")
@@ -46,6 +49,20 @@ class Config:
         self.waypoints_to_circle_id = rospy.get_param("~waypoints_to_circle_id")
         self.waypoints_in_circle_id = rospy.get_param("~waypoints_in_circle_id")
         self.circle_time_limit = rospy.get_param("~circle_time_limit")
+
+
+# Dynamic reconfiguration
+def dynamic_reconf_callback(dyn_conf, level):
+    global pf, config
+    pf.goal_weight = config.goal_weight = dyn_conf.goal_weight
+    pf.obstacle_weight = config.obstacle_weight = dyn_conf.obstacle_weight
+    pf.diameter = config.profile_diameter = dyn_conf.profile_diameter
+    pf.d_inf = config.d_inf = dyn_conf.d_inf
+    pf.p_ngz = config.p_ngz = dyn_conf.p_ngz
+    pf.p_hyst = config.p_hyst = dyn_conf.p_hyst
+    pf.g_v = config.g_v = dyn_conf.g_v
+    rospy.loginfo("Reconfigure request: {}".format(config))
+    return dyn_conf
 
 
 def waypoint_callback(data):
@@ -146,11 +163,12 @@ if __name__ == '__main__':
     # Initialize
     path_planner_init()
     config = Config()
-    pf = PotentialField(config.profile_diameter, config.obstacle_weight,
-                        config.d_inf, config.goal_weight, config.p_ngz,
+    pf = PotentialField(config.profile_diameter, config.obstacle_weight, config.d_inf, config.goal_weight, config.p_ngz,
                         config.p_hyst, config.g_v)
+    # Dynamic reconfigure
+    srv = Server(PathPlannerConfig, dynamic_reconf_callback)
 
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(5)
     # current loop
     while not rospy.is_shutdown():
         goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x, 0,
@@ -186,10 +204,10 @@ if __name__ == '__main__':
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
         if np.linalg.norm(goal[0:2]) < 5:
-            if goal != [waypoints[-1].pose.position.y, waypoints[waypoint_index].pose.position.x]:
+            if waypoint_index != len(waypoints)-1:
                 waypoint_index += 1
                 goal = waypoints[waypoint_index]
                 rospy.logwarn("Next waypoint %d", waypoint_index)
             else:
-                print("Path complete")
+                rospy.loginfo("Path complete")
         rate.sleep()
