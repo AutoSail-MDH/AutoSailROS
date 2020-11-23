@@ -1,7 +1,7 @@
 const { Ultrasonic } = require('../')()
 
 const ultrasonic = new Ultrasonic({
-  setRate: 4, // Hz
+  setRate: 8, // Hz
   setCompass: 1, // Turn on compass/9DOF sensor
   maxRetries: Infinity
 })

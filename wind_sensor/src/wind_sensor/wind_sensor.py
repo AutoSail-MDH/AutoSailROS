@@ -4,21 +4,21 @@ import json
 from subprocess import Popen, PIPE
 import sys
 import os
+import math
 
 
 class WindSensor:
 
     def __init__(self):
-        self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
+        self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../src/signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.buffer = b''
 
     def read_sensor(self):
-
-        while True:
-
+        wind_angle_val = None
+        out = b''
+        while out != b'\n':
             # read sensor data one char at the time
             out = self.wind_sensor.stdout.read(1)
-
             # read to EOL of stdout
             if out == b'\n':
 
@@ -119,6 +119,14 @@ class WindSensor:
 
             else:
                 self.buffer += out
+
+        wind_angle_val = float(wind_angle_val)
+        wind_speed_val = float(wind_speed_val)
+        if wind_speed_val == 0:
+            wind_speed_val = 0.001
+
+        wind_vector = [math.cos(wind_angle_val)*wind_speed_val, math.sin(wind_angle_val)*wind_speed_val]
+        return wind_vector
 
 
 if __name__ == "__main__":
