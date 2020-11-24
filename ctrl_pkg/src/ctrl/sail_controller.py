@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-import numpy as np
+#!/usr/bin/env python
 
 sail_angle_rad = 0
 
@@ -22,15 +21,18 @@ def calculate_sail_angle(current_pid_roll, max_roll, max_sail):
     return current_pid_roll / max_roll * max_sail
 
 
-def trim_sail(sail_angle, sail_limits, scalar):
+def trim_sail(sail_angle, sail_limits):
     """
-    Using the sail angle to adjust the servo which is trimming the sail
-    :param sail_angle: angle of the sail
-    :return: the amount of degree the servo should be positioned in 1620 loos sail and 0 beeing maximum trim
+    Determine the servo position given the sail angle and sail limit
+    :param sail_angle: angle of the sail, in radian
+    :param sail_limits: The max angle of the sail, in radian
+    :return: the value of the servo, where 0 is fully released sail and 1620 is fully trimmed
     """
-    if sail_angle > sail_limits:
+    # If desired value is outside of max range, return max value
+    if sail_angle > sail_limits or sail_angle < -sail_limits:
         return 0
-    elif sail_angle < 0:
-        return sail_limits * scalar
-    servo_degree = np.multiply(sail_limits-abs(sail_angle), scalar)
-    return np.abs(servo_degree)
+
+    # Calculate relation between sail angle and servo range, return proportional servo degree
+    scalar = 1620 / sail_limits
+    servo_degree = 1620-abs(sail_angle)*scalar
+    return servo_degree

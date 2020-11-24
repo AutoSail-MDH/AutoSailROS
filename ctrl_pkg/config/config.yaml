@@ -5,7 +5,6 @@ rate: 100
 
 # --- Sail Configs ---
 sail_limits: 80 #1.3962634  # 80 degree
-sail_servo_scalar: 20.25
 sail_setpoint: 5
 max_roll: 30 #0.52359877559 # pi/6
 

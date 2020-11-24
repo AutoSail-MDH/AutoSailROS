@@ -165,7 +165,6 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/rudder_node.py
   scripts/sail_node.py
-  scripts/sail_node_pid.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -225,6 +224,6 @@ install(DIRECTORY config/
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(tests)
 if(CATKIN_ENABLE_TESTING)
-   find_package(rostest REQUIRED)
-  add_rostest(tests/rostest.test)
+    find_package(rostest REQUIRED)
+    add_rostest(tests/rostest.test)
 endif()
