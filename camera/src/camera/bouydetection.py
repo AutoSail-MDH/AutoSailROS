@@ -131,10 +131,7 @@ def startzedCamera():
     if not zed.is_opened():
         print("Opening ZED Camera...")
     status = zed.open(init)
-    if status != sl.ERROR_CODE.SUCCESS:
-        print(repr(status))
-        exit()
-    return zed
+    return zed, status
 
 
 """
