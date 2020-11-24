@@ -7,8 +7,7 @@ from std_msgs.msg import Float64
 
 class MotorControllerListener:
     def __init__(self):
-        usbport = rospy.get_param("~/usbport", "/dev/ttyACM0")
-        self.mcl = MotorController(usbport)
+        self.mcl = MotorController()
         self.rudder = None
         self.sail = None
         
@@ -33,7 +32,7 @@ class MotorControllerListener:
             position = int(11.201*(angle + 45)+992)  # k value is 11.201 because input is between -80 and 80 degrees so
             # the slope between rudder and sail are different
             rospy.loginfo("Position Rudder:[%d]", position)  # logs the current position of the rudder
-            self.mcl.set_position(1, position) # changes the position of servo 1
+            self.mcl.set_position(1, position)  # changes the position of servo 1
 
 
 if __name__ == '__main__':
