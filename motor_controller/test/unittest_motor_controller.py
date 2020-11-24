@@ -4,7 +4,6 @@ from motor_controller.motor_controller import MotorController
 from unittest import TestCase, mock
 
 
-#@patch('motor_controller.motor_controller.serial.Serial')
 class TestMotorController(TestCase):
 
     def setUp(self):
