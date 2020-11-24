@@ -1,5 +1,6 @@
 <launch>
     <include file="$(find path_planner)/launch/node.launch"/>
     <include file="$(find ctrl_pkg)/launch/node.launch"/>
+    <include file="$(find motor_controller)/launch/node.launch"/>
     <!--<node pkg="startup" name="startup_test" type="startup_test.py"/>-->
 </launch>
