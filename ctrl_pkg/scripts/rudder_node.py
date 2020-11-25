@@ -36,7 +36,7 @@ class SubscriberValues:
 
     def callback_velocity(self, data):
         x = data.twist.twist.linear.x
-        y = data.twist.twist.linear.y
+        y = -data.twist.twist.linear.y
         self.velocity = math.sqrt(math.pow(x, 2)+math.pow(y, 2))
         self.current_course = math.atan2(y, x)
 

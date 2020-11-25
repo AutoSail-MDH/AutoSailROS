@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="7461d0d1-e4ec-4f96-9c58-8a6f1ee3782e" name="Default Changelist" comment="Create functions">
+      <change afterPath="$PROJECT_DIR$/wind_sensor/.catkin_workspace" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/.built_by" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CATKIN_IGNORE" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeCache.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CMakeCCompiler.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CMakeCXXCompiler.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_C.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_CXX.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CMakeSystem.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CompilerIdC/a.out" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/3.10.2/CompilerIdCXX/a.out" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/CMakeError.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/CMakeOutput.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/CMakeRuleHashes.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/Makefile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/Makefile2" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/TargetDirectories.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/clean_test_results.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/clean_test_results.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/clean_test_results.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/clean_test_results.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/cmake.check_cache" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/download_extra_data.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/download_extra_data.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/download_extra_data.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/download_extra_data.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/doxygen.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/doxygen.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/doxygen.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/doxygen.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/feature_tests.bin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/feature_tests.c" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/feature_tests.cxx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/progress.marks" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/run_tests.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/run_tests.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/run_tests.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/run_tests.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/tests.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/tests.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/tests.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CMakeFiles/tests.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CTestConfiguration.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CTestCustom.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/CTestTestfile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/.rosinstall" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/_setup_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/env.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/local_setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/local_setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/local_setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/atomic_configure/setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin/catkin_generated/version/package.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/env_cached.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/generate_cached_setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/.rosinstall" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/_setup_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/env.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/local_setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/local_setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/local_setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/installspace/setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/order_packages.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/order_packages.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/setup_cached.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/stamps/Project/_setup_util.py.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/stamps/Project/interrogate_setup_dot_py.py.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/stamps/Project/order_packages.cmake.em.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_generated/stamps/Project/package.xml.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/catkin_make.cache" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/CMakeFiles/progress.marks" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/CTestTestfile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/flags.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/flags.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/gmock_main.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CMakeFiles/progress.marks" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/CTestTestfile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/flags.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/flags.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/gtest_main.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CMakeFiles/progress.marks" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/CTestTestfile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/gtest/googlemock/gtest/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/progress.marks" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_cpp.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_cpp.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_cpp.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_cpp.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_eus.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_eus.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_eus.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_eus.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_lisp.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_lisp.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_lisp.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_lisp.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_nodejs.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_nodejs.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_nodejs.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_py.dir/DependInfo.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_py.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_py.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CMakeFiles/std_msgs_generate_messages_py.dir/progress.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/CTestTestfile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/Makefile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/installspace/wind_sensor.pc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/installspace/wind_sensorConfig-version.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/installspace/wind_sensorConfig.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/ordered_paths.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/package.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/pkg.develspace.context.pc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/pkg.installspace.context.pc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/stamps/wind_sensor/package.xml.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/catkin_generated/stamps/wind_sensor/pkg.pc.em.stamp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/build/wind_sensor/cmake_install.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/.built_by" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/.catkin" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/.rosinstall" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/_setup_util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/cmake.lock" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/env.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/lib/pkgconfig/wind_sensor.pc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/local_setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/local_setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/local_setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/setup.bash" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/setup.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/setup.zsh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/share/wind_sensor/cmake/wind_sensorConfig-version.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/devel/share/wind_sensor/cmake/wind_sensorConfig.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/scripts/wind_sensor_node.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/src/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/src/wind_sensor/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wind_sensor/src/wind_sensor/package.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="projectConfigVersion" value="2" />
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="wind_sensor" />
+                    <option name="lastUsedInstant" value="1605601043" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1605601042" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="ProjectId" id="1kPSsIvvxEcjGazuBboDA7b5O7f" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/wind_sensor/src" />
+    <property name="settings.editor.selected.configurable" value="PyConsoleConfigurable.Python Console" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings module-name="AutoSailROS" is-module-sdk="true">
+        <option name="myUseModuleSdk" value="true" />
+        <option name="myModuleName" value="AutoSailROS" />
+      </console-settings>
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/wind_sensor/src" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="wind_sensor" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="AutoSailROS" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/wind_sensor/src/wind_sensor" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wind_sensor/src/wind_sensor/wind_sensor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.wind_sensor" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7461d0d1-e4ec-4f96-9c58-8a6f1ee3782e" name="Default Changelist" comment="" />
+      <created>1605600939015</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1605600939015</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Use signalk calypso ultrasonic&#10;&#10;Utilize the stdout from standalone.js, read byte by byte, &#10;add to data and print.">
+      <created>1605618610069</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1605618610069</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Convert Json to Python Dict">
+      <created>1605624544651</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1605624544651</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Add dictionary">
+      <created>1605627638409</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1605627638409</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Add exceptions for empty index">
+      <created>1605687826837</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1605687826837</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Create functions">
+      <created>1605692987846</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1605692987846</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Use signalk calypso ultrasonic&#10;&#10;Utilize the stdout from standalone.js, read byte by byte, &#10;add to data and print." />
+    <MESSAGE value="Convert Json to Python Dict" />
+    <MESSAGE value="Add dictionary" />
+    <MESSAGE value="Add exceptions for empty index" />
+    <MESSAGE value="Create functions" />
+    <option name="LAST_COMMIT_MESSAGE" value="Create functions" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="686" y="363" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605623675538">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="686" y="363" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605623675538" />
+    <state width="1898" height="176" key="GridCell.Tab.0.bottom" timestamp="1605706101436">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="176" key="GridCell.Tab.0.bottom/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605706101436" />
+    <state width="1898" height="176" key="GridCell.Tab.0.center" timestamp="1605706101436">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="176" key="GridCell.Tab.0.center/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605706101436" />
+    <state width="1898" height="176" key="GridCell.Tab.0.left" timestamp="1605706101436">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="176" key="GridCell.Tab.0.left/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605706101436" />
+    <state width="1898" height="176" key="GridCell.Tab.0.right" timestamp="1605706101436">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="176" key="GridCell.Tab.0.right/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605706101436" />
+    <state width="1898" height="392" key="GridCell.Tab.1.bottom" timestamp="1605627654609">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="392" key="GridCell.Tab.1.bottom/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605627654609" />
+    <state width="1898" height="392" key="GridCell.Tab.1.center" timestamp="1605627654609">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="392" key="GridCell.Tab.1.center/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605627654609" />
+    <state width="1898" height="392" key="GridCell.Tab.1.left" timestamp="1605627654609">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="392" key="GridCell.Tab.1.left/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605627654609" />
+    <state width="1898" height="392" key="GridCell.Tab.1.right" timestamp="1605627654609">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state width="1898" height="392" key="GridCell.Tab.1.right/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605627654609" />
+    <state x="644" y="236" key="RollbackChangesDialog" timestamp="1605705355546">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="644" y="236" key="RollbackChangesDialog/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605705355546" />
+    <state x="178" y="38" key="SettingsEditor" timestamp="1605604614349">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="178" y="38" key="SettingsEditor/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605604614349" />
+    <state x="557" y="266" width="1071" height="552" key="Vcs.Push.Dialog.v2" timestamp="1605704848281">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="557" y="266" width="1071" height="552" key="Vcs.Push.Dialog.v2/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605704848281" />
+    <state x="623" y="262" width="672" height="678" key="search.everywhere.popup" timestamp="1605690187589">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="623" y="262" width="672" height="678" key="search.everywhere.popup/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605690187589" />
+    <state x="682" y="305" key="vcs.readOnlyHandler.ReadOnlyStatusDialog" timestamp="1605699791857">
+      <screen x="0" y="0" width="1920" height="1200" />
+    </state>
+    <state x="682" y="305" key="vcs.readOnlyHandler.ReadOnlyStatusDialog/0.0.1920.1200/1920.0.1200.1920@0.0.1920.1200" timestamp="1605699791857" />
+  </component>
+</project>
