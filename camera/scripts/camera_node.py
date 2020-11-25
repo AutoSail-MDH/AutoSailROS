@@ -55,8 +55,8 @@ if __name__ == "__main__":
         ang = angle(distance, x, w2)
 
         if not np.isnan(distance) and not np.isinf(distance):
-            camera_data = camera_msg
-            camera_data.distance = distance
-            camera_data.angle = ang
+            camera_data = camera_msg()
+            camera_data.distance = int(distance)
+            camera_data.angle = int(ang)
             camera_pub.publish(camera_data)
         rate.sleep()
