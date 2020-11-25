@@ -11,26 +11,27 @@ class TestProfile(unittest.TestCase):
     def test_check_if_even_statement(self):
         dim = 6
         pos_v = [0, 0]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(round(np.sqrt(list_len)), dim + 1, 1)
 
         dim = 4
         pos_v = [0, 0]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(round(np.sqrt(list_len)), dim + 1, 1)
 
         dim = 34
         pos_v = [0, 0]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(round(np.sqrt(list_len)), dim + 1, 1)
 
     def test_vessel_pos_in_profile(self):
         dim = 5
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len/2)].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2)].l_ky, 0)
@@ -39,7 +40,7 @@ class TestProfile(unittest.TestCase):
 
         dim = 10
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2)].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2)].l_ky, 0)
@@ -48,7 +49,7 @@ class TestProfile(unittest.TestCase):
 
         dim = 13
         pos_v = [6, 2]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2)].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2)].l_ky, 0)
@@ -58,7 +59,7 @@ class TestProfile(unittest.TestCase):
     def test_vessel_min1_pos_in_profile(self):
         dim = 5
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) - 1].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) - 1].l_ky, -1)
@@ -68,7 +69,7 @@ class TestProfile(unittest.TestCase):
     def test_vessel_min2_pos_in_profile(self):
         dim = 5
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) - 2].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) - 2].l_ky, -2)
@@ -78,7 +79,7 @@ class TestProfile(unittest.TestCase):
     def test_vessel_plus1_pos_in_profile(self):
         dim = 5
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) + 1].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) + 1].l_ky, 1)
@@ -88,7 +89,7 @@ class TestProfile(unittest.TestCase):
     def test_vessel_plus2_pos_in_profile(self):
         dim = 5
         pos_v = [5, 3]
-        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        potential_field_object = pfa.PotentialField(dim, 0, 0, 0, 0, 0, 0)
         profile, list_len = potential_field_object._create_profile(pos_v=pos_v)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) + 2].l_kx, 0)
         self.assertAlmostEqual(profile[math.floor(list_len / 2) + 2].l_ky, 2)
