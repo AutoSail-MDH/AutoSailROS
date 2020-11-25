@@ -4,17 +4,19 @@ import math
 import pyzed.sl as sl
 import numpy as np
 
-from std_msgs.msg import String, Int64
+from std_msgs.msg import String
+from camera.msg import camera_msg
 from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle
 
 
 if __name__ == "__main__":
     rospy.init_node("camera")
-    distance_pub = rospy.Publisher(name="camera/distance", data_class=Int64, queue_size=1)
-    angle_pub = rospy.Publisher(name="camera/angle", data_class=Int64, queue_size=1)
-    status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=1)
+    refresh_rate = rospy.get_param("~rate", 60)
+    queue_size = rospy.get_param("~queue_size", 1)
+    camera_pub = rospy.Publisher(name="camera/data", data_class=camera_msg, queue_size=queue_size)
+    status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
 
-    rate = rospy.Rate(60)
+    rate = rospy.Rate(refresh_rate)
     zed, status = startzedCamera()
 
     # Check if camera initialized successfully
@@ -53,6 +55,8 @@ if __name__ == "__main__":
         ang = angle(distance, x, w2)
 
         if not np.isnan(distance) and not np.isinf(distance):
-            distance_pub.publish(int(distance))
-            angle_pub.publish(int(ang))
+            camera_data = camera_msg
+            camera_data.distance = distance
+            camera_data.angle = ang
+            camera_pub.publish(camera_data)
         rate.sleep()
