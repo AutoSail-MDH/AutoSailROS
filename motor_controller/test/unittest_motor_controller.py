@@ -8,8 +8,14 @@ class TestMotorController(TestCase):
 
     def setUp(self):
         self.patcher = mock.patch('motor_controller.motor_controller.serial.Serial')
-        self.mock_serial = self.patcher.start().return_value
+        self.port = mock.patch('motor_controller.motor_controller.serial.tools.list_ports.comports')
+        mock_port = self.port.start()
+        mock_serial = self.patcher.start()
+        mock_port.return_value = [["/dev/ttyACM0", "Test123"], ["/dev/ttyACM1", "Bazinga234"], ["/dev/ttyACM2", "Pololu"],
+                                  ["/dev/ttyACM3", "Pololu"], ["/dev/ttyACM4", "Intel"], ["/dev/ttyACM5", "AMD"]]
         self.sc = MotorController()
+        mock_serial.assert_called_with("/dev/ttyACM2", timeout=1)
+        self.mock_serial = mock_serial.return_value
 
     def test_set_position(self):
         """
@@ -63,10 +69,12 @@ class TestMotorController(TestCase):
         self.mock_serial.write.assert_called_with([0xaa, 0x0c, 0x10, 0])
         self.assertEqual(position, 2567/4)
         self.assertEqual(self.mock_serial.read.call_count, 2)
+
     def tearDown(self):
         self.patcher.stop()
-
+        self.port.stop()
 if __name__ == '__main__':
     rosunit.unitrun("motor_controller", "unittest_motor_controller", TestMotorController)
+
 
 
