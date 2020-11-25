@@ -11,7 +11,7 @@ from ctrl.sail_controller import trim_sail
 
 # Dynamic configuration imports
 from dynamic_reconfigure.server import Server
-from ctrl_pkg.cfg import SailControllerConfig
+from ctrl_pkg.cfg import SailController
 
 
 # Class for saving values from the subscriptions
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     sc_pid = pid.PID()
 
     # Dynamic reconfigure setup
-    srv = Server(SailControllerConfig, dynamic_reconf_callback)
+    srv = Server(SailController, dynamic_reconf_callback)
 
     while not rospy.is_shutdown():
         # Use the PID to get a desired roll angle
