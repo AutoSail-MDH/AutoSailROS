@@ -1,0 +1,43 @@
+<!-- to run tests: rostest autosail ctrl/rostest.test -->
+<launch>
+    <include file="$(find autosail)/launch/node.launch"/>
+
+   <!-- Run unittest and rostest for services -->
+    <test pkg="autosail" type="libtest_sail.py" test-name="sail_controller"/>
+    <test pkg="autosail" type="libtest_rudder.py" test-name="rudder_controller"/>
+
+
+    <!-- Run publish tests -->
+    <test pkg="rostest" type="hztest" test-name="sail_control_hztest" name="sail_hztest">
+        <param name="topic" value="sail_controller/sail_angle"/>
+        <param name="hz" value="100.0"/>
+        <param name="hzerror" value="0.1"/>
+        <param name="test_duration" value="10.0"/>
+    </test>
+
+    <test pkg="rostest" type="publishtest" test-name="sail_controller_pubtest" >
+        <rosparam>
+            topics:
+                - name: sail_controller/sail_angle
+                  timeout: 10
+                  negative: False
+        </rosparam>
+    </test>
+
+    <!-- Rudder tests -->
+    <test test-name="rudder_controller_test" pkg="rostest" type="hztest" name="rudder_hztest" >
+        <param name="topic" value="/rudder_controller/rudder_angle" />
+        <param name="hz" value="100.0" />
+        <param name="hzerror" value="0.1" />
+        <param name="test_duration" value="10.0" />
+    </test>
+
+    <test pkg="rostest" type="publishtest" test-name="rudder_control_pubtest" >
+        <rosparam>
+            topics:
+                - name: rudder_controller/rudder_angle
+                  timeout: 10
+                  negative: False
+        </rosparam>
+    </test>
+</launch>

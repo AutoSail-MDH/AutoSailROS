@@ -1,0 +1,5 @@
+<launch>
+   <node pkg="autosail" name="path_planner" type="path_planner_node.py" output="screen">
+      <rosparam command="load" file="$(find autosail)/config/path_planner_config.yaml"/>
+   </node>
+</launch>

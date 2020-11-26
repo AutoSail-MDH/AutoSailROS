@@ -1,0 +1,6 @@
+<launch>
+    <include file="$(find autosail)/launch/path_planner.launch"/>
+    <include file="$(find autosail)/launch/ctrl.launch"/>
+    <include file="$(find autosail)/launch/motor_controller.launch"/>
+    <!--<node pkg="startup" name="startup_test" type="startup_test.py"/>-->
+</launch>

@@ -1,5 +1,0 @@
-<launch>
-   <node pkg="motor_controller" name="motor_controller_listener" type="motor_controller_node.py">
-      <rosparam command="load" file="$(find motor_controller)/config/config.yaml"/>
-   </node>
-</launch>

@@ -1,0 +1,8 @@
+<launch>
+   <node pkg="autosail" name="sail_controller" type="sail_node.py">
+      <rosparam command="load" file="$(find autosail)/config/ctrl_config.yaml"/>
+   </node>
+   <node pkg="autosail" name="rudder_controller" type="rudder_node.py">
+      <rosparam command="load" file="$(find autosail)/config/ctrl_config.yaml"/>
+   </node>
+</launch>

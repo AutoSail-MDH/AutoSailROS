@@ -1,3 +1,0 @@
-<launch>
-   <node pkg="wind_sensor" name="wind_sensor_node" type="wind_sensor_node.py"/>
-</launch>
