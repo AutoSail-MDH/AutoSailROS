@@ -1,0 +1,5 @@
+<launch>
+   <node pkg="camera" name="camera" type="camera_node.py">
+      <rosparam command="load" file="$(find camera)/config/config.yaml"/>
+   </node>
+</launch>
