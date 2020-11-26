@@ -15,7 +15,7 @@ def calculate_rudder_angle(pid_corrected_heading, rudder_limit):
     """
     # Clam the value between the max and min values of the rudder.
     # The rudder angle is the inverse of the direction of the vessel.
-    return max(min(-pid_corrected_heading, rudder_limit), -rudder_limit)
+    return max(min(pid_corrected_heading, rudder_limit), -rudder_limit)
 
 
 def trajectory_to_relative_heading(desired_trajectory, current_course):

@@ -30,7 +30,7 @@ class SubscriberValues:
     def callback_current_heading(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
+        yaw = -math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
 
         self.current_heading = yaw
 
