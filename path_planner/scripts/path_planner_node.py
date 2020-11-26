@@ -200,7 +200,7 @@ if __name__ == '__main__':
         min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
-        pub_heading.publish(-min_angle)
+        pub_heading.publish(min_angle)
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
         if np.linalg.norm(goal[0:2]) < 5:
