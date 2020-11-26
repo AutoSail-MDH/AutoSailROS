@@ -82,11 +82,11 @@ def wind_sensor_callback(data):
     """
     global w_speed, w_theta, lin_velocity, heading_yaw
     if lin_velocity and heading_yaw is not None:
-        true_wind_ = [data.vector.x * 1.94384449 + lin_velocity[0], data.vector.y * 1.94384449 + lin_velocity[1]]
-        w_theta = np.arctan2(true_wind_[1], true_wind_[0]) + np.pi
+        true_wind_ = [data.vector.x * 1.94384449 + lin_velocity[0], -data.vector.y * 1.94384449 + lin_velocity[1]]
+        w_theta = np.arctan2(true_wind_[1], true_wind_[0])
         w_speed = np.linalg.norm(true_wind_)
         w_theta = w_theta + heading_yaw + np.pi
-        w_theta = math.atan2(math.sin(w_theta), math.cos(w_theta)) + math.pi/2
+        w_theta = math.atan2(math.sin(w_theta), math.cos(w_theta))
         #rospy.loginfo("True wind: {}".format(math.degrees(w_theta)))
 
 
@@ -120,7 +120,7 @@ def imu_heading_callback(data):
     global heading, heading_yaw
     heading_quaternion = Imu()
     heading_quaternion.orientation = data.orientation
-    yaw = quaternion_to_euler_yaw(heading_quaternion.orientation)
+    yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading = [np.cos(yaw), np.sin(yaw)]
     heading_yaw = yaw
 
@@ -200,7 +200,7 @@ if __name__ == '__main__':
         min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
-        pub_heading.publish(-min_angle)
+        pub_heading.publish(min_angle)
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
         if np.linalg.norm(goal[0:2]) < 5:

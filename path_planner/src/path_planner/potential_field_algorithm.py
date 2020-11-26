@@ -301,18 +301,22 @@ class PotentialField:
     #         obstacles_xy_array[i, 1] = round(obstacles_xy_1d[1])
     #     return obstacles_xy_array
 
-    def plot_heat_map(self, profile):
+    def plot_heat_map(self, profile, heading):
         """
         method used to plot the heat map
         profile: profile for the vessel
         :return:
         """
         import matplotlib.pyplot as plt
+        heading_x = np.linspace(self.diameter / 2 - 1 / 2, self.diameter / 2 + heading[1] * 10, 10)
+        heading_y = np.linspace(self.diameter / 2 - 1 / 2, self.diameter / 2 - heading[0] * 10, 10)
         profile_matrix = self._reshape_profile(profile)
         plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
+        plt.plot(heading_x, heading_y, linewidth=2)
         plt.ion()
         plt.show()
         plt.pause(0.001)
+        plt.clf()
 
     def calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """
@@ -334,6 +338,6 @@ class PotentialField:
         min_angle, profile = self._calculate_profile(position_v, obstacles, goal_pos,
                                                      w_theta, heading, w_speed, v_v)
         # plot a heat map of the profile for the vessel
-        self.plot_heat_map(profile)
+        self.plot_heat_map(profile, heading)
 
         return min_angle
