@@ -47,10 +47,10 @@ catkin_python_setup()
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  camera_msg.msg
-)
+# add_message_files(
+#   FILES
+#   camera_msg.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -207,5 +207,9 @@ catkin_install_python(PROGRAMS
 ## Install config files
 install(DIRECTORY config/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+    PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY launch/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
     PATTERN ".svn" EXCLUDE
 )

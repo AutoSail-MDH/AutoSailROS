@@ -3,17 +3,18 @@ import rospy
 import math
 import pyzed.sl as sl
 import numpy as np
+import cv2
 
 from std_msgs.msg import String
-from camera.msg import camera_msg
-from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle
+from geometry_msgs.msg import Vector3Stamped
+from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle, convert_to_vec
 
 
 if __name__ == "__main__":
     rospy.init_node("camera")
     refresh_rate = rospy.get_param("~rate", 60)
     queue_size = rospy.get_param("~queue_size", 1)
-    camera_pub = rospy.Publisher(name="camera/data", data_class=camera_msg, queue_size=queue_size)
+    camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
     status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
 
     rate = rospy.Rate(refresh_rate)
@@ -54,9 +55,12 @@ if __name__ == "__main__":
 
         ang = angle(distance, x, w2)
 
+        # If an object is detected, publish its position as an x, y coordinate
         if not np.isnan(distance) and not np.isinf(distance):
-            camera_data = camera_msg()
-            camera_data.distance = int(distance)
-            camera_data.angle = int(ang)
+            camera_data = Vector3Stamped()
+            object_coord_x, object_coord_y = convert_to_vec(distance, ang)
+            camera_data.vector.x = object_coord_x
+            camera_data.vector.y = object_coord_y
+            camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
         rate.sleep()
