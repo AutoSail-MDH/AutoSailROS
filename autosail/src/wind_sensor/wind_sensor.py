@@ -12,8 +12,25 @@ class WindSensor:
     def __init__(self):
         self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../src/signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.buffer = b''
+        """
+        Opens the standalone.js javascript which opens the bluetooth
+        communication with the sensor and starts to read the data in
+        a json format.
+        """
 
     def read_sensor(self):
+        """
+        Converts the json format to a Python Dictionary, and takes the
+        wind_angle_val, wind_speed_val, which are converted to a float
+        and then transformed in to a vector.
+        :param wind_angle_val: The angle of the wind
+        :type wind_angle_val: Integer
+        :param wind_speed_val: The speed of the wind
+        :type wind_speed_val: Integer
+        :param wind_vector: Wind vectory calculated by using speed and angle.
+        :type wind_vector:
+        :return: The wind vector
+        """
         wind_angle_val = None
         wind_speed_val = None
         out = b''
