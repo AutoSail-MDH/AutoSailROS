@@ -147,6 +147,7 @@ catkin_install_python(PROGRAMS
 
    scripts/ctrl/rudder_node.py
    scripts/ctrl/sail_node.py
+   scripts/ctrl/sail_node_wind_angle.py
 
    scripts/drivers/motor_controller_node.py
    scripts/drivers/wind_sensor_node.py
