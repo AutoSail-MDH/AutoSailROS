@@ -63,6 +63,7 @@ class WindSensor:
 
     def __del__(self):
         self.readThread.join()
+        self.wind_sensor.kill()
 
 
 if __name__ == "__main__":

@@ -4,12 +4,12 @@ import rospy
 from geometry_msgs.msg import Vector3Stamped
 from std_msgs.msg import Float64
 from wind_sensor.wind_sensor import WindSensor
+import subprocess as sp
 
 
 class WindSensorTalker:
     def __init__(self):
         self.wnd = WindSensor()
-        pass
 
     def talker(self):
         wind_pub = rospy.Publisher('wind_sensor/wind_vector', Vector3Stamped, queue_size=10)
@@ -18,6 +18,7 @@ class WindSensorTalker:
         battery_pub = rospy.Publisher('wind_sensor/battery_voltage', Float64, queue_size=10)
         rospy.init_node('wind_sensor_node', anonymous=True)
         rate = rospy.Rate(8)  # refresh rate in hz
+        rospy.sleep(5)
         while not rospy.is_shutdown():
             self.wnd.update()
             wind_vector = self.wnd.get_wind_vector()
@@ -40,6 +41,13 @@ class WindSensorTalker:
             temp_msg = Float64()
             temp_msg = self.wnd.get_temp()
             temp_msg -= 273.15 # convert to celsius from kelvin
+            stdoutdata = sp.getoutput("hcitool con")
+
+            if "DC:73:74:12:94:80" not in stdoutdata.split():
+                rospy.logerr("Connection Failed, Reconnecting!")
+                self.wnd.wind_sensor.kill()
+                self.wnd = WindSensor()
+                rospy.sleep(5)
 
             wind_pub.publish(vec_msg)
             rpy_pub.publish(rpy_msg)
