@@ -9,15 +9,27 @@ import subprocess as sp
 
 class WindSensorTalker:
     def __init__(self):
+        """
+        Function that initializes the variable self.wnd based on the WindSensor class that is defined in wind_sensor.py
+        """
         self.wnd = WindSensor()
 
     def talker(self):
+        """
+        Function that initializes the 4 publishers(wind_pub, rpy_pub, temp_pub, battery_pub), then initializes the node
+        as wind_sensor_node and sets the rate to the users defined value(8 is the max of the wind sensor) then sleeps to
+        let the startup and bluetooth connection finish.
+
+        Makes function calls to gather the sensor readings from the wind sensor and saves the to the correct formats for
+        publishing with a check at the end that the bluetooth connectivity is still up and if it is not the connection
+        is reset and a small sleep to wait for it to establish before continuing.
+        """
         wind_pub = rospy.Publisher('wind_sensor/wind_vector', Vector3Stamped, queue_size=10)
         rpy_pub = rospy.Publisher('wind_sensor/roll_pitch_yaw', Vector3Stamped, queue_size=10)
         temp_pub = rospy.Publisher('wind_sensor/temperature', Float64, queue_size=10)
         battery_pub = rospy.Publisher('wind_sensor/battery_voltage', Float64, queue_size=10)
         rospy.init_node('wind_sensor_node', anonymous=True)
-        rate = rospy.Rate(1)  # refresh rate in hz
+        rate = rospy.Rate(8)  # refresh rate in hz
         rospy.sleep(5)
         while not rospy.is_shutdown():
             self.wnd.update()
