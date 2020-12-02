@@ -9,14 +9,14 @@ from ctrl.sail_controller import calculate_sail_angle, trim_sail
 class TestSailController(unittest.TestCase):
 
     def test_negative_angle(self):
-        sail_limits = math.pi/1.4
+        sail_limits = math.radians(80)
         max_roll = math.pi/6
         self.assertAlmostEqual(calculate_sail_angle(-max_roll, max_roll, sail_limits), 0)
         self.assertEqual(calculate_sail_angle(-max_roll/2, max_roll, sail_limits), 0)
         self.assertAlmostEqual(calculate_sail_angle(0, max_roll, sail_limits), 0)
 
     def test_positive_angle(self):
-        sail_limits = math.pi/1.4
+        sail_limits = math.radians(80)
         max_roll = math.pi / 6
         self.assertAlmostEqual(calculate_sail_angle(max_roll, max_roll, sail_limits), sail_limits)
         self.assertEqual(calculate_sail_angle(max_roll/2, max_roll, sail_limits), sail_limits/2)
