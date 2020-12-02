@@ -154,6 +154,8 @@ catkin_install_python(PROGRAMS
    scripts/path_planner/path_planner_node.py
    scripts/path_planner/path_planner_partner_node.py
 
+   scripts/stm32/stm32_node.py
+
    scripts/utility/sim_converter_node.py
    scripts/utility/boat_tf_broadcaster.py
    scripts/utility/route_planner_service.py
