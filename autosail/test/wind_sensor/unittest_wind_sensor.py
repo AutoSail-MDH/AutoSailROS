@@ -13,9 +13,9 @@ mock_wind_speed_val = [1.145678, 1.26456, 1.35834]
 mock_wind_angle_val = [1.1042771838760873, 1.2042771838760873, 1.3042771838760873]
 mock_temp = [21, 22, 23]
 mock_battery = [0.1, 0.2, 0.3]
-mock_roll = [0.05235987755982988, 0.05235987755982988, 0.05235987755982988]
-mock_pitch = [0.5410520681182421, 0.5410520681182421, 0.5410520681182421]
-mock_yaw = [1.780235837034216, 1.780235837034216, 1.780235837034216]
+mock_roll = [0.01235987755982988, 0.02235987755982988, 0.03235987755982988]
+mock_pitch = [0.1410520681182421, 0.2410520681182421, 0.3410520681182421]
+mock_yaw = [1.180235837034216, 1.280235837034216, 1.380235837034216]
 
 
 def write_mock_values(x):
@@ -31,9 +31,9 @@ def write_mock_values(x):
                b'{"path":"electrical.batteries.99.name","value":"ULTRASONIC"},' \
                b'{"path":"electrical.batteries.99.location","value":"Mast"},' \
                b'{"path":"electrical.batteries.99.capacity.stateOfCharge","value":0.1},' \
-               b'{"path":"navigation.attitude.roll","value":0.05235987755982988},' \
-               b'{"path":"navigation.attitude.pitch","value":0.5410520681182421},' \
-               b'{"path":"navigation.attitude.yaw","value":1.780235837034216},' \
+               b'{"path":"navigation.attitude.roll","value":0.01235987755982988},' \
+               b'{"path":"navigation.attitude.pitch","value":0.1410520681182421},' \
+               b'{"path":"navigation.attitude.yaw","value":1.180235837034216},' \
                b'{"path":"navigation.headingMagnetic","value":1.780235837034216}]}]}\n'
 
     if x == 1:
@@ -45,9 +45,9 @@ def write_mock_values(x):
                b'{"path":"electrical.batteries.99.name","value":"ULTRASONIC"},' \
                b'{"path":"electrical.batteries.99.location","value":"Mast"},' \
                b'{"path":"electrical.batteries.99.capacity.stateOfCharge","value":0.2},' \
-               b'{"path":"navigation.attitude.roll","value":0.05235987755982988},' \
-               b'{"path":"navigation.attitude.pitch","value":0.5410520681182421},' \
-               b'{"path":"navigation.attitude.yaw","value":1.780235837034216},' \
+               b'{"path":"navigation.attitude.roll","value":0.02235987755982988},' \
+               b'{"path":"navigation.attitude.pitch","value":0.2410520681182421},' \
+               b'{"path":"navigation.attitude.yaw","value":1.280235837034216},' \
                b'{"path":"navigation.headingMagnetic","value":1.780235837034216}]}]}\n'
 
     if x == 2:
@@ -59,9 +59,9 @@ def write_mock_values(x):
                b'{"path":"electrical.batteries.99.name","value":"ULTRASONIC"},' \
                b'{"path":"electrical.batteries.99.location","value":"Mast"},' \
                b'{"path":"electrical.batteries.99.capacity.stateOfCharge","value":0.3},' \
-               b'{"path":"navigation.attitude.roll","value":0.05235987755982988},' \
-               b'{"path":"navigation.attitude.pitch","value":0.5410520681182421},' \
-               b'{"path":"navigation.attitude.yaw","value":1.780235837034216},' \
+               b'{"path":"navigation.attitude.roll","value":0.03235987755982988},' \
+               b'{"path":"navigation.attitude.pitch","value":0.3410520681182421},' \
+               b'{"path":"navigation.attitude.yaw","value":1.380235837034216},' \
                b'{"path":"navigation.headingMagnetic","value":1.780235837034216}]}]}\n'
 
 
