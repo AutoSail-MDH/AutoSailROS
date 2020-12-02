@@ -8,17 +8,24 @@ import tempfile
 import os
 import math
 
-mock_temp = 299.15
-mock_battery = 0.2
-mock_roll = 0.05235987755982988
-mock_pitch = 0.5410520681182421
-mock_yaw = 1.780235837034216
-wind_speed_val = 0.001
-wind_angle_val = 1.2042771838760873
 
-mock_wind_vector = [math.cos(wind_angle_val)*wind_speed_val, math.sin(wind_angle_val)*wind_speed_val]
+mock_wind_speed_val = [0.001, 0.001, 0.001]
+mock_wind_angle_val = [1.2042771838760873, 1.2042771838760873, 1.2042771838760873]
+mock_temp = [299.15, 299.15, 299.15]
+mock_battery = [0.2, 0.2, 0.2]
+mock_roll = [0.05235987755982988, 0.05235987755982988, 0.05235987755982988]
+mock_pitch = [0.5410520681182421, 0.5410520681182421, 0.5410520681182421]
+mock_yaw = [1.780235837034216, 1.780235837034216, 1.780235837034216]
+
+x = 0
+
+
+mock_wind_vector = [math.cos(mock_wind_angle_val[x]) * float(mock_wind_speed_val[x]),
+                    math.sin(mock_wind_angle_val[x]) * float(mock_wind_speed_val[x])]
+
 
 def write_mock_values():
+
     return b'GOT MESSAGE: {"updates":[{"source":{"label":"Calypso Ultrasonic","type":"Ultrasonic"},' \
            b'"timestamp":"2020-12-01T12:17:22.723Z","values":[' \
            b'{"path":"environment.outside.temperature","value":299.15},' \
@@ -51,23 +58,23 @@ class TestWindSensor(TestCase):
         self.stdout_mock.write(mock_values)
         self.stdout_mock.seek(0)
         battery_charge = self.ws.get_battery_charge()
-        self.assertEqual(mock_battery, battery_charge)
+        self.assertEqual(mock_battery[x], battery_charge)
 
     def test_get_rpy(self):
         mock_values = write_mock_values()
         self.stdout_mock.write(mock_values)
         self.stdout_mock.seek(0)
         rpy_vector = self.ws.get_rpy()
-        self.assertEqual(mock_roll, rpy_vector[0])
-        self.assertEqual(mock_pitch, rpy_vector[1])
-        self.assertEqual(mock_yaw, rpy_vector[2])
+        self.assertEqual(mock_roll[x], rpy_vector[0])
+        self.assertEqual(mock_pitch[x], rpy_vector[1])
+        self.assertEqual(mock_yaw[x], rpy_vector[2])
 
     def test_get_tmp(self):
         mock_values = write_mock_values()
         self.stdout_mock.write(mock_values)
         self.stdout_mock.seek(0)
         temp = self.ws.get_temp()
-        self.assertEqual(mock_temp, temp)
+        self.assertEqual(mock_temp[x], temp)
 
     def test_wind_vector(self):
         mock_values = write_mock_values()
@@ -81,24 +88,3 @@ if __name__ == '__main__':
     rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
 
 
-
-
-# def write_mock_values():
-#     return b'GOT MESSAGE: {"updates":[{"source":{"label":"Calypso Ultrasonic","type":"Ultrasonic"},"timestamp":"2020-12-01T12:17:22.723Z","values":[{"path":"environment.outside.temperature","value":299.15},{"path":"environment.wind.angleApparent","value":0},{"path":"environment.wind.speedApparent","value":0},{"path":"electrical.batteries.99.name","value":"ULTRASONIC"},{"path":"electrical.batteries.99.location","value":"Mast"},{"path":"electrical.batteries.99.capacity.stateOfCharge","value":0.1}]}]}\n'
-#
-#
-# class TestWindSensor(TestCase):
-#
-#     def setUp(self):
-#         self.ws = WindSensor()
-#
-#     @patch('wind_sensor.wind_sensor.Popen')
-#     def test_stdout(self, mock_stdout):
-#         mock_stdout.read_line.return_value = write_mock_values()
-#         battery_charge = self.ws.get_battery_charge()
-#         print(battery_charge)
-#         self.assertEquals(0.1, battery_charge)
-#
-#
-# if __name__ == '__main__':
-#     rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
