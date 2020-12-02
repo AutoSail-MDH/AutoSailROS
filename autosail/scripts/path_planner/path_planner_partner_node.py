@@ -21,7 +21,7 @@ def path_planner_partner_publisher():
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
     pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
-    pub_wind_sensor = rospy.Publisher('/wind_sensor', geometry_msgs.msg.Vector3Stamped, queue_size=10)
+    pub_wind_sensor = rospy.Publisher('/wind_sensor/true', geometry_msgs.msg.Vector3Stamped, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
     rospy.init_node('path_planner_partner')
     rate = rospy.Rate(60)  # 60hz

@@ -3,11 +3,12 @@ import rospy
 import numpy as np
 import math
 import time
+import multiprocessing
 from std_msgs.msg import Float64
 from sensor_msgs.msg import NavSatFix, Imu
 from geometry_msgs.msg import TwistWithCovarianceStamped, Vector3Stamped
 import message_filters
-from pymap3d.ned import geodetic2ned
+from pymap3d.ned import geodetic2ned, ned2geodetic
 from marti_nav_msgs.msg import RoutePoint, Route
 from scipy.spatial import distance
 from dynamic_reconfigure.server import Server
@@ -25,10 +26,8 @@ lon0 = None
 current_position = None
 velocity = None
 heading = []  # np.array([0., 0.])
-heading_yaw = None
 w_speed = None
 w_theta = None
-lin_velocity = []
 
 radius = 6371  # Earth Radius in KM
 
@@ -80,13 +79,12 @@ def wind_sensor_callback(data):
     reads the /wind_sensor topic and saves the wind speed and wind angle as global variables
     :param data: std_msgs.msg.Int64MultiArray with wind speed and wind angle
     """
-    global w_speed, w_theta, lin_velocity, heading_yaw
-    if lin_velocity and heading_yaw is not None:
-        true_wind_ = [data.vector.x * 1.94384449 + lin_velocity[0], -data.vector.y * 1.94384449 + lin_velocity[1]]
-        w_theta = np.arctan2(true_wind_[1], true_wind_[0])
-        w_speed = np.linalg.norm(true_wind_)
-        w_theta = w_theta + heading_yaw + np.pi
-        w_theta = math.atan2(math.sin(w_theta), math.cos(w_theta))
+    global w_speed, w_theta
+    true_wind_ = [data.vector.x * 1.94384449, data.vector.y * 1.94384449]
+    w_theta = np.arctan2(true_wind_[1], true_wind_[0])
+    w_speed = np.linalg.norm(true_wind_)
+    w_theta = w_theta + np.pi
+    w_theta = math.atan2(math.sin(w_theta), math.cos(w_theta))
         #rospy.loginfo("True wind: {}".format(math.degrees(w_theta)))
 
 
@@ -104,7 +102,7 @@ def gps_velocity_callback(data):
     reads the gps/fix_velocity topic and saves the linear velocity as a global variable
     :param data: geometry_msgs.msg.TwistWithCovarianceStamped with linear x, y velocity
     """
-    global velocity, lin_velocity
+    global velocity
     lin_velocity_x = data.twist.twist.linear.x * 1.94384449
     lin_velocity_y = - data.twist.twist.linear.y * 1.94384449
     lin_velocity = [lin_velocity_x, lin_velocity_y]
@@ -117,21 +115,23 @@ def imu_heading_callback(data):
     :param data: geometry_msgs.msg.QuaternionStamped(
     :return: Nothing
     """
-    global heading, heading_yaw
+    global heading
     heading_quaternion = Imu()
     heading_quaternion.orientation = data.orientation
     yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading = [np.cos(yaw), np.sin(yaw)]
-    heading_yaw = yaw
 
 
-def obstacles_callback(data):
+def obstacle_camera_callback(data):
     """
-    reads the /path_planner/obstacles topic and saves the obstacle as a global np.array
-    :param data: std_msgs.msg.Float64MultiArray with latitude longitude for the obstacles
+    Read obstacle from camera and add them if it differs from the existing obstacles
+    :param data: geometry_msgs.msg.Vector3Stamped
     """
-    global obstacles
-    obstacles = data.data
+    global obstacles, lon0, lat0
+    geo = ned2geodetic(data.vector.x, data.vector.y, 0, lat0, lon0, 0)[:2]
+    for o in obstacles:
+        if not 0 < (geo[0] - o[0]) < 0.00001 or not 0 < (geo[1] - o[1]) < 0.00001:
+            obstacles.append(geo)
 
 
 def path_planner_init():
@@ -143,8 +143,8 @@ def path_planner_init():
     rospy.Subscriber("/gps/fix", NavSatFix, gps_position_callback, queue_size=1)
     rospy.Subscriber("/gps/fix_velocity", TwistWithCovarianceStamped, gps_velocity_callback, queue_size=1)
     rospy.Subscriber("/imu/data", Imu, imu_heading_callback, queue_size=1)
-    rospy.Subscriber("/wind_sensor", Vector3Stamped, wind_sensor_callback, queue_size=1)
-    rospy.Subscriber("/path_planner/obstacles", obstacles_array_msg, obstacles_callback, queue_size=1)
+    rospy.Subscriber("/wind_sensor/true", Vector3Stamped, wind_sensor_callback, queue_size=1)
+    rospy.Subscriber("/camera/data", Vector3Stamped, obstacle_camera_callback, queue_size=1)
 
     # waits until obstacles and position data has been read from the topics
     while not rospy.is_shutdown():
@@ -173,6 +173,9 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x, 0,
                             current_position.latitude, current_position.longitude, 0)
+        obstacles_xy = [geodetic2ned(o[0], o[1], 0, current_position.latitude, current_position.longitude, 0)[:2]
+                        for o in obstacles]
+
         # if waypoint circle waypoint?
         # if goal[2] == config.waypoints_to_circle_id:
         #     start = time.time()
@@ -197,10 +200,12 @@ if __name__ == '__main__':
         #     if goal != waypoint_xy[-1]:
         #         waypoint_index += 1
         #         goal = waypoint_xy[waypoint_index]
-        min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles, velocity)
+        min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
         pub_heading.publish(min_angle)
+
+        pf.plot_heat_map(0.1, heading)
         rospy.loginfo("Vessel position {}".format(current_position))
         rospy.loginfo("Goal position {}".format(goal))
         if np.linalg.norm(goal[0:2]) < 5:
