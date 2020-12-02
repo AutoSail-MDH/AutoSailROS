@@ -17,7 +17,7 @@ class WindSensorTalker:
         temp_pub = rospy.Publisher('wind_sensor/temperature', Float64, queue_size=10)
         battery_pub = rospy.Publisher('wind_sensor/battery_voltage', Float64, queue_size=10)
         rospy.init_node('wind_sensor_node', anonymous=True)
-        rate = rospy.Rate(8)  # refresh rate in hz
+        rate = rospy.Rate(1)  # refresh rate in hz
         rospy.sleep(5)
         while not rospy.is_shutdown():
             self.wnd.update()
@@ -42,13 +42,11 @@ class WindSensorTalker:
             temp_msg = self.wnd.get_temp()
             temp_msg -= 273.15 # convert to celsius from kelvin
             stdoutdata = sp.getoutput("hcitool con")
-
             if "DC:73:74:12:94:80" not in stdoutdata.split():
                 rospy.logerr("Connection Failed, Reconnecting!")
-                self.wnd.wind_sensor.kill()
+                del self.wnd
                 self.wnd = WindSensor()
                 rospy.sleep(5)
-
             wind_pub.publish(vec_msg)
             rpy_pub.publish(rpy_msg)
             battery_pub.publish(battery_msg)
@@ -62,23 +60,3 @@ if __name__ == '__main__':
         wnd.talker()
     except rospy.ROSInterruptException:
         pass
-"""
-class WindSensorTalker:
-    def __init__(self):
-        self.wnds = WindSensor()
-
-    def talker_callback(self):
-        wind_angle = WindSensor.read_sensor(self.wnds)
-        pub.publish(wind_angle)
-        print(wind_angle)
-        rate.sleep()
-
-
-if __name__ == '__main__':
-    rospy.init_node("wind_sensor_talker", anonymous=True)
-    wnds = WindSensorTalker()
-    pub = rospy.Publisher("wind_sensor/wind_angle", std_msgs.msg.String, queue_size=10)
-    rate = rospy.Rate(1)
-    wnds.talker_callback()
-    rospy.spin()
-"""
