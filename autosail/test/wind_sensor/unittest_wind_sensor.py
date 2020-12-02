@@ -8,6 +8,7 @@ import tempfile
 import os
 import math
 
+y = 0
 
 mock_wind_speed_val = [0.001, 0.001, 0.001]
 mock_wind_angle_val = [1.2042771838760873, 1.2042771838760873, 1.2042771838760873]
@@ -17,11 +18,8 @@ mock_roll = [0.05235987755982988, 0.05235987755982988, 0.05235987755982988]
 mock_pitch = [0.5410520681182421, 0.5410520681182421, 0.5410520681182421]
 mock_yaw = [1.780235837034216, 1.780235837034216, 1.780235837034216]
 
-x = 0
-
-
-mock_wind_vector = [math.cos(mock_wind_angle_val[x]) * float(mock_wind_speed_val[x]),
-                    math.sin(mock_wind_angle_val[x]) * float(mock_wind_speed_val[x])]
+mock_wind_vector = [math.cos(mock_wind_angle_val[y]) * mock_wind_speed_val[y],
+                    math.sin(mock_wind_angle_val[y]) * mock_wind_speed_val[y]]
 
 
 def write_mock_values():
@@ -54,27 +52,42 @@ class TestWindSensor(TestCase):
         os.remove(self.stdout_mock.name)
 
     def test_battery_charge(self):
-        mock_values = write_mock_values()
-        self.stdout_mock.write(mock_values)
-        self.stdout_mock.seek(0)
-        battery_charge = self.ws.get_battery_charge()
-        self.assertEqual(mock_battery[x], battery_charge)
+        x = 0
+        while True:
+            mock_values = write_mock_values()
+            self.stdout_mock.write(mock_values)
+            self.stdout_mock.seek(0)
+            battery_charge = self.ws.get_battery_charge()
+            self.assertEqual(mock_battery[x], battery_charge)
+            x = x + 1
+            if x > 2:
+                break
 
     def test_get_rpy(self):
-        mock_values = write_mock_values()
-        self.stdout_mock.write(mock_values)
-        self.stdout_mock.seek(0)
-        rpy_vector = self.ws.get_rpy()
-        self.assertEqual(mock_roll[x], rpy_vector[0])
-        self.assertEqual(mock_pitch[x], rpy_vector[1])
-        self.assertEqual(mock_yaw[x], rpy_vector[2])
+        x = 0
+        while True:
+            mock_values = write_mock_values()
+            self.stdout_mock.write(mock_values)
+            self.stdout_mock.seek(0)
+            rpy_vector = self.ws.get_rpy()
+            self.assertEqual(mock_roll[x], rpy_vector[0])
+            self.assertEqual(mock_pitch[x], rpy_vector[1])
+            self.assertEqual(mock_yaw[x], rpy_vector[2])
+            x = x + 1
+            if x > 2:
+                break
 
     def test_get_tmp(self):
-        mock_values = write_mock_values()
-        self.stdout_mock.write(mock_values)
-        self.stdout_mock.seek(0)
-        temp = self.ws.get_temp()
-        self.assertEqual(mock_temp[x], temp)
+        x = 0
+        while True:
+            mock_values = write_mock_values()
+            self.stdout_mock.write(mock_values)
+            self.stdout_mock.seek(0)
+            temp = self.ws.get_temp()
+            self.assertEqual(mock_temp[x], temp)
+            x = x + 1
+            if x > 2:
+                break
 
     def test_wind_vector(self):
         mock_values = write_mock_values()
@@ -82,6 +95,7 @@ class TestWindSensor(TestCase):
         self.stdout_mock.seek(0)
         wind_vector = self.ws.get_wind_vector()
         self.assertEqual(mock_wind_vector, wind_vector)
+
 
 
 if __name__ == '__main__':
