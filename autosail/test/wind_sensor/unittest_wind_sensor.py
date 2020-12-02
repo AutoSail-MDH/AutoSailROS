@@ -8,7 +8,7 @@ import tempfile
 import os
 import math
 
-
+# Global Variables, used to assert output
 mock_wind_speed_val = [1.145678, 1.26456, 1.35834]
 mock_wind_angle_val = [1.1042771838760873, 1.2042771838760873, 1.3042771838760873]
 mock_temp = [21, 22, 23]
@@ -19,7 +19,9 @@ mock_yaw = [1.780235837034216, 1.780235837034216, 1.780235837034216]
 
 
 def write_mock_values(x):
-
+    """
+    Function which returns a mock version of the wind-sensor JSON format
+    """
     if x == 0:
         return b'GOT MESSAGE: {"updates":[{"source":{"label":"Calypso Ultrasonic","type":"Ultrasonic"},' \
                b'"timestamp":"2020-12-01T12:17:22.723Z","values":[' \
@@ -66,6 +68,11 @@ def write_mock_values(x):
 class TestWindSensor(TestCase):
 
     def setUp(self):
+        """
+        Function which mocks an output to stdout by utilizing a tempor-
+        ary file. Starts the wind-sensor node so its functions can be
+        used.
+        """
         self.patcher = patch('wind_sensor.wind_sensor.Popen')
         self.popen_mock = self.patcher.start()
         self.stdout_mock = tempfile.NamedTemporaryFile(delete=False)
@@ -73,10 +80,16 @@ class TestWindSensor(TestCase):
         self.ws = WindSensor()
 
     def tearDown(self):
+        """
+        Closes the mocked stdout.
+        """
         self.stdout_mock.close()
         os.remove(self.stdout_mock.name)
 
     def test_battery_charge(self):
+        """
+        Asserts a mocked battery value with the input value from stdout
+        """
         x = 0
         while True:
             mock_values = write_mock_values(x)
@@ -89,10 +102,17 @@ class TestWindSensor(TestCase):
                 break
 
     def mock_wind_vector(self, x):
+        """
+        Returns a mocked wind vector dependant on the input value from
+        the mocked wind angle and wind speed taken from the mocked stdout.
+        """
         return [math.cos(mock_wind_angle_val[x]) * mock_wind_speed_val[x],
                 math.sin(mock_wind_angle_val[x]) * mock_wind_speed_val[x]]
 
     def test_get_rpy(self):
+        """
+        Asserts a mocked roll, pitch and yaw, value with the input value from stdout
+        """
         x = 0
         while True:
             mock_values = write_mock_values(x)
@@ -107,6 +127,9 @@ class TestWindSensor(TestCase):
                 break
 
     def test_get_tmp(self):
+        """
+        Asserts a mocked temperature value with the input value from stdout
+        """
         x = 0
         while True:
             mock_values = write_mock_values(x)
@@ -119,6 +142,9 @@ class TestWindSensor(TestCase):
                 break
 
     def test_wind_vector(self):
+        """
+        Asserts a mocked wind vector value with the input value from stdout
+        """
         x = 0
         while True:
             mock_values = write_mock_values(x)
