@@ -8,7 +8,6 @@ import tempfile
 import os
 import math
 import time
-import nose.tools
 
 # Global Variables, used to assert output
 mock_wind_speed_val = [1.145678, 1.26456, 1.35834]
@@ -94,8 +93,8 @@ class TestWindSensor(TestCase):
         as well as close and remove the created file.
         """
         del self.ws
-        self.stdout_mock.close()
-        os.unlink(self.stdout_mock.name)
+        #self.stdout_mock.close()
+        #os.unlink(self.stdout_mock.name)
 
     def mock_wind_vector(self, x):
         """
@@ -117,7 +116,8 @@ class TestWindSensor(TestCase):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0) # Rewinds to the beginning of the file.
             battery_charge = self.ws.get_battery_charge()
-            self.assertEqual(mock_battery[x], battery_charge)
+            with self.subTest(x=x):
+                self.assertEqual(mock_battery[x], battery_charge)
 
     def test_get_rpy(self):
         """
@@ -127,9 +127,10 @@ class TestWindSensor(TestCase):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             rpy_vector = self.ws.get_rpy()
-            self.assertEqual(mock_roll[x], rpy_vector[0])
-            self.assertEqual(mock_pitch[x], rpy_vector[1])
-            self.assertEqual(mock_yaw[x], rpy_vector[2])
+            with self.subTest(x=x):
+                self.assertEqual(mock_roll[x], rpy_vector[0])
+                self.assertEqual(mock_pitch[x], rpy_vector[1])
+                self.assertEqual(mock_yaw[x], rpy_vector[2])
 
     def test_get_tmp(self):
         """
@@ -139,7 +140,8 @@ class TestWindSensor(TestCase):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             temp = self.ws.get_temp()
-            self.assertEqual(mock_temp[x], temp)
+            with self.subTest(x=x):
+                self.assertEqual(mock_temp[x], temp)
 
     def test_wind_vector(self):
         """
@@ -149,9 +151,10 @@ class TestWindSensor(TestCase):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             wind_vector = self.ws.get_wind_vector()
-            self.assertEqual(self.mock_wind_vector(x), wind_vector)
+            with self.subTest(x=x):
+                self.assertEqual(self.mock_wind_vector(x), wind_vector)
 
 
 if __name__ == '__main__':
-    rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
+        rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
 
