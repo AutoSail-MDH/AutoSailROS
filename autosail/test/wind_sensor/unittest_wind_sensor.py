@@ -156,5 +156,5 @@ class TestWindSensor(TestCase):
 
 
 if __name__ == '__main__':
-        rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
+    rosunit.unitrun("autosail", "unittest_wind_sensor", TestWindSensor)
 
