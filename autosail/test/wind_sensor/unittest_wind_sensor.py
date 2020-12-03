@@ -7,6 +7,7 @@ from unittest.mock import patch
 import tempfile
 import os
 import math
+import time
 
 # Global Variables, used to assert output
 mock_wind_speed_val = [1.145678, 1.26456, 1.35834]
@@ -20,7 +21,8 @@ mock_yaw = [1.180235837034216, 1.280235837034216, 1.380235837034216]
 
 def write_mock_values(x):
     """
-    Function which returns a mock version of the wind-sensor JSON format
+    Function which returns a mocked bytearray version of the wind-sens-
+    or JSON format to be used in the wind_sensor.py functions
     """
     if x == 0:
         return b'GOT MESSAGE: {"updates":[{"source":{"label":"Calypso Ultrasonic","type":"Ultrasonic"},' \
@@ -66,12 +68,18 @@ def write_mock_values(x):
 
 
 class TestWindSensor(TestCase):
+    """
+    Asserts the equality of the return values from the functions in wi-
+    nd_sensor and the mocked values. Runs for 3 iterations for each fu-
+    nction.
+    """
 
     def setUp(self):
         """
         Function which mocks an output to stdout by utilizing a tempor-
         ary file. Starts the wind-sensor node so its functions can be
-        used.
+        used. Mocks a tempfile which act as a standard stream pipe for
+        Popen
         """
         self.patcher = patch('wind_sensor.wind_sensor.Popen')
         self.popen_mock = self.patcher.start()
@@ -81,25 +89,12 @@ class TestWindSensor(TestCase):
 
     def tearDown(self):
         """
-        Closes the mocked stdout.
+        At the end of the test, delete the call to the wind_sensor.py
+        as well as close and remove the created file.
         """
+        del self.ws
         self.stdout_mock.close()
         os.remove(self.stdout_mock.name)
-
-    def test_battery_charge(self):
-        """
-        Asserts a mocked battery value with the input value from stdout
-        """
-        x = 0
-        while True:
-            mock_values = write_mock_values(x)
-            self.stdout_mock.write(mock_values)
-            self.stdout_mock.seek(0)
-            battery_charge = self.ws.get_battery_charge()
-            self.assertEqual(mock_battery[x], battery_charge)
-            x = x + 1
-            if x > 2:
-                break
 
     def mock_wind_vector(self, x):
         """
@@ -109,31 +104,48 @@ class TestWindSensor(TestCase):
         return [math.cos(mock_wind_angle_val[x]) * mock_wind_speed_val[x],
                 math.sin(mock_wind_angle_val[x]) * mock_wind_speed_val[x]]
 
-    def test_get_rpy(self):
+    def test_battery_charge(self):
         """
-        Asserts a mocked roll, pitch and yaw, value with the input value from stdout
+        Asserts a mocked battery value with the input value from stdout.
+        Takes the byte arrays and writes it to the NamedTemporaryFile,
+        which acts as stdout, then calls the get_battery_charge functi-
+        on in wind_sensor and compares the return value with the mocke-
+        d values at the top of this file.
         """
         x = 0
         while True:
-            mock_values = write_mock_values(x)
-            self.stdout_mock.write(mock_values)
+            self.stdout_mock.write(write_mock_values(x))
+            self.stdout_mock.seek(0) # Rewinds to the beginning of the file.
+            battery_charge = self.ws.get_battery_charge()
+            self.assertEqual(mock_battery[x], battery_charge)
+            x = x + 1
+            if x > 2:
+                break
+
+    def test_get_rpy(self):
+        """
+        Asserts a mocked roll, pitch and yaw, value with the input value from stdout.
+        """
+        x = 0
+        while True:
+            self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             rpy_vector = self.ws.get_rpy()
             self.assertEqual(mock_roll[x], rpy_vector[0])
             self.assertEqual(mock_pitch[x], rpy_vector[1])
             self.assertEqual(mock_yaw[x], rpy_vector[2])
             x = x + 1
+            time.sleep(0.1)
             if x > 2:
                 break
 
     def test_get_tmp(self):
         """
-        Asserts a mocked temperature value with the input value from stdout
+        Asserts a mocked temperature value with the input value from stdout.
         """
         x = 0
         while True:
-            mock_values = write_mock_values(x)
-            self.stdout_mock.write(mock_values)
+            self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             temp = self.ws.get_temp()
             self.assertEqual(mock_temp[x], temp)
@@ -147,8 +159,7 @@ class TestWindSensor(TestCase):
         """
         x = 0
         while True:
-            mock_values = write_mock_values(x)
-            self.stdout_mock.write(mock_values)
+            self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             wind_vector = self.ws.get_wind_vector()
             self.assertEqual(self.mock_wind_vector(x), wind_vector)
