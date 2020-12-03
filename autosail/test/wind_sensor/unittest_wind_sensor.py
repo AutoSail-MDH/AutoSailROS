@@ -112,9 +112,9 @@ class TestWindSensor(TestCase):
         on in wind_sensor and compares the return value with the mocke-
         d values at the top of this file.
         """
-        for x in range(0,2):
+        for x in range(0, 2):
             self.stdout_mock.write(write_mock_values(x))
-            self.stdout_mock.seek(0) # Rewinds to the beginning of the file.
+            self.stdout_mock.seek(0)  # Rewinds to the beginning of the file.
             battery_charge = self.ws.get_battery_charge()
             with self.subTest(x=x):
                 self.assertEqual(mock_battery[x], battery_charge)
