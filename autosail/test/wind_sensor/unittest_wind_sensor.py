@@ -92,9 +92,9 @@ class TestWindSensor(TestCase):
         At the end of the test, delete the call to the wind_sensor.py
         as well as close and remove the created file.
         """
-        del self.ws
-        #self.stdout_mock.close()
-        #os.unlink(self.stdout_mock.name)
+        self.ws.close()
+        self.stdout_mock.close()
+        os.unlink(self.stdout_mock.name)
 
     def mock_wind_vector(self, x):
         """
