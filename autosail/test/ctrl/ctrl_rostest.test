@@ -1,6 +1,6 @@
 <!-- to run tests: rostest autosail ctrl/rostest.test -->
 <launch>
-    <include file="$(find autosail)/launch/node.launch"/>
+    <include file="$(find autosail)/launch/ctrl.launch"/>
 
    <!-- Run unittest and rostest for services -->
     <test pkg="autosail" type="libtest_sail.py" test-name="sail_controller"/>

@@ -23,7 +23,7 @@ class TestRudder(unittest.TestCase):
 
         # test publishers
         self.course_pub = rospy.Publisher(name="/path_planner/course", data_class=Float64, queue_size=queue_size)
-        self.navheading_pub = rospy.Publisher(name="/gps/navheading", data_class=Imu, queue_size=queue_size)
+        self.navheading_pub = rospy.Publisher(name="/imu/data", data_class=Imu, queue_size=queue_size)
         self.velocity_pub = rospy.Publisher(name="/gps/fix_velocity", data_class=TwistWithCovarianceStamped,
                                             queue_size=queue_size)
 
