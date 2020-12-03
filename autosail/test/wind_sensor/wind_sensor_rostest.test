@@ -1,4 +1,4 @@
-<!-- to tests run: rostest wind_sensor rostest.tests -->
+<!-- to tests run: rostest autosail wind_sensor/wind_sensor_rostest.tests -->
 <launch>
 
     <node pkg="wind_sensor" name="wind_sensor_node" type="wind_sensor_node.py" >
