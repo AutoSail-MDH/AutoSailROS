@@ -19,6 +19,7 @@ class WindSensor:
         self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../../src/signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.data = {}
         self.q = collections.deque(maxlen=1)
+        self.stop_thread = False
         self.readThread = threading.Thread(target=self.read_output)
         self.readThread.daemon = True
         self.readThread.start()
@@ -27,8 +28,11 @@ class WindSensor:
         """
         Reads the output line by line and adds it to the line variable.
         """
-        for line in iter(self.wind_sensor.stdout.readline, ""):
-            self.q.append(line)
+        while not self.stop_thread:
+            for line in iter(self.wind_sensor.stdout.readline, ""):
+                if self.stop_thread:
+                    break
+                self.q.append(line)
 
     def update(self):
         """
@@ -103,12 +107,16 @@ class WindSensor:
         self.update()
         return float(self.get_data("electrical.batteries.99.capacity.stateOfCharge"))
 
-    def __del__(self):
+    def close(self):
         """
-        Function that closes the thread and kills the connection to bluetooth through the javascript.
+        Closes the thread and kills the connection to bluetooth through the javascript.
         """
+        self.stop_thread = True
         self.readThread.join()
         self.wind_sensor.kill()
+
+    def __del__(self):
+        self.close()
 
 
 if __name__ == "__main__":
