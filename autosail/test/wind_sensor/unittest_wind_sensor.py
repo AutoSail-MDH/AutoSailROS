@@ -8,6 +8,7 @@ import tempfile
 import os
 import math
 import time
+import nose.tools
 
 # Global Variables, used to assert output
 mock_wind_speed_val = [1.145678, 1.26456, 1.35834]
@@ -94,7 +95,7 @@ class TestWindSensor(TestCase):
         """
         del self.ws
         self.stdout_mock.close()
-        os.remove(self.stdout_mock.name)
+        os.unlink(self.stdout_mock.name)
 
     def mock_wind_vector(self, x):
         """
@@ -112,60 +113,43 @@ class TestWindSensor(TestCase):
         on in wind_sensor and compares the return value with the mocke-
         d values at the top of this file.
         """
-        x = 0
-        while True:
+        for x in range(0,2):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0) # Rewinds to the beginning of the file.
             battery_charge = self.ws.get_battery_charge()
             self.assertEqual(mock_battery[x], battery_charge)
-            x = x + 1
-            if x > 2:
-                break
 
     def test_get_rpy(self):
         """
         Asserts a mocked roll, pitch and yaw, value with the input value from stdout.
         """
-        x = 0
-        while True:
+        for x in range(0, 2):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             rpy_vector = self.ws.get_rpy()
             self.assertEqual(mock_roll[x], rpy_vector[0])
             self.assertEqual(mock_pitch[x], rpy_vector[1])
             self.assertEqual(mock_yaw[x], rpy_vector[2])
-            x = x + 1
-            time.sleep(0.1)
-            if x > 2:
-                break
 
     def test_get_tmp(self):
         """
         Asserts a mocked temperature value with the input value from stdout.
         """
-        x = 0
-        while True:
+        for x in range(0, 2):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             temp = self.ws.get_temp()
             self.assertEqual(mock_temp[x], temp)
-            x = x + 1
-            if x > 2:
-                break
 
     def test_wind_vector(self):
         """
         Asserts a mocked wind vector value with the input value from stdout
         """
-        x = 0
-        while True:
+        for x in range(0, 2):
             self.stdout_mock.write(write_mock_values(x))
             self.stdout_mock.seek(0)
             wind_vector = self.ws.get_wind_vector()
             self.assertEqual(self.mock_wind_vector(x), wind_vector)
-            x = x + 1
-            if x > 2:
-                break
 
 
 if __name__ == '__main__':
