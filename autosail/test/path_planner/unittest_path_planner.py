@@ -21,7 +21,7 @@ class TestPathPlanner(TestCase):
         self.pub_gps_velocity = rospy.Publisher('gps/fix_velocity', TwistWithCovarianceStamped, queue_size=10)
         self.pub_gps_heading = rospy.Publisher('/imu/data', Imu, queue_size=10)
         self.pub_wind_sensor = rospy.Publisher('/wind_sensor/true', Vector3Stamped, queue_size=10)
-        self.pub_obstacles = rospy.Publisher('/path_planner/obstacles', Vector3Stamped, queue_size=10)
+        self.pub_obstacles = rospy.Publisher('/camera/data', Vector3Stamped, queue_size=10)
         self.output = None
         self.sub = rospy.Subscriber('/path_planner/course', Float64, self.output_callback, queue_size=1)
         self.rate = rospy.Rate(1)
@@ -80,6 +80,19 @@ class TestPathPlanner(TestCase):
         self.pub_gps_position.publish(fix)
         rospy.sleep(2)
         self.assertLess(abs(90 - abs(self.output)), 5)
+
+        obstacle_msg = Vector3Stamped()
+        obstacle_msg.vector.x = 20
+        obstacle_msg.vector.y = -20
+        obstacle_msg.header.stamp = rospy.Time.now()
+        self.pub_obstacles.publish(obstacle_msg)
+        rospy.sleep(5)
+
+        obstacle_msg.vector.x = 0
+        obstacle_msg.vector.y = -5
+        obstacle_msg.header.stamp = rospy.Time.now()
+        self.pub_obstacles.publish(obstacle_msg)
+        rospy.sleep(5)
 
 
 

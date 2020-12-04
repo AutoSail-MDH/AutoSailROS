@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class PointClass:
@@ -55,6 +56,8 @@ class PotentialField:
         self.p_hyst = p_hyst
         self.g_v = g_v
         self.profile = None
+
+        plt.ion()
 
     def find_nearest(self, array, value):
         """
@@ -279,23 +282,21 @@ class PotentialField:
         min_angle, min_index = self._find_global_minima_angle(profile)
         return min_angle, profile
 
-    def plot_heat_map(self, sleep, heading=None):
+    def plot_heat_map(self, sleep=0.01, heading=None):
         """
         method used to plot the heat map
         profile: profile for the vessel
         """
-        import matplotlib.pyplot as plt
         if self.profile is not None:
+            plt.clf()
             profile_matrix = self._reshape_profile(self.profile)
             plt.imshow(profile_matrix, cmap='hot', interpolation='nearest')
             if heading is not None:
                 heading_x = np.linspace(self.diameter / 2 - 1 / 2, self.diameter / 2 + heading[1] * 25, 10)
                 heading_y = np.linspace(self.diameter / 2 - 1 / 2, self.diameter / 2 - heading[0] * 25, 10)
                 plt.plot(heading_x, heading_y, linewidth=3)
-            plt.ion()
-            plt.show()
-            plt.pause(sleep)
-            plt.clf()
+            plt.gcf().canvas.draw_idle()
+            plt.gcf().canvas.start_event_loop(0.3)
 
     def calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """
@@ -313,7 +314,7 @@ class PotentialField:
         goal_pos = goal[0:2]
         position_v = [int(round(position_v[0])), int(round(position_v[1]))]
         # calculates the local x,y for the obstacles in the frame of the reference points
-        obstacles = np.array(obstacles)
+        obstacles = np.array(obstacles).astype(int)
         min_angle, profile = self._calculate_profile(position_v, obstacles, goal_pos,
                                                      w_theta, heading, w_speed, v_v)
         self.profile = profile
