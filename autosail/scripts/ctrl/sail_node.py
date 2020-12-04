@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 import rospy
 import math
-import sensor_msgs.msg
-import std_msgs.msg
+
+from geometry_msgs.msg import Vector3Stamped
+from sensor_msgs.msg import Imu
+from std_msgs.msg import Float64
 
 # Local libs
 from ctrl import pid
-from ctrl.sail_controller import calculate_sail_angle
-from ctrl.sail_controller import trim_sail
+from ctrl.sail_controller_wind_angle import calculate_sail_angle, trim_sail
 
 # Dynamic configuration imports
 from dynamic_reconfigure.server import Server
@@ -18,12 +19,20 @@ from autosail.cfg import SailControllerConfig
 class SubscriberValues:
     def __init__(self):
         self.roll_angle = 0.0
+        self.wind_angle = 0.0
 
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
         roll = abs(math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2)))
         self.roll_angle = roll
+
+    def callback_wind_angle(self, data):
+        x = data.vector.x
+        y = -data.vector.y
+        angle = math.atan2(y, x)  # -atan(y/x) since NED coordinates
+        self.wind_angle = angle
+        rospy.loginfo("""wind angle={}""".format(math.degrees(self.wind_angle)))
 
 
 # Dynamic reconfiguration
@@ -49,11 +58,13 @@ if __name__ == "__main__":
     max_roll = rospy.get_param("~max_roll", 30) * math.pi / 180
 
     # Publishers
-    sail_angle = rospy.Publisher("sail_controller/sail_angle", std_msgs.msg.Float64, queue_size=queue_size)
-    sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", std_msgs.msg.Float64, queue_size=queue_size)
+    sail_angle = rospy.Publisher("sail_controller/sail_angle", Float64, queue_size=queue_size)  # Used for simulation
+    sail_servo = rospy.Publisher("sail_controller/sail_servo_angle", Float64, queue_size=queue_size)
 
     # Subscribers
-    rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
+    rospy.Subscriber(name="/imu/data", data_class=Imu, callback=values.callback_roll_angle,
+                     queue_size=queue_size)
+    rospy.Subscriber(name='/wind/apparent', data_class=Vector3Stamped, callback=values.callback_wind_angle,
                      queue_size=queue_size)
 
     # Initialize PID
@@ -68,7 +79,7 @@ if __name__ == "__main__":
 
         # Calculate the new sail angle and sail trim
         new_sail_angle_rad = calculate_sail_angle(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
-                                                  max_sail=sail_limits)
+                                                  wind_angle=values.wind_angle, max_sail=sail_limits)
         trim_degree = trim_sail(new_sail_angle_rad, sail_limits)
 
         # Publish the sail angle
