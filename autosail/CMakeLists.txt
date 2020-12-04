@@ -177,6 +177,6 @@ install(DIRECTORY launch/
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
-    add_rostest(test/ctrl/rostest.test)
-    add_rostest(test/path_planner/rostest.test)
+    add_rostest(test/ctrl/ctrl_rostest.test)
+    add_rostest(test/path_planner/path_planner_rostest.test)
 endif()
