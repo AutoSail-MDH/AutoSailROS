@@ -122,16 +122,24 @@ def imu_heading_callback(data):
     heading = [np.cos(yaw), np.sin(yaw)]
 
 
+def obstacle_exist(obstacle):
+    global obstacles
+    for o in obstacles:
+        if 0 < (obstacle[0] - o[0]) < 0.00001 or 0 < (obstacle[1] - o[1]) < 0.00001:
+            return True
+    return False
+
+
 def obstacle_camera_callback(data):
     """
     Read obstacle from camera and add them if it differs from the existing obstacles
     :param data: geometry_msgs.msg.Vector3Stamped
     """
-    global obstacles, lon0, lat0
-    geo = ned2geodetic(data.vector.x, data.vector.y, 0, lat0, lon0, 0)[:2]
-    for o in obstacles:
-        if not 0 < (geo[0] - o[0]) < 0.00001 or not 0 < (geo[1] - o[1]) < 0.00001:
-            obstacles.append(geo)
+    global obstacles, current_position
+    geo = ned2geodetic(data.vector.x, data.vector.y, 0, current_position.latitude, current_position.longitude, 0)[:2]
+    rospy.loginfo("Got obstacle at {}".format(geo))
+    if not obstacle_exist(geo):
+        obstacles.append(geo)
 
 
 def path_planner_init():
@@ -206,8 +214,9 @@ if __name__ == '__main__':
         pub_heading.publish(min_angle)
 
         pf.plot_heat_map(0.1, heading)
-        rospy.loginfo("Vessel position {}".format(current_position))
-        rospy.loginfo("Goal position {}".format(goal))
+        rospy.loginfo("Vessel position lat/lon ({}, {})".format(current_position.latitude, current_position.longitude))
+        rospy.loginfo("Goal position x/y {}".format(goal))
+        rospy.loginfo("Obstacles lat/lon {} x/y {}".format(obstacles, obstacles_xy))
         if np.linalg.norm(goal[0:2]) < 5:
             if waypoint_index != len(waypoints)-1:
                 waypoint_index += 1
