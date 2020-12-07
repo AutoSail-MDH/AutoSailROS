@@ -76,8 +76,9 @@ def detect_contour(image):
     # printimage('mask', mask)
     result = cv2.bitwise_and(image, image, mask=mask)
     # printimage('result', result)
-    x, y = shapemask(result)
-    return x, y
+    x, y, image= shapemask(result,image)
+    return x, y, image
+
 
 
 def colormask(hsvimage):
@@ -93,7 +94,7 @@ def colormask(hsvimage):
     return maskedimage
 
 
-def shapemask(image):
+def shapemask(image,og_image):
     """
     receives the masked image and then find the largest countour and finds the middle point and returns the coordinates
     :param image: A matrix that represent the image
@@ -116,7 +117,11 @@ def shapemask(image):
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-    return cX, cY
+
+    #cv2.drawContours(og_image, [cnts], -1 (0, 255, 0),2)
+    #cv2.circle(og_image,(cX,cY), 7,(255, 255, 255),-1)
+
+    return cX, cY, image
 
 
 '''
