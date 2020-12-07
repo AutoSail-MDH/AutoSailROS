@@ -47,8 +47,8 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         status_pub.publish(str(status))
-        image, point_cloud = grab_frame(zed, runtime_parameters)
-        x, y, image = detect_contour(image)
+        og_image, point_cloud = grab_frame(zed, runtime_parameters)
+        x, y, image, cnt_image = detect_contour(og_image)
 
         err, point_cloud_value = point_cloud.get_value(x, y)
         distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
@@ -61,7 +61,7 @@ if __name__ == "__main__":
         ang = angle(distance, x, w2)
 
 
-        # If an object is detected, publish its position as an x, y coordinate
+        # If an objecd src/AutosailROSct is detected, publish its position as an x, y coordinate
         if not np.isnan(distance) and not np.isinf(distance):
             camera_data = Vector3Stamped()
             #camera_image = sensor_msgs.msg.Image()
@@ -73,6 +73,6 @@ if __name__ == "__main__":
             camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
-        img_msg = bridge.cv2_to_imgmsg(image)
+        img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
         image_pub.publish(img_msg)
         rate.sleep()
