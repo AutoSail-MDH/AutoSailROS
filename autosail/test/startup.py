@@ -20,7 +20,10 @@ rudder_angle = None
 sail_servo_angle = None
 
 
-w_speed = 0
+w_speed = None
+longitude = None
+lin_velocity = None
+yaw = None
 
 longitudes = []
 latitudes = []
@@ -182,17 +185,18 @@ def test_system():
             break
 
     if abs(test_values.desired_course - desired_course) < np.deg2rad(5):
-        print("Startup test-Path planner: Succeeded")
+        rospy.loginfo("Startup test-Path planner: Succeeded")
     else:
-        print("Startup test-Path planner: Failed")
+        rospy.loginfo("Startup test-Path planner: Failed")
     if abs(test_values.rudder_angle - rudder_angle) < np.deg2rad(5):
-        print("Startup test-Rudder control: Succeeded")
+        rospy.loginfo("Startup test-Rudder control: Succeeded")
     else:
-        print("Startup test-Rudder control: Failed")
+        rospy.loginfo("Startup test-Rudder control: Failed")
     if abs(test_values.sail_servo_angle - sail_servo_angle) < np.deg2rad(5):
-        print("Startup test-Sail control: Succeeded")
+        rospy.loginfo("Startup test-Sail control: Succeeded")
     else:
-        print("Startup test-Sail control: Failed")
+        rospy.loginfo("Startup test-Sail control: Failed")
+
 
 def init_subscribers():
     gps_pos_sub = rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, callback_gps_position, queue_size=1)
@@ -200,7 +204,7 @@ def init_subscribers():
                                         queue_size=1)
     wind_sub = rospy.Subscriber("/wind_sensor/wind_vector", geometry_msgs.msg.Vector3Stamped, callback_wind_sensor, queue_size=1)
     imu_sub = rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, callback_imu_heading, queue_size=1)
-"""
+    """
     water_level_sub = rospy.Subscriber(name="water_level", data_class=Float64, callback=callback_water_level,
                                        queue_size=1)
     water_detect_sub = rospy.Subscriber(name="water_detection", data_class=Bool, callback=callback_water_detect,
@@ -226,54 +230,54 @@ def test_sensors():
     wind_speeds = []
     yaws = []
 
-    #longitude, latitude, lin_velocity, water_level, w_speed, yaw = None
-    """
-    latitude = None
-    lin_velocity = None
-    water_level = None
-    w_speed = None
-    yaw = None"""
 
     rate = rospy.Rate(10)
     rate.sleep()
-    # Save 10 values of the sensors
-    #while longitude is None or latitude is None or lin_velocity is None or water_level is None or w_speed is None \
-    #        or yaw is None:
-    #    rate.sleep()
+
+    while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
+        pass
     for i in range(10):
-        # longitudes += [longitude]
-        # latitudes += [latitude]
+        longitudes += [longitude]
         # water_levels += [water_level]
         # current
-        # gps_velocities += [lin_velocity]
+        # camera
+        gps_velocities += [lin_velocity]
         wind_speeds += [w_speed]
-        print(w_speed)
-
-        # yaws += [yaw]
+        yaws += [yaw]
         rate.sleep()
 
-    """diff_yaw = np.diff(yaws)
+    diff_yaw = np.diff(yaws)
     diff_yaw = abs(np.diff(diff_yaw)/abs(sum(yaws) / len(yaws)))
     if max(diff_yaw) < 1e-3:
-        passed = True
-        print("Startup test-Imu: Succeeded")
+        rospy.loginfo("Startup test-Imu: Succeeded")
     else:
-        print("Startup test-Imu: Failed")
+        rospy.loginfo("Startup test-Imu: Failed")
 
     diff_wind_speeds = np.diff(wind_speeds)
-    print(diff_wind_speeds)
     diff_wind_speeds = abs(np.diff(diff_wind_speeds) / abs(sum(wind_speeds) / len(wind_speeds)))
-    print(diff_wind_speeds)
     if max(diff_wind_speeds) < 2:
-        passed = True
-        print("Startup test-Wind: Succeeded")
+        rospy.loginfo("Startup test-Wind: Succeeded")
     else:
-        print("Startup test-Wind: Failed") """
+        rospy.loginfo("Startup test-Wind: Failed")
 
-    return passed
+    diff_longitudes = np.diff(longitudes)
+    diff_longitudes = abs(np.diff(diff_longitudes) / abs(sum(longitudes) / len(longitudes)))
+    print(diff_longitudes)
+    if max(diff_longitudes) < 0.001:
+        rospy.loginfo("Startup test-gps_pos: Succeeded")
+    else:
+        rospy.loginfo("Startup test-gps_pos: Failed")
+
+    diff_velocity = np.diff(gps_velocities)
+    diff_velocity = abs(np.diff(diff_velocity) / abs(sum(gps_velocities) / len(gps_velocities)))
+    if max(diff_velocity) < 0.1:
+        rospy.loginfo("Startup test-gps_velocity: Succeeded")
+    else:
+        rospy.loginfo("Startup test-gps_velocity: Failed")
+
 
 
 if __name__ == "__main__":
     rospy.init_node("startup_test")
-    #test_system()
+    test_system()
     test_sensors()
