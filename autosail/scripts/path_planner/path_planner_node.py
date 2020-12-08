@@ -213,10 +213,7 @@ if __name__ == '__main__':
         # publish the calculated angle
         pub_heading.publish(min_angle)
 
-        pf.plot_heat_map(0.1, heading)
-        rospy.loginfo("Vessel position lat/lon ({}, {})".format(current_position.latitude, current_position.longitude))
-        rospy.loginfo("Goal position x/y {}".format(goal))
-        rospy.loginfo("Obstacles lat/lon {} x/y {}".format(obstacles, obstacles_xy))
+        # pf.plot_heat_map(0.1, heading)
         if np.linalg.norm(goal[0:2]) < 5:
             if waypoint_index != len(waypoints)-1:
                 waypoint_index += 1

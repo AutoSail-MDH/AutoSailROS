@@ -14,6 +14,7 @@ import math
 import rospy
 import runpy
 import os
+import subprocess
 
 desired_course = None
 rudder_angle = None
@@ -83,7 +84,7 @@ class Publisher:
     def __init__(self):
         self.pub_waypoints = rospy.Publisher('path_planner/waypoints', Route, queue_size=10)
         self.pub_obstacle = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
-        self.pub_wind_sensor = rospy.Publisher('/wind_sensor', geometry_msgs.msg.Vector3Stamped, queue_size=10)
+        self.pub_wind_sensor = rospy.Publisher('/wind_sensor/wind_vector', geometry_msgs.msg.Vector3Stamped, queue_size=10)
         self.pub_imu = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
         self.pub_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
         self.pub_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
@@ -230,7 +231,8 @@ def test_sensors():
 
     rate = rospy.Rate(10)
     rate.sleep()
-
+    #-startup system sensors
+    subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
         pass
     for i in range(10):
