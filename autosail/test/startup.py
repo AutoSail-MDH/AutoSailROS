@@ -46,12 +46,11 @@ class FakeSignals:
         waypoint.id = "0" # 59.61744366137741, 16.561736302687205
         self.waypoints = waypoint_array.route_points.append(waypoint)
         # obstacle
-        mat_obstacle = obstaclemsg()
-        mat_obstacle.latitude = 59.617369
-        mat_obstacle.longitude = 16.560619
-        obstacle_array = obstacles_array_msg()
-        obstacle_array.data.append(mat_obstacle)
-        self.obstacle = obstacle_array
+        obstacle_msg = geometry_msgs.msg.Vector3Stamped()
+        obstacle_msg.vector.x = 30
+        obstacle_msg.vector.y = -30
+        obstacle_msg.header.stamp = rospy.Time.now()
+        self.obstacle = obstacle_msg
         # wind sensor !
         wind_sensor_value = geometry_msgs.msg.Vector3Stamped()
         wind_sensor_value.vector.x = 7
@@ -83,7 +82,7 @@ class FakeSignals:
 class Publisher:
     def __init__(self):
         self.pub_waypoints = rospy.Publisher('path_planner/waypoints', Route, queue_size=10)
-        self.pub_obstacle = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
+        self.pub_obstacle = rospy.Publisher('"/camera/data"', geometry_msgs.msg.Vector3Stamped, queue_size=10)
         self.pub_wind_sensor = rospy.Publisher('/wind_sensor/wind_vector', geometry_msgs.msg.Vector3Stamped, queue_size=10)
         self.pub_imu = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
         self.pub_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
