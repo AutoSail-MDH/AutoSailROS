@@ -43,9 +43,9 @@ class WindSensorTalker:
             rpy_vector = self.wnd.get_rpy()
             rpy_msg = Vector3Stamped()
             rpy_msg.header.stamp = rospy.Time.now()
-            rpy_msg.vector.x = rpy_vector[0]
-            rpy_msg.vector.y = rpy_vector[1]
-            rpy_msg.vector.z = rpy_vector[2]
+            rpy_msg.vector.x = rpy_vector[1]
+            rpy_msg.vector.y = rpy_vector[0]
+            rpy_msg.vector.z = -rpy_vector[2]
 
             battery_msg = Float64()
             battery_msg = self.wnd.get_battery_charge()

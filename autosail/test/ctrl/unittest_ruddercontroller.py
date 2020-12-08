@@ -18,8 +18,8 @@ def callback_rudder_angle(data):
 
 class TestRudder(unittest.TestCase):
     def setUp(self):
-        rospy.init_node("unittest_rudder")
         queue_size = rospy.get_param("~queue_size", 1)
+        self.rate = rospy.Rate(1)
 
         # test publishers
         self.course_pub = rospy.Publisher(name="/path_planner/course", data_class=Float64, queue_size=queue_size)
@@ -40,36 +40,62 @@ class TestRudder(unittest.TestCase):
         self.assertEqual(self.velocity_pub.get_num_connections(), 1)
         self.assertEqual(self.rudder_sub.get_num_connections(), 1)
 
-    def test_rudder_angle(self):
+    def test_rudder_angle_max_left(self):
         global rudder_angle
 
         course_msg = Float64()
         course_msg.data = math.pi
-        self.course_pub.publish(course_msg)
 
         imu_msg = Imu()
-        rot = Rotation.from_euler('xyz', [90, 0, 0], degrees=True)
+        rot = Rotation.from_euler('z', 90, degrees=True)
         rot_quat = rot.as_quat()
         imu_msg.orientation.x = rot_quat[0]
         imu_msg.orientation.y = rot_quat[1]
         imu_msg.orientation.z = rot_quat[2]
         imu_msg.orientation.w = rot_quat[3]
-        self.imu_pub.publish(imu_msg)
 
         velocity_msg = TwistWithCovarianceStamped()
-        velocity_msg.twist.twist.linear.x = 1
+        velocity_msg.twist.twist.linear.x = 0.1
         velocity_msg.twist.twist.linear.y = 0
-        self.velocity_pub.publish(velocity_msg)
 
-        rospy.sleep(1/100)
+        while True:
+            self.course_pub.publish(course_msg)
+            self.imu_pub.publish(imu_msg)
+            self.velocity_pub.publish(velocity_msg)
+            if rudder_angle is not None or rospy.is_shutdown():
+                break
+        self.assertEqual(rudder_angle, math.pi/4)
 
-        self.assertEqual(rudder_angle, 0)
+    def test_rudder_angle_max_right(self):
+        global rudder_angle
 
-    def tearDown(self):
-        rospy.signal_shutdown("test ended")
+        course_msg = Float64()
+        course_msg.data = math.pi
+
+        imu_msg = Imu()
+        rot = Rotation.from_euler('z', -90, degrees=True)
+        rot_quat = rot.as_quat()
+        imu_msg.orientation.x = rot_quat[0]
+        imu_msg.orientation.y = rot_quat[1]
+        imu_msg.orientation.z = rot_quat[2]
+        imu_msg.orientation.w = rot_quat[3]
+
+        velocity_msg = TwistWithCovarianceStamped()
+        velocity_msg.twist.twist.linear.x = 0.1
+        velocity_msg.twist.twist.linear.y = 0
+
+        rudder_angle = None
+        while True:
+            self.course_pub.publish(course_msg)
+            self.imu_pub.publish(imu_msg)
+            self.velocity_pub.publish(velocity_msg)
+            if rudder_angle is not None or rospy.is_shutdown():
+                break
+        self.assertEqual(rudder_angle, math.pi/4)
 
 
 if __name__ == "__main__":
     import rostest
 
+    rospy.init_node("unittest_rudder")
     rostest.rosrun("autosail", "libtest_rudder", TestRudder)

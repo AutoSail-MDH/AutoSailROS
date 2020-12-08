@@ -24,7 +24,7 @@ class SubscriberValues:
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        roll = abs(math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2)))
+        roll = -math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
         self.roll_angle = roll
 
     def callback_wind_angle(self, data):
@@ -54,6 +54,7 @@ if __name__ == "__main__":
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
     sail_limits = rospy.get_param("~sail_limits", 80) * math.pi / 180
+    max_servo = rospy.get_param("~max_servo", 1620)
     queue_size = rospy.get_param("~queue_size", 1)
     max_roll = rospy.get_param("~max_roll", 30) * math.pi / 180
 
@@ -66,10 +67,10 @@ if __name__ == "__main__":
                      queue_size=queue_size)
 #    rospy.Subscriber(name='wind_sensor', data_class=Vector3Stamped, callback=values.callback_wind_angle,
 #                     queue_size=queue_size)
-    rospy.Subscriber(name='/wind/apparent', data_class=Vector3Stamped, callback=values.callback_wind_angle,
+    rospy.Subscriber(name='/wind_sensor/wind_vector', data_class=Vector3Stamped, callback=values.callback_wind_angle,
                      queue_size=queue_size)
 
-    # Initialize PID
+    # Initialize PID with integral coefficient as 0 since it will constantly adjust
     sc_pid = pid.PID()
     pid.ki = 0
 
@@ -83,7 +84,7 @@ if __name__ == "__main__":
         # Calculate the new sail angle and sail trim
         new_sail_angle_rad = calculate_sail_angle(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
                                                   wind_angle=values.wind_angle, max_sail=sail_limits)
-        trim_degree = trim_sail(new_sail_angle_rad, sail_limits)
+        trim_degree = trim_sail(new_sail_angle_rad, sail_limits, max_servo)
         rospy.loginfo("""sail angle={}""".format(math.degrees(new_sail_angle_rad)))
 
         # Publish the sail angle

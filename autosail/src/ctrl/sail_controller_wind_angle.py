@@ -27,11 +27,12 @@ def calculate_sail_angle(current_pid_roll, max_roll, wind_angle, max_sail):
     return max(min(max_sail, sail_angle), -max_sail)
 
 
-def trim_sail(sail_angle, sail_limits):
+def trim_sail(sail_angle, sail_limits, servo_max):
     """
     Determine the servo position given the sail angle and sail limit
     :param sail_angle: angle of the sail, in radian
     :param sail_limits: The max angle of the sail, in radian
+    :servo_max: The maximum value of the servo
     :return: the value of the servo, where 0 is fully released sail and 1620 is fully trimmed
     """
     # If desired value is outside of max range, return max value
@@ -39,6 +40,6 @@ def trim_sail(sail_angle, sail_limits):
         return 0
 
     # Calculate relation between sail angle and servo range, return proportional servo degree
-    scalar = 1620 / sail_limits
-    servo_degree = 1620-abs(sail_angle)*scalar
+    scalar = servo_max / sail_limits
+    servo_degree = servo_max-abs(sail_angle)*scalar
     return servo_degree

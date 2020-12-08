@@ -7,6 +7,7 @@ rate: 100
 sail_limits: 80 #1.3962634  # 80 degree
 sail_setpoint: 5
 max_roll: 30 #0.52359877559 # pi/6
+max_servo: 1620
 
 # --- Rudder Configs ---
 rudder_limits: 45 #0.7853981633974483  # pi/4 radians
