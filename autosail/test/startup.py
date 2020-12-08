@@ -98,12 +98,9 @@ def callback_desired_course(data):
     global desired_course, course
     desired_course = data.data
 
-
-
 def callback_rudder_angle(data):
     global rudder_angle
     rudder_angle = data.data
-
 
 def callback_sail(data):
     global sail_servo_angle
