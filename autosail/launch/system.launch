@@ -1,4 +1,6 @@
 <launch>
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
+
     <include file="$(find autosail)/launch/wind_sensor.launch"/>
     <include file="$(find autosail)/launch/path_planner.launch"/>
     <include file="$(find autosail)/launch/ctrl.launch"/>
