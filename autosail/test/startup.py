@@ -187,15 +187,15 @@ def test_system():
     if abs(test_values.desired_course - desired_course) < np.deg2rad(5):
         rospy.loginfo("Startup test-Path planner: Succeeded")
     else:
-        rospy.loginfo("Startup test-Path planner: Failed")
+        rospy.logerr("Startup test-Path planner: Failed")
     if abs(test_values.rudder_angle - rudder_angle) < np.deg2rad(5):
         rospy.loginfo("Startup test-Rudder control: Succeeded")
     else:
-        rospy.loginfo("Startup test-Rudder control: Failed")
+        rospy.logerr("Startup test-Rudder control: Failed")
     if abs(test_values.sail_servo_angle - sail_servo_angle) < np.deg2rad(5):
         rospy.loginfo("Startup test-Sail control: Succeeded")
     else:
-        rospy.loginfo("Startup test-Sail control: Failed")
+        rospy.logerr("Startup test-Sail control: Failed")
 
 
 def init_subscribers():
@@ -251,14 +251,14 @@ def test_sensors():
     if max(diff_yaw) < 1e-3:
         rospy.loginfo("Startup test-Imu: Succeeded")
     else:
-        rospy.loginfo("Startup test-Imu: Failed")
+        rospy.logerr("Startup test-Imu: Failed")
 
     diff_wind_speeds = np.diff(wind_speeds)
     diff_wind_speeds = abs(np.diff(diff_wind_speeds) / abs(sum(wind_speeds) / len(wind_speeds)))
     if max(diff_wind_speeds) < 2:
         rospy.loginfo("Startup test-Wind: Succeeded")
     else:
-        rospy.loginfo("Startup test-Wind: Failed")
+        rospy.logerr("Startup test-Wind: Failed")
 
     diff_longitudes = np.diff(longitudes)
     diff_longitudes = abs(np.diff(diff_longitudes) / abs(sum(longitudes) / len(longitudes)))
@@ -266,14 +266,14 @@ def test_sensors():
     if max(diff_longitudes) < 0.001:
         rospy.loginfo("Startup test-gps_pos: Succeeded")
     else:
-        rospy.loginfo("Startup test-gps_pos: Failed")
+        rospy.logerr("Startup test-gps_pos: Failed")
 
     diff_velocity = np.diff(gps_velocities)
     diff_velocity = abs(np.diff(diff_velocity) / abs(sum(gps_velocities) / len(gps_velocities)))
     if max(diff_velocity) < 0.1:
         rospy.loginfo("Startup test-gps_velocity: Succeeded")
     else:
-        rospy.loginfo("Startup test-gps_velocity: Failed")
+        rospy.logerr("Startup test-gps_velocity: Failed")
 
 
 
