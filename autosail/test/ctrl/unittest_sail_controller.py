@@ -244,7 +244,7 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        #self.assertEqual(sail_servo, 708.75)
+        self.assertEqual(sail_servo, 168.75)
         self.assertAlmostEqual(sail_angle, -math.pi/4-max_sail/3)
 
         wind_msg = Vector3Stamped()
@@ -260,7 +260,7 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        # self.assertEqual(sail_servo, 708.75)
+        self.assertEqual(sail_servo, 168.75)
         self.assertAlmostEqual(sail_angle, math.pi/4+max_sail/3)
 
 
