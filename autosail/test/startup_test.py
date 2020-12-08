@@ -27,7 +27,7 @@ class FakeSignals:
         waypoint.pose.position.x = 16.56172953630712
         waypoint.pose.position.y = 59.617444802123934
         waypoint.id = "0"
-        self.waypoint_array.route_points.append(waypoint)
+        self.waypoints = waypoint_array.route_points.append(waypoint)
 
         gps_position_value = sensor_msgs.msg.NavSatFix()
         gps_position_value.longitude = 16.560831863216134

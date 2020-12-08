@@ -66,7 +66,7 @@ if __name__ == "__main__":
                      queue_size=queue_size)
 #    rospy.Subscriber(name='wind_sensor', data_class=Vector3Stamped, callback=values.callback_wind_angle,
 #                     queue_size=queue_size)
-    rospy.Subscriber(name='/wind/apparent', data_class=Vector3Stamped, callback=values.callback_wind_angle,
+    rospy.Subscriber(name='/wind_sensor', data_class=Vector3Stamped, callback=values.callback_wind_angle,
                      queue_size=queue_size)
 
     # Initialize PID

@@ -32,7 +32,7 @@ if __name__ == "__main__":
     rospy.init_node("true_wind")
     rospy.Subscriber("/gps/fix_velocity", TwistWithCovarianceStamped, gps_velocity_callback, queue_size=1)
     rospy.Subscriber("/imu/data", Imu, imu_heading_callback, queue_size=1)
-    rospy.Subscriber("/wind_sensor", Vector3Stamped, wind_callback, queue_size=1)
+    rospy.Subscriber("/wind_sensor/wind_vector", Vector3Stamped, wind_callback, queue_size=1)
     pub = rospy.Publisher("wind_sensor/true", Vector3Stamped, queue_size=1)
 
     rate = rospy.Rate(8)
