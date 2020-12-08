@@ -1,8 +1,7 @@
 <launch>
-    <include file="$(find autosail)/launch/wind_sensor.launch"/>
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
+    <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>
     <include file="$(find autosail)/launch/path_planner.launch"/>
     <include file="$(find autosail)/launch/ctrl.launch"/>
-    <include file="$(find autosail)/launch/motor_controller.launch"/>
-    <include file="$(find autosail)/launch/camera.launch"/>
-    <!--<node pkg="startup" name="startup_test" type="startup_test.py"/>-->
+    <include file="$(find autosail)/test/startup.launch"/>
 </launch>
