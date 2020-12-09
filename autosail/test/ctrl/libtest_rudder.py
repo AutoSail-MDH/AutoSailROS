@@ -178,21 +178,21 @@ class TestRudder(unittest.TestCase):
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
         angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
-        self.assertAlmostEqual(angle, -math.pi / 4)
+        self.assertAlmostEqual(angle, math.pi / 4)
 
         self.pid.setpoint = -math.pi / 4
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
         angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
-        self.assertAlmostEqual(angle, math.pi / 4)
+        self.assertAlmostEqual(angle, -math.pi / 4)
 
         self.pid.setpoint = -math.pi
         pid_adjusted_heading = 0
         for i in range(100000):
             pid_adjusted_heading = self.pid(current_heading)
         angle = rc.calculate_rudder_angle(pid_corrected_heading=pid_adjusted_heading, rudder_limit=math.pi / 4)
-        self.assertAlmostEqual(angle, math.pi / 4)
+        self.assertAlmostEqual(angle, -math.pi / 4)
 
 
 class Plotting:

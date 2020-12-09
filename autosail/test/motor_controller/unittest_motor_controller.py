@@ -73,6 +73,8 @@ class TestMotorController(TestCase):
     def tearDown(self):
         self.patcher.stop()
         self.port.stop()
+
+
 if __name__ == '__main__':
     rosunit.unitrun("autosail", "unittest_motor_controller", TestMotorController)
 

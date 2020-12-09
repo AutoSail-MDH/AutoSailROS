@@ -147,6 +147,7 @@ catkin_install_python(PROGRAMS
 
    scripts/ctrl/rudder_node.py
    scripts/ctrl/sail_node.py
+   scripts/ctrl/sail_node_wind_angle.py
 
    scripts/drivers/motor_controller_node.py
    scripts/drivers/wind_sensor_node.py
@@ -159,6 +160,8 @@ catkin_install_python(PROGRAMS
    scripts/utility/sim_converter_node.py
    scripts/utility/boat_tf_broadcaster.py
    scripts/utility/route_planner_service.py
+   scripts/utility/true_wind_node.py
+   scripts/temperature_sbcs/temperature_node.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -177,6 +180,6 @@ install(DIRECTORY launch/
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
-    add_rostest(test/ctrl/rostest.test)
-    add_rostest(test/path_planner/rostest.test)
+    add_rostest(test/ctrl/ctrl_rostest.test)
+    add_rostest(test/path_planner/path_planner_rostest.test)
 endif()

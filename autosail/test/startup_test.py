@@ -6,27 +6,47 @@ import os
 from std_msgs.msg import Float64, Float64MultiArray, Int64, Int64MultiArray, Bool
 from geometry_msgs.msg import TwistWithCovarianceStamped, Vector3Stamped
 from sensor_msgs.msg import Imu, NavSatFix
-from marti_nav_msgs.msg import Route
 
+
+import std_msgs.msg
+import sensor_msgs.msg
+import geometry_msgs.msg
+import numpy as np
+from marti_nav_msgs.msg import RoutePoint, Route
+from autosail.msg import obstaclemsg
+from autosail.msg import obstacles_array_msg
+from scipy.spatial.transform import Rotation
+
+# TODO: clean up imports
 
 class FakeSignals:
     def __init__(self):
-        gps_position_value = NavSatFix()
-        gps_position_value.latitude = 7
-        gps_position_value.longitude = 46
+        #--------- path planner sensors -----
+        waypoint_array = Route()
+        waypoint = RoutePoint()  # 90 deg
+        waypoint.pose.position.x = 16.56172953630712
+        waypoint.pose.position.y = 59.617444802123934
+        waypoint.id = "0"
+        self.waypoints = waypoint_array.route_points.append(waypoint)
+
+        gps_position_value = sensor_msgs.msg.NavSatFix()
+        gps_position_value.longitude = 16.560831863216134
+        gps_position_value.latitude = 59.61745620958708
         self.gps_position = gps_position_value
 
+
         gps_velocity_value = TwistWithCovarianceStamped()
-        gps_velocity_value.twist.twist.linear.x = 5
-        gps_velocity_value.twist.twist.linear.y = 42
-        gps_velocity_value.twist.twist.linear.z = 1
+        gps_velocity_value.twist.twist.linear.x = 1
+        gps_velocity_value.twist.twist.linear.y = 0
+        gps_velocity_value.twist.twist.linear.z = 0
         self.gps_velocity = gps_velocity_value
 
         wind_sensor_value = Vector3Stamped()
-        wind_sensor_value.vector.x = 9
+        wind_sensor_value.vector.x = 7
         wind_sensor_value.vector.y = 7
-        wind_sensor_value.vector.z = 4
+        wind_sensor_value.vector.z = 0
         self.wind_sensor = wind_sensor_value
+        #-----------------------------------
 
         imu_value = Imu()
         imu_value.linear_acceleration.x = 9
@@ -167,51 +187,30 @@ def callback_imu_heading(data):
     yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
 
 
-"""
-class PubAndSub:
-    def __init__(self):
-        self.pub = self.Pub()
-        self.sub = self.Sub()
-
-    class Pub:
-        def __init__(self):
-            self.waypoints = rospy.Publisher(name="path_planner/waypoints", data_class=Route, queue_size=1)
-            self.gps_pos = rospy.Publisher(name="gps/fix", data_class=NavSatFix, queue_size=1)
-            self.gps_vel = rospy.Publisher(name="gps/fix_velocity", data_class=TwistWithCovarianceStamped,
-                                           queue_size=1)
-            self.wind = rospy.Publisher(name="wind_sensor", data_class=Vector3Stamped, queue_size=1)
-            self.imu = rospy.Publisher(name="imu/data", data_class=Imu, queue_size=1)
-            self.waypoint_idx = rospy.Publisher(name="waypoint/index", data_class=Int64, queue_size=1)
-            self.water_level = rospy.Publisher(name="water_level", data_class=Float64, queue_size=1)
-            self.water_detect = rospy.Publisher(name="water_detection", data_class=Bool, queue_size=1)
-            self.current = rospy.Publisher(name="current", data_class=Float64, queue_size=1)
-            self.camera = rospy.Publisher(name="camera", data_class=Float64, queue_size=1)
-
-    class Sub:
-        def __init__(self):
-            rospy.Subscriber(name="/rudder_controller/rudder_angle", data_class=Float64,
-                             callback=callback_rudder, queue_size=1)
-            rospy.Subscriber(name="sail_controller/sail_servo_angle", data_class=Float64,
-                             callback=callback_sail, queue_size=1)
-
-
-def shut_down_pub(publishers)
-"""
-
-
 def test_system():
     global gps_pos_pub, gps_velocity_pub, wind_pub, imu_pub, water_level_pub, \
         water_detect_pub, current_pub, camera_pub
     global rudder_sub, sail_sub
     sensor_values = FakeSignals()
+    pub_waypoints = rospy.Publisher('path_planner/waypoints', Route, queue_size=10)
+    pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
+    pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
+    pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
+    pub_wind_sensor = rospy.Publisher('/wind_sensor', geometry_msgs.msg.Vector3Stamped, queue_size=10)
+    pub_obstacles = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
+
+
+
 
     # Start publishing to fake sensor values
     # waypoints_pub = rospy.Publisher(name="path_planner/waypoints", data_class=Route, queue_size=1)
-    gps_pos_pub = rospy.Publisher(name="gps/fix", data_class=NavSatFix, queue_size=1)
+
+    """gps_pos_pub = rospy.Publisher(name="gps/fix", data_class=NavSatFix, queue_size=1)
     gps_velocity_pub = rospy.Publisher(name="gps/fix_velocity", data_class=TwistWithCovarianceStamped, queue_size=1)
-    wind_pub = rospy.Publisher(name="wind_sensor", data_class=Vector3Stamped, queue_size=1)
+    wind_pub = rospy.Publisher(name="/wind_sensor", data_class=Vector3Stamped, queue_size=1)
     imu_pub = rospy.Publisher(name="imu/data", data_class=Imu, queue_size=1)
-    # obstacles_pub = rospy.Publisher(name="path_planner/obstacles", data_class=obstacles_array_msg, queue_size=1)  # TODO: ska kolla om medelandetypen ska ändras
+    """
+    #obstacles_pub = rospy.Publisher(name="path_planner/obstacles", data_class=obstacles_array_msg, queue_size=1)  # TODO: ska kolla om medelandetypen ska ändras
     # waypoint_index_pub = rospy.Publisher(name="waypoint/index", data_class=Int64, queue_size=1)
 
     # ---- TODO: fix när det är bestämt
@@ -219,7 +218,6 @@ def test_system():
     water_detect_pub = rospy.Publisher(name="water_detection", data_class=Bool, queue_size=1)
     current_pub = rospy.Publisher(name="current", data_class=Float64, queue_size=1)
     camera_pub = rospy.Publisher(name="camera", data_class=Float64, queue_size=1)
-    # -----
 
     # Subscribe to the outputs of the system
     rudder_sub = rospy.Subscriber(name="/rudder_controller/rudder_angle", data_class=Float64, callback=callback_rudder,
@@ -266,7 +264,7 @@ def test_sensors():
     gps_pos_sub = rospy.Subscriber("/gps/fix", NavSatFix, callback_gps_position, queue_size=1)
     gps_velocity_sub = rospy.Subscriber("/gps/fix_velocity", TwistWithCovarianceStamped, callback_gps_velocity,
                                         queue_size=1)
-    wind_sub = rospy.Subscriber("/wind_sensor", Vector3Stamped, callback_wind_sensor, queue_size=1)
+    wind_sub = rospy.Subscriber("wind_sensor", Vector3Stamped, callback_wind_sensor, queue_size=1)
     imu_sub = rospy.Subscriber("/imu/data", Imu, callback_imu_heading, queue_size=1)
     water_level_sub = rospy.Subscriber(name="water_level", data_class=Float64, callback=callback_water_level,
                                        queue_size=1)
