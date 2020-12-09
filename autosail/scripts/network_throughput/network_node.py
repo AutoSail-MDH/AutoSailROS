@@ -13,11 +13,11 @@ def networkPublisher():
     rospy.init_node('network_node', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        tx1 = net.get_tx()
-        rx1 = net.get_rx()
+        tx1 = net.get_data('tx')
+        rx1 = net.get_data('rx')
         time.sleep(1)
-        tx2 = net.get_tx()
-        rx2 = net.get_rx()
+        tx2 = net.get_data('tx')
+        rx2 = net.get_data('rx')
         tx_speed = round((float(tx2) - float(tx1))/1000000.0, 4)
         rx_speed = round((float(rx2) - float(rx1))/1000000.0, 4)
         txpub.publish(tx_speed)

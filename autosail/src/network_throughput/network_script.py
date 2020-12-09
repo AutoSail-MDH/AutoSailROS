@@ -1,21 +1,19 @@
 #!/usr/bin/env python
 import time
-
+import os
 
 class network:
     def __init__(self):
         pass
 
-    def get_rx(self):
-        with open('/sys/class/net/eno1/statistics/rx_bytes', 'r') as f:
-            data_read = f.read()
+    def get_data(self, var):
+        if os.uname()[4][0:3] == 'x86':
+            with open('/sys/class/net/eno1/statistics/' + var + '_bytes', 'r') as f:
+                data_read = f.read()
+        else:
+            with open('/sys/class/net/eth0/statistics/' + var + '_bytes', 'r') as f:
+                data_read = f.read()
         return data_read
-
-    def get_tx(self):
-        with open('/sys/class/net/eno1/statistics/tx_bytes', 'r') as f:
-            data_read = f.read()
-        return data_read
-
 
 if __name__ == "__main__":
     while True:
