@@ -9,6 +9,8 @@ from autosail.msg import obstaclemsg
 from autosail.msg import obstacles_array_msg
 from scipy.spatial.transform import Rotation
 import std_msgs.msg
+from autosail.msg import stm32_msg
+
 
 import math
 import rospy
@@ -154,7 +156,7 @@ def callback_imu_heading(data):
 
 def callback_stm32(data):
     global stm32_values
-    water_level = data.data
+    stm32_values = data
 
 
 def publish_signals(fake_signals, publisher):
@@ -218,10 +220,8 @@ def init_sensor_subscribers():
                                         queue_size=1)
     wind_sub = rospy.Subscriber("/wind_sensor/wind_vector", geometry_msgs.msg.Vector3Stamped, callback_wind_sensor, queue_size=1)
     imu_sub = rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, callback_imu_heading, queue_size=1)
-    """
-    stm32_sub = rospy.Subscriber(name="stm32", data_class=stm32_msg, callback=callback_stm32,
+    stm32_sub = rospy.Subscriber(name="/stm32_handle/sensor_readings", data_class=stm32_msg, callback=callback_stm32,
                                        queue_size=1)
-    """
 
 
 def test_sensors():
@@ -266,11 +266,16 @@ def list_check(list, limit, name):
     :return:
     """
     diff_list = np.diff(list)
-    diff_list = abs(np.diff(diff_list) / abs(sum(list) / len(list)))
-    if max(diff_list) < limit:
-        rospy.loginfo("Startup test-{}: Succeeded".format(name))
+    print("diff_list", diff_list)
+    if max(abs(diff_list)) > 0:
+        diff_list = abs(np.diff(diff_list) / abs(sum(list) / len(list)))
+        print("max(diff_list)", max(diff_list))
+        if max(diff_list) < limit:
+            rospy.loginfo("Startup test-{}: Succeeded".format(name))
+        else:
+            rospy.logerr("Startup test-{}: Failed".format(name))
     else:
-        rospy.logerr("Startup test-{}: Failed".format(name))
+        rospy.loginfo("Startup test-{}: Succeeded".format(name))
 
 def test_stm32():
     """
@@ -287,7 +292,7 @@ def test_stm32():
     water_detect_2 = []
     pump = []
 
-    while stm32_values is not None:
+    while not rospy.is_shutdown() and stm32_values is None:
         pass
 
     for i in range(10):
@@ -298,16 +303,16 @@ def test_stm32():
         water_detect_1 += [stm32_values.water_detect_1]
         water_detect_2 += [stm32_values.water_detect_2]
         pump += [stm32_values.pump]
+
         rate.sleep()
-
-    list_check(list=adc_current, limit=1, name="adc_current") # TODO: limit
-    list_check(list=I2c_current_1, limit=1, name="I2c_current_1") # TODO: limit
-    list_check(list=I2c_current_2, limit=1, name="I2c_current_2") # TODO: limit
-    list_check(list=I2c_current_3, limit=1, name="I2c_current_3") # TODO: limit
-    list_check(list=water_detect_1, limit=1, name="water_detect_1") # TODO: limit
-    list_check(list=water_detect_2, limit=1, name="water_detect_2") # TODO: limit
-    list_check(list=pump, limit=1, name="pump") # TODO: limit
-
+    print("I2c_current_2", I2c_current_2)
+    list_check(list=adc_current, limit=0.01, name="adc_current")
+    list_check(list=I2c_current_1, limit=1, name="I2c_current_1")
+    list_check(list=I2c_current_2, limit=0.01, name="I2c_current_2")
+    list_check(list=I2c_current_3, limit=0.01, name="I2c_current_3")
+    list_check(list=water_detect_1, limit=0.01, name="water_detect_1")
+    list_check(list=water_detect_2, limit=0.01, name="water_detect_2")
+    list_check(list=pump, limit=0.01, name="pump")
 
 
 if __name__ == "__main__":

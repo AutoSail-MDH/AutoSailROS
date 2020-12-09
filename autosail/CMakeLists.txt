@@ -50,7 +50,7 @@ catkin_python_setup()
 ##   * add "message_runtime" and every package in MSG_DEP_SET to
 ##     catkin_package(CATKIN_DEPENDS ...)
 ##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
+##     and list every .msg/.srv/.action file to be processeds
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
@@ -61,6 +61,7 @@ add_message_files(
    waypoint_array_msg.msg
    obstaclemsg.msg
    obstacles_array_msg.msg
+   stm32_msg.msg
 
 )
 
