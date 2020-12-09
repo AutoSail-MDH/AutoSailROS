@@ -4,4 +4,5 @@
     <include file="$(find autosail)/launch/path_planner.launch"/>
     <include file="$(find autosail)/launch/ctrl.launch"/>
     <include file="$(find autosail)/test/startup.launch"/>
+    <node pkg="autosail" name="network_node" type="network_node.py"/>
 </launch>
