@@ -159,6 +159,7 @@ catkin_install_python(PROGRAMS
    scripts/utility/boat_tf_broadcaster.py
    scripts/utility/route_planner_service.py
    scripts/utility/true_wind_node.py
+   scripts/temperature_sbcs/temperature_node.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
