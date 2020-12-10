@@ -71,7 +71,7 @@ if __name__ == "__main__":
             #camera_image.data = image
             object_coord_x, object_coord_y = convert_to_vec(distance, ang)
             camera_data.vector.x = object_coord_x
-            camera_data.vector.y = object_coord_y
+            camera_data.vector.y = -object_coord_y
             camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)

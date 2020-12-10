@@ -11,6 +11,7 @@ def handle_route_planner(req):
         point = RoutePoint()
         point.pose = wp
         point.id = "0"
+        point.pose.orientation.w = 1
         prop = KeyValue()
         prop.key = "diameter"
         prop.value = "5"

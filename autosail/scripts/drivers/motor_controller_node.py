@@ -22,7 +22,7 @@ class MotorControllerListener:
         :type msg: Integer
         '''
         # Store the message received.
-        self.rudder = msg.data
+        self.rudder = msg.data+math.radians(5)
         self.servo_control()
 
     def sail_callback(self, msg):

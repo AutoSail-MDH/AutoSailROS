@@ -33,7 +33,7 @@ def angle(d, x, mx):
 def grab_frame(zed, runtime_parameters):
     """
     This function receives the zed camera and its runtime parameters and grabs a frame if the camera has been started succelfyllu
-    :param zed: Zed class
+    :param zed: camera class
     :param runtime_parameters: This is the runtime parameters
     :return: returns the frame that is grabed and the 3d pointcloud
     """
@@ -194,6 +194,7 @@ def startzedCamera():
     init_params.camera_resolution = sl.RESOLUTION.HD720
     '''
     init = sl.InitParameters()
+
 
     if not zed.is_opened():
         print("Opening ZED Camera...")

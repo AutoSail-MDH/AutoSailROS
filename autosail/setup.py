@@ -8,7 +8,8 @@ setup_args = generate_distutils_setup(
               'motor_controller',
               'path_planner',
               'wind_sensor',
-              'camera'
+              'camera',
+              'network_throughput'
               ],
     package_dir={'': 'src'}
 )

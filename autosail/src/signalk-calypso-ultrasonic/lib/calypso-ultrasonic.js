@@ -480,7 +480,7 @@ class Ultrasonic extends EventEmitter {
     if (model.pitch !== null) {
       values.push({
         path: 'navigation.attitude.pitch',
-        value: model.roll
+        value: model.pitch
       })
     }
 
