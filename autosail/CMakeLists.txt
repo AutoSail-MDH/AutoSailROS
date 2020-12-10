@@ -12,8 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   message_generation
   geometry_msgs
-  marti_nav_msgs
-  marti_common_msgs
+  #marti_nav_msgs
+  #marti_common_msgs
   rospy
   sensor_msgs
   std_msgs
@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED python3)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
