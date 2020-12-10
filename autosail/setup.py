@@ -9,7 +9,7 @@ setup_args = generate_distutils_setup(
               'path_planner',
               'wind_sensor',
               'camera',
-              'stm32'
+              'stm32',
               'camera',
               'network_throughput'
               ],
