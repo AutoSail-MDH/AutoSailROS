@@ -48,7 +48,7 @@ if __name__ == "__main__":
         err, point_cloud_value = point_cloud.get_value(x, y)
         distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
                              point_cloud_value[1] * point_cloud_value[1] +
-                             point_cloud_value[2] * point_cloud_value[2])
+                             point_cloud_value[2] * point_cloud_value[2])/1000
 
         point_cloud_np = point_cloud.get_data()
         point_cloud_np.dot(tr_np)
