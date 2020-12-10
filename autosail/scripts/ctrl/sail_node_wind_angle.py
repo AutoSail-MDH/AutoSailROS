@@ -24,12 +24,14 @@ class SubscriberValues:
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        roll = -math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
+        #roll = -math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
+        roll = math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
         self.roll_angle = roll
 
     def callback_wind_angle(self, data):
         x = data.vector.x
-        y = -data.vector.y
+        #y = -data.vector.y
+        y = data.vector.y
         angle = math.atan2(y, x)  # -atan(y/x) since NED coordinates
         self.wind_angle = angle
         rospy.loginfo("""wind angle={}""".format(math.degrees(self.wind_angle)))

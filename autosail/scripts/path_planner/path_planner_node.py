@@ -104,7 +104,8 @@ def gps_velocity_callback(data):
     """
     global velocity
     lin_velocity_x = data.twist.twist.linear.x * 1.94384449
-    lin_velocity_y = - data.twist.twist.linear.y * 1.94384449
+    #lin_velocity_y = - data.twist.twist.linear.y * 1.94384449
+    lin_velocity_y = data.twist.twist.linear.y * 1.94384449
     lin_velocity = [lin_velocity_x, lin_velocity_y]
     velocity = math.sqrt((lin_velocity_x ** 2) + (lin_velocity_y ** 2))
 
@@ -118,7 +119,8 @@ def imu_heading_callback(data):
     global heading
     heading_quaternion = Imu()
     heading_quaternion.orientation = data.orientation
-    yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
+    #yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
+    yaw = quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading = [np.cos(yaw), np.sin(yaw)]
 
 

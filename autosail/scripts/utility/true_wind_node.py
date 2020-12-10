@@ -13,19 +13,22 @@ wind = None
 def gps_velocity_callback(data):
     global velocity
     lin_velocity_x = data.twist.twist.linear.x
-    lin_velocity_y = - data.twist.twist.linear.y
+    #lin_velocity_y = - data.twist.twist.linear.y
+    lin_velocity_y = data.twist.twist.linear.y
     velocity = [lin_velocity_x, lin_velocity_y]
 
 
 def imu_heading_callback(data):
     global yaw
-    yaw = -quaternion_to_euler_yaw(data.orientation)
+    #yaw = -quaternion_to_euler_yaw(data.orientation)
+    yaw = quaternion_to_euler_yaw(data.orientation)
     #yaw = [np.cos(yaw), np.sin(yaw)]
 
 
 def wind_callback(data):
     global wind
-    wind = [data.vector.x, -data.vector.y]
+    #wind = [data.vector.x, -data.vector.y]
+    wind = [data.vector.x, data.vector.y]
 
 
 if __name__ == "__main__":

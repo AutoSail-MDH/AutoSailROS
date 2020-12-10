@@ -78,7 +78,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 0)
-        self.assertEqual(sail_angle, max_sail)
+        self.assertEqual(sail_angle, -max_sail)
 
         # Test wind from side
         wind_msg.vector.x = 0
@@ -91,7 +91,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 708.75)
-        self.assertEqual(sail_angle, math.pi/4)
+        self.assertEqual(sail_angle, -math.pi/4)
 
         # Test wind from ahead and side
         wind_msg.vector.x = -1
@@ -129,7 +129,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 708.75)
-        self.assertEqual(sail_angle, -math.pi/4)
+        self.assertEqual(sail_angle, math.pi/4)
 
         # Test wind from behind and other side
         wind_msg.vector.x = 1
@@ -142,7 +142,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 0)
-        self.assertEqual(sail_angle, -max_sail)
+        self.assertEqual(sail_angle, max_sail)
 
     def test_sail_angle_roll(self):
         global sail_servo, sail_angle
@@ -164,7 +164,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 2/3*max_servo)
-        self.assertAlmostEqual(sail_angle, -max_sail/3)
+        self.assertAlmostEqual(sail_angle, max_sail/3)
 
         # Test 20 deg roll
         imu_msg = get_imu_msg(20)
@@ -176,7 +176,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 1 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, 2/3*-max_sail)
+        self.assertAlmostEqual(sail_angle, 2/3*max_sail)
 
         # Test 30 deg roll
         imu_msg = get_imu_msg(30)
@@ -188,7 +188,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 0)
-        self.assertAlmostEqual(sail_angle, -max_sail)
+        self.assertAlmostEqual(sail_angle, max_sail)
 
         # Test -30 deg roll
         imu_msg = get_imu_msg(-30)
@@ -200,7 +200,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 0)
-        self.assertAlmostEqual(sail_angle, max_sail)
+        self.assertAlmostEqual(sail_angle, -max_sail)
 
         # Test -20 deg roll
         imu_msg = get_imu_msg(-20)
@@ -212,7 +212,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 1 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, 2 / 3 * max_sail)
+        self.assertAlmostEqual(sail_angle, 2 / 3 * -max_sail)
 
         # Test -10 deg roll
         imu_msg = get_imu_msg(-10)
@@ -224,7 +224,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 2 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, max_sail / 3)
+        self.assertAlmostEqual(sail_angle, -max_sail / 3)
 
     def test_sail_wind_and_roll(self):
         global sail_servo, sail_angle
@@ -245,7 +245,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 168.75)
-        self.assertAlmostEqual(sail_angle, -math.pi/4-max_sail/3)
+        self.assertAlmostEqual(sail_angle, math.pi/4+max_sail/3)
 
         wind_msg = Vector3Stamped()
         wind_msg.vector.x = 0
@@ -261,7 +261,7 @@ class TestSail(unittest.TestCase):
                 break
         rospy.sleep(2)
         self.assertEqual(sail_servo, 168.75)
-        self.assertAlmostEqual(sail_angle, math.pi/4+max_sail/3)
+        self.assertAlmostEqual(sail_angle, -math.pi/4-max_sail/3)
 
 
 if __name__ == "__main__":
