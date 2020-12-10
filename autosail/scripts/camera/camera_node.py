@@ -9,7 +9,6 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Vector3Stamped
 from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle, convert_to_vec
 
-
 if __name__ == "__main__":
     rospy.init_node("camera")
     refresh_rate = rospy.get_param("~rate", 60)
@@ -23,7 +22,7 @@ if __name__ == "__main__":
     # Check if camera initialized successfully
     if status != sl.ERROR_CODE.SUCCESS:
         # Delay for the publisher to have time to publish the message
-        rospy.sleep(1/30)
+        rospy.sleep(1 / 30)
         status_pub.publish(str(status))
         rospy.signal_shutdown("Error starting camera")
 
@@ -46,9 +45,9 @@ if __name__ == "__main__":
         x, y = detect_contour(image)
 
         err, point_cloud_value = point_cloud.get_value(x, y)
-        distance = float(math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
+        distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
                              point_cloud_value[1] * point_cloud_value[1] +
-                             point_cloud_value[2] * point_cloud_value[2])/1000.)
+                             point_cloud_value[2] * point_cloud_value[2])
 
         point_cloud_np = point_cloud.get_data()
         point_cloud_np.dot(tr_np)
@@ -59,8 +58,8 @@ if __name__ == "__main__":
         if not np.isnan(distance) and not np.isinf(distance):
             camera_data = Vector3Stamped()
             object_coord_x, object_coord_y = convert_to_vec(distance, ang)
-            camera_data.vector.x = object_coord_x
-            camera_data.vector.y = -object_coord_y
+            camera_data.vector.x = object_coord_x/1000
+            camera_data.vector.y = -object_coord_y/1000
             camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
         rate.sleep()
