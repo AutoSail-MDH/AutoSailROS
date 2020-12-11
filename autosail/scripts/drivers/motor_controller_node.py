@@ -18,6 +18,7 @@ class MotorControllerListener:
         self.rudder_mid = rudder_limit/2
         self.rudder_k = 1008/rudder_limit
         self.sail_k = 1008/sail_limit
+        self.last_100 = []
         
     def rudder_callback(self, msg):
         '''
@@ -27,7 +28,11 @@ class MotorControllerListener:
         :type msg: Integer
         '''
         # Store the message received.
-        self.rudder = msg.data+math.radians(5)
+        self.last_100.append(msg.data+math.radians(5))
+        if len(self.last_100) > 100:
+            self.last_100.pop(0)
+        #self.rudder = msg.data+math.radians(5)
+        self.rudder = sum(self.last_100)/len(self.last_100)
         self.servo_control()
 
     def sail_callback(self, msg):
