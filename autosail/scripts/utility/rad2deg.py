@@ -11,13 +11,13 @@ from std_msgs.msg import Float64
 
 
 def callback(msg):
-    global rad_pub
-    rad_pub.publish(math.radians(msg.data))
+    global deg_pub
+    deg_pub.publish(math.degrees(msg.data))
 
 
 if __name__ == "__main__":
-    rospy.init_node("deg2rad", anonymous=True)
-    rad_pub = rospy.Publisher("rad", Float64, queue_size=1)
-    rospy.Subscriber("deg", Float64, callback, queue_size=1)
+    rospy.init_node("rad2deg", anonymous=True)
+    deg_pub = rospy.Publisher("deg", Float64, queue_size=1)
+    rospy.Subscriber("rad", Float64, callback, queue_size=1)
     rospy.spin()
 
