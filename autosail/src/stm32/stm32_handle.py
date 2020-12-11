@@ -8,7 +8,7 @@ def sensor_readings():
     Communicating to MCU to acquire sensor  data, from battery life, current consumption and water detection
     :return: data from MCU sensors
     """
-    ser = serial.Serial('/dev/ttyACM0', 52000, timeout=2)  # open serial port
+    ser = serial.Serial('/dev/ttyACM60', 52000, timeout=2)  # open serial port
     if ser.isOpen():
         print("Already open")
     else:
