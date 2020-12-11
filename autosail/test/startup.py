@@ -192,7 +192,7 @@ def test_system():
     rate = rospy.Rate(1)
     timerStart = rospy.Time.now()
     while not rospy.is_shutdown():
-        timerCheck = timerStart - rospy.Time.now()
+        timerCheck = rospy.Time.now() - timerStart
         if timerCheck.secs >= 10:
             rospy.logerr(f'Pathplanner/Motorcontroller error, desired_course:{desired_course}, ruder_angle:{rudder_angle}, sail_servo_angle:{sail_servo_angle}')
             break
@@ -249,7 +249,7 @@ def test_sensors():
     subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
     timerStart = rospy.Time.now()
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
-        timerCheck = timerStart - rospy.Time.now()
+        timerCheck = rospy.Time.now() - timerStart
         if timerCheck.secs >= 10:
             rospy.logerr(f'Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, lin_velocity:{lin_velocity}, yaw: {yaw}')
             break
@@ -303,7 +303,7 @@ def test_stm32():
     pump = []
     timerStart = rospy.Time.now()
     while not rospy.is_shutdown() and stm32_values is None:
-        timerCheck = timerStart - rospy.Time.now()
+        timerCheck = rospy.Time.now() - timerStart
         if timerCheck.secs >= 10:
             rospy.logerr(f'Problem with stm32, rospy is shutdown:{rospy.is_shutdown()}, stm32_values:{stm32_values}')
             break
