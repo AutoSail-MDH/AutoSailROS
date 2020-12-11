@@ -16,8 +16,10 @@ def sensor_readings():
     data = b'5'  # data sent
     ser.write(data)  # Serial port write data
     while True:
-        data = ser.readline()
-        if data != b"":
+        r = ser.read()
+        data += r
+        print(r)
+        if r == b"\n":
             break
     print("receive data is:", list(data))
     ser.close()
