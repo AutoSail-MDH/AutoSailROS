@@ -6,8 +6,8 @@ import pyzed.sl as sl
 
 
 def convert_to_vec(distance, angle):
-    x = distance*math.cos(angle)
-    y = math.copysign(distance*math.sin(angle), angle)
+    x = distance * math.cos(angle)
+    y = math.copysign(distance * math.sin(angle), angle)
     return x, y
 
 
@@ -21,10 +21,10 @@ def angle(d, x, mx):
     :return: returns the angle in radians
     """
 
-    #print("avstånd b", x-mx)
-    b = x-mx
+    # print("avstånd b", x-mx)
+    b = x - mx
 
-    r = math.asin(b/d)
+    r = math.asin(b / d)
     # d_angle = r*(180/math.pi)
 
     return r
@@ -76,8 +76,8 @@ def detect_contour(image):
     # printimage('mask', mask)
     result = cv2.bitwise_and(image, image, mask=mask)
     # printimage('result', result)
-    x, y = shapemask(result)
-    return x, y
+    x, y, image, og_image = shapemask(result, image)
+    return x, y, image, og_image
 
 
 def colormask(hsvimage):
@@ -93,7 +93,7 @@ def colormask(hsvimage):
     return maskedimage
 
 
-def shapemask(image):
+def shapemask(image, og_image):
     """
     receives the masked image and then find the largest countour and finds the middle point and returns the coordinates
     :param image: A matrix that represent the image
@@ -106,6 +106,7 @@ def shapemask(image):
     blurred = cv2.GaussianBlur(gray, (11, 11), 0)
     thresh = cv2.threshold(blurred, 10, 255, cv2.THRESH_BINARY)[1]
 
+    # cnts,hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)[-2:]
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
 
@@ -116,16 +117,28 @@ def shapemask(image):
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-    return cX, cY
+
+        else:
+            cX, cY = 0, 0
+    cv2.drawContours(og_image, cnts, -1, (0, 255, 0), 10)
+    cv2.circle(og_image, (cX, cY), 7, (255, 255, 255), -1)
+
+    cv2.putText(og_image, "Bouy", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 8)
+    cv2.putText(og_image, "Bouy", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4)
+
+    # cv2.drawContours(og_image, [cnts], -1 (0, 255, 0),2)
+    # cv2.circle(og_image,(cX,cY), 7,(255, 255, 255),-1)
+
+    return cX, cY, image, og_image
 
 
 '''
 def detectshape(c):
-    
+
     THIS ONE IS NOT BEING USED
     :param c: 
     :return: 
-    
+
     # initialize the shape name and approximate the contour
     shape = "unidentified"
     peri = cv2.arcLength(c, True)
@@ -171,7 +184,7 @@ def startzedCamera():
     init_params = sl.InitParameters()
     init_params.depth_mode = sl.DEPTH_MODE.ULTRA  # Use PERFORMANCE depth mode
     init_params.coordinate_units = sl.UNIT.METER  # Use meter units (for depth measurements)
-    init_params.camera_resolution = sl.RESOLUTION.HD720
+    init_params.camera_resolution = sl.RESOLUTION.HD1080
     init_params.depth_minimum_distance = 0.15
     init_params.depth_maximum_distance = 40
 
@@ -234,5 +247,5 @@ def pad_img_to_fit_bbox(img, x1, x2, y1, y2):
     x1 += np.abs(np.minimum(0, x1))
     x2 += np.abs(np.minimum(0, x1))
     return img, x1, x2, y1, y2
-    
+
 '''

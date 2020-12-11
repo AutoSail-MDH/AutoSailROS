@@ -3,13 +3,13 @@
 import rospy
 import os
 import time
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 from network_throughput.network_script import network
 
 def networkPublisher():
     net = network()
-    txpub = rospy.Publisher('/network/tx_Mbps', Float64, queue_size=10)
-    rxpub = rospy.Publisher('/network/rx_Mbps', Float64, queue_size=10)
+    txpub = rospy.Publisher('/network/tx_Mbps', Float32, queue_size=10)
+    rxpub = rospy.Publisher('/network/rx_Mbps', Float32, queue_size=10)
     rospy.init_node('network_node', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
