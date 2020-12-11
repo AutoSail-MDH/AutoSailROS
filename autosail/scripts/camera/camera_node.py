@@ -20,6 +20,7 @@ if __name__ == "__main__":
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
     status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
     apriltag_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
+    found_apriltags_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
 
     rate = rospy.Rate(refresh_rate)
@@ -46,6 +47,8 @@ if __name__ == "__main__":
     tr_np = mirror_ref.m
 
     bridge = CvBridge()
+    foundTag = set({"No AprilTag found"})
+    tag = "No AprilTag found"
 
     while not rospy.is_shutdown():
         status_pub.publish(str(status))
@@ -65,14 +68,30 @@ if __name__ == "__main__":
         #Apriltag detection
         frame1 = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
 
-        detector = apriltag.Detector()
-        result = detector.detect(frame1)
 
-        if result != []:
-            tag = "tag36h11"
+        options = apriltag.DetectorOptions(families="tag36h11")
+        detector = apriltag.Detector(options)
+        results = detector.detect(frame1)
+        #print("[INFO] {} total AprilTags detected".format(len(results)))
+
+
+
+
+        if results != []:
+            if "No AprilTag found" in foundTag:
+                foundTag.remove("No AprilTag found")
+
+            for r in results:
+                tagFamily = r.tag_family.decode("utf-8")
+                #print("[INFO] tag family: {}".format(tagFamily))
+                foundTag.add(tagFamily)
+
+
+
         else:
             tag = "No AprilTag found"
 
+        print(foundTag)
         apriltag_pub.publish(str(tag))
 
 
@@ -89,5 +108,5 @@ if __name__ == "__main__":
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
         #img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
-       # image_pub.publish(img_msg)
+        #image_pub.publish(img_msg)
         rate.sleep()
