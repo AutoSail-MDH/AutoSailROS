@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import rospy
 import math
 import pyzed.sl as sl
 import numpy as np
 import cv2
+import apriltag
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Vector3Stamped
@@ -11,12 +12,14 @@ from cv_bridge import CvBridge
 import sensor_msgs.msg
 from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle, convert_to_vec
 
+
 if __name__ == "__main__":
     rospy.init_node("camera")
     refresh_rate = rospy.get_param("~rate", 60)
     queue_size = rospy.get_param("~queue_size", 1)
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
     status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
+    apriltag_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
 
     rate = rospy.Rate(refresh_rate)
@@ -25,7 +28,7 @@ if __name__ == "__main__":
     # Check if camera initialized successfully
     if status != sl.ERROR_CODE.SUCCESS:
         # Delay for the publisher to have time to publish the message
-        rospy.sleep(1 / 30)
+        rospy.sleep(1/30)
         status_pub.publish(str(status))
         rospy.signal_shutdown("Error starting camera")
 
@@ -54,12 +57,23 @@ if __name__ == "__main__":
                              point_cloud_value[1] * point_cloud_value[1] +
                              point_cloud_value[2] * point_cloud_value[2])
 
-        #old_time = rospy.Time.now()
-        #point_cloud_np = point_cloud.get_data()
-        #rospy.loginfo('Execution time: {}'.format((rospy.Time.now() - old_time)/1000000))
-        #point_cloud_np.dot(tr_np)
+        point_cloud_np = point_cloud.get_data()
+        point_cloud_np.dot(tr_np)
 
         ang = angle(distance, x, w2)
+
+        #Apriltag detection
+        frame1 = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
+
+        detector = apriltag.Detector()
+        result = detector.detect(frame1)
+
+        if result != []:
+            tag = "tag36h11"
+        else:
+            tag = "No AprilTag found"
+
+        apriltag_pub.publish(str(tag))
 
 
         # If an objecd src/AutosailROSct is detected, publish its position as an x, y coordinate
@@ -69,11 +83,11 @@ if __name__ == "__main__":
 
             #camera_image.data = image
             object_coord_x, object_coord_y = convert_to_vec(distance, ang)
-            camera_data.vector.x = object_coord_x/1000
-            camera_data.vector.y = -object_coord_y/1000
+            camera_data.vector.x = object_coord_x
+            camera_data.vector.y = object_coord_y
             camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
-        img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
-        image_pub.publish(img_msg)
+        #img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
+       # image_pub.publish(img_msg)
         rate.sleep()
