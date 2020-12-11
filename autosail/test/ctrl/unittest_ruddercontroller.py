@@ -64,7 +64,7 @@ class TestRudder(unittest.TestCase):
             self.velocity_pub.publish(velocity_msg)
             if rudder_angle is not None or rospy.is_shutdown():
                 break
-        self.assertEqual(rudder_angle, math.pi/4)
+        self.assertEqual(rudder_angle, -math.pi/4)
 
     def test_rudder_angle_max_right(self):
         global rudder_angle

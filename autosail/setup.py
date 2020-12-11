@@ -10,6 +10,8 @@ setup_args = generate_distutils_setup(
               'wind_sensor',
               'camera',
               'stm32'
+              'camera',
+              'network_throughput'
               ],
     package_dir={'': 'src'}
 )

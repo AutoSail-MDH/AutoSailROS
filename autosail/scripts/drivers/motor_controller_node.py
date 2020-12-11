@@ -13,6 +13,11 @@ class MotorControllerListener:
         self.mcl = MotorController()
         self.rudder = None
         self.sail = None
+        rudder_limit = rospy.get_param("~rudder_servo_limit", 90)
+        sail_limit = rospy.get_param("~sail_servo_limit", 1440)
+        self.rudder_mid = rudder_limit/2
+        self.rudder_k = 1008/rudder_limit
+        self.sail_k = 1008/sail_limit
         
     def rudder_callback(self, msg):
         '''
@@ -42,12 +47,14 @@ class MotorControllerListener:
         '''
         if self.sail is not None:
             angle = math.degrees(self.sail)  # takes the sail angle in radians and converts to degrees
-            position = int(6.301*(angle + 80)+992)  # k value is 6.301 because input is between -45 and 45degrees
+            # k value is 0.7 because input is between 0 and 1440 degrees so
+            position = int(self.sail_k*angle+992)
             rospy.loginfo("Position Sail:[%d]", position)  # logs the current position of the sail
             self.mcl.set_position(0, position)  # changes the position of servo 0
         if self.rudder is not None:
             angle = math.degrees(self.rudder)  # takes the rudder angle in radians and converts to degrees
-            position = int(11.201*(angle + 45)+992)  # k value is 11.201 because input is between 0 and 1620 degrees so
+            # k value is 6.301 because input is between -45 and 45 degrees
+            position = int(self.rudder_k*(angle + self.rudder_mid)+992)
             # the slope between rudder and sail are different
             rospy.loginfo("Position Rudder:[%d]", position)  # logs the current position of the rudder
             self.mcl.set_position(1, position)  # changes the position of servo 1
