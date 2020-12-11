@@ -39,11 +39,12 @@ class SubscriberValues:
 
 # Dynamic reconfiguration
 def dynamic_reconf_callback(config, level):
-    global sc_pid, sail_limits
+    global sc_pid, sail_limits, enable_tilt
     sc_pid.kp = config.kp
     sc_pid.ki = config.ki
     sc_pid.kd = config.kd
     sc_pid.set_limits((-config.sail_limit * math.pi / 180, config.sail_limit * math.pi / 180))
+    enable_tilt = config.enable_auto_tilt
     rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={sail_limit}""".format(**config))
     return config
 
@@ -75,14 +76,17 @@ if __name__ == "__main__":
     # Initialize PID with integral coefficient as 0 since it will constantly adjust
     sc_pid = pid.PID()
     pid.ki = 0
-
+    # Enable the global variable enable_tilt
+    enable_tilt = False
     # Dynamic reconfigure setup
     srv = Server(SailControllerConfig, dynamic_reconf_callback)
 
     while not rospy.is_shutdown():
         # Use the PID to get a desired roll angle
-        pid_corrected_roll = -(sc_pid(values.roll_angle))
-
+        if enable_tilt:
+            pid_corrected_roll = -(sc_pid(values.roll_angle))
+        else:
+            pid_corrected_roll = 0
         # Calculate the new sail angle and sail trim
         new_sail_angle_rad = calculate_sail_angle(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
                                                   wind_angle=values.wind_angle, max_sail=sail_limits)
