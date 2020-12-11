@@ -193,7 +193,7 @@ def test_system():
     timerStart = rospy.Time.now()
     while not rospy.is_shutdown():
         timerCheck = timerStart - rospy.Time.now()
-        if timerCheck.secs == 10:
+        if timerCheck.secs >= 10:
             rospy.logerr(f'Pathplanner/Motorcontroller error, desired_course:{desired_course}, ruder_angle:{rudder_angle}, sail_servo_angle:{sail_servo_angle}')
             break
         publish_signals(fake_signals, publisher)
@@ -250,7 +250,7 @@ def test_sensors():
     timerStart = rospy.Time.now()
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
         timerCheck = timerStart - rospy.Time.now()
-        if timerCheck.secs == 10:
+        if timerCheck.secs >= 10:
             rospy.logerr(f'Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, lin_velocity:{lin_velocity}, yaw: {yaw}')
             break
         pass
@@ -304,7 +304,7 @@ def test_stm32():
     timerStart = rospy.Time.now()
     while not rospy.is_shutdown() and stm32_values is None:
         timerCheck = timerStart - rospy.Time.now()
-        if timerCheck.secs == 10:
+        if timerCheck.secs >= 10:
             rospy.logerr(f'Problem with stm32, rospy is shutdown:{rospy.is_shutdown()}, stm32_values:{stm32_values}')
             break
         pass
