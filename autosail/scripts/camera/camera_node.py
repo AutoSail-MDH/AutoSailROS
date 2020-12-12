@@ -7,6 +7,7 @@ import cv2
 import apriltag
 import sensor_msgs.msg
 
+
 from dynamic_reconfigure.server import Server
 from autosail.cfg import CameraConfig
 from std_msgs.msg import String
@@ -14,6 +15,14 @@ from geometry_msgs.msg import Vector3Stamped
 from cv_bridge import CvBridge
 from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle, convert_to_vec
 
+
+B_L = 0
+G_L = 150
+R_L = 95
+
+B_U = 11
+G_U = 255
+R_U = 255
 
 
 def dynamic_reconf_callback(config, level):
@@ -28,7 +37,9 @@ def dynamic_reconf_callback(config, level):
     G_U = config.G_U
     R_U = config.R_U
 
-    rospy.loginfo("Reconfigure request: {}".format(config))
+    print("B_L in recon", B_L)
+
+    #rospy.loginfo("Reconfigure request: {}".format(config))
     return config
 
 
@@ -43,8 +54,7 @@ if __name__ == "__main__":
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
     mask_pub = rospy.Publisher(name="camera/mask", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
 
-    # Dynamic reconfigure
-    srv = Server(CameraConfig, dynamic_reconf_callback)
+
 
     rate = rospy.Rate(refresh_rate)
     zed, status = startzedCamera()
@@ -73,10 +83,17 @@ if __name__ == "__main__":
     foundTag = set({"No AprilTag found"})
     tag = "No AprilTag found"
 
+    # Dynamic reconfigure
+    srv = Server(CameraConfig, dynamic_reconf_callback)
+    print(srv)
+
     while not rospy.is_shutdown():
         status_pub.publish(str(status))
         og_image, point_cloud = grab_frame(zed, runtime_parameters)
-        x, y, image, cnt_image, mask = detect_contour(og_image)
+        lower = (B_L, G_L, R_L)
+        upper = (B_U, G_U, R_U)
+
+        x, y, image, cnt_image, mask = detect_contour(og_image, lower, upper)
 
         err, point_cloud_value = point_cloud.get_value(x, y)
         distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
@@ -133,9 +150,12 @@ if __name__ == "__main__":
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
 
-        img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
-        image_pub.publish(img_msg)
+        cv2.imshow("img msg", cnt_image)
+        #img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
+        #image_pub.publish(img_msg)
 
-        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
-        mask_pub.publish(mask_img_msg)
+        #mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
+        #mask_pub.publish(mask_img_msg)
+        cv2.imshow("mask", mask)
+        cv2.waitKey(1)
         rate.sleep()
