@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import rospy
 import std_msgs.msg
 import sensor_msgs.msg
@@ -13,7 +14,7 @@ from autosail.msg import stm32_msg
 
 
 import math
-import rospy
+import roslaunch
 import runpy
 import os
 import subprocess
@@ -249,8 +250,11 @@ def test_sensors():
 
     rate = rospy.Rate(10)
     # startup system sensors
-    subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
-    timer_start = rospy.Time.now()
+    # subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
+    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+    roslaunch.configure_logging(uuid)
+    launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
+    launch.start()
     rospy.sleep(10)  # Sleep to enable all sensors to fully load before continuing
     timer_start = rospy.Time.now()
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
