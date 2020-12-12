@@ -240,7 +240,7 @@ def test_sensors():
     Test that the sensors give consistent values
     """
     # Global values used in the callback functions
-    global longitude, lin_velocity, yaw, w_speed
+    global longitude, lin_velocity, yaw, w_speed, launch
     # Arrays for saving the values of the sensors
     longitudes = []
     water_levels = []
@@ -251,9 +251,6 @@ def test_sensors():
     rate = rospy.Rate(10)
     # startup system sensors
     # subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
-    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-    roslaunch.configure_logging(uuid)
-    launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
     launch.start()
     rospy.sleep(10)  # Sleep to enable all sensors to fully load before continuing
     timer_start = rospy.Time.now()
@@ -340,9 +337,20 @@ def test_stm32():
 
 
 if __name__ == "__main__":
-    rospy.init_node("startup_test")
+    node = rospy.init_node("startup_test")
+
+    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+    roslaunch.configure_logging(uuid)
+    launch = roslaunch.parent.ROSLaunchParent(uuid,
+                                              [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
+
     test_system()
     init_sensor_subscribers()
     test_sensors()
     test_stm32()
     rospy.loginfo("Startup test complete")
+    node.shutdown()
+    try:
+        launch.spin()
+    except:
+        launch.shutdown()
