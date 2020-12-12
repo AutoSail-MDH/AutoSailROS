@@ -244,9 +244,9 @@ def test_sensors():
     yaws = []
 
     rate = rospy.Rate(10)
-    rate.sleep()
     #-startup system sensors
     subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
+    rospy.sleep(10) # Sleep to enable all sensors to fully load before continuing
     timerStart = rospy.Time.now()
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
         timerCheck = rospy.Time.now() - timerStart
