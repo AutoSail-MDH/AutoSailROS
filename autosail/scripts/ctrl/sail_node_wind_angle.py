@@ -24,27 +24,27 @@ class SubscriberValues:
     def callback_roll_angle(self, data):
         # transform the quaternion to an Euler angle
         q = data.orientation
-        #roll = -math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
         roll = math.atan2(2 * (q.w * q.x + q.y * q.z), 1 - 2 * (q.x ** 2 + q.y ** 2))
         self.roll_angle = roll
 
     def callback_wind_angle(self, data):
         x = data.vector.x
-        #y = -data.vector.y
         y = data.vector.y
-        angle = math.atan2(y, x)  # -atan(y/x) since NED coordinates
+        angle = math.atan2(y, x)
         self.wind_angle = angle
         rospy.loginfo("""wind angle={}""".format(math.degrees(self.wind_angle)))
 
 
 # Dynamic reconfiguration
 def dynamic_reconf_callback(config, level):
-    global sc_pid, sail_limits, enable_tilt
+    global sc_pid, sail_limits, enable_tilt, min_roll, max_roll
     sc_pid.kp = config.kp
     sc_pid.ki = config.ki
     sc_pid.kd = config.kd
     sc_pid.set_limits((-config.sail_limit * math.pi / 180, config.sail_limit * math.pi / 180))
     enable_tilt = config.enable_auto_tilt
+    min_roll = config.min_roll
+    max_roll = config.max_roll
     rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={sail_limit}""".format(**config))
     return config
 
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     sail_limits = rospy.get_param("~sail_limits", 80) * math.pi / 180
     max_servo = rospy.get_param("~max_servo", 1620)
     queue_size = rospy.get_param("~queue_size", 1)
+    min_roll = rospy.get_param("~min_roll", 10) * math.pi / 180
     max_roll = rospy.get_param("~max_roll", 30) * math.pi / 180
 
     # Publishers
@@ -68,13 +69,12 @@ if __name__ == "__main__":
     # Subscribers
     rospy.Subscriber(name="/imu/data", data_class=sensor_msgs.msg.Imu, callback=values.callback_roll_angle,
                      queue_size=queue_size)
-#    rospy.Subscriber(name='wind_sensor', data_class=Vector3Stamped, callback=values.callback_wind_angle,
-#                     queue_size=queue_size)
     rospy.Subscriber(name='/wind_sensor/wind_vector', data_class=Vector3Stamped, callback=values.callback_wind_angle,
                      queue_size=queue_size)
 
     # Initialize PID with integral coefficient as 0 since it will constantly adjust
     sc_pid = pid.PID()
+    sc_pid.setpoint = min_roll
     pid.ki = 0
     # Enable the global variable enable_tilt
     enable_tilt = False
@@ -83,8 +83,10 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         # Use the PID to get a desired roll angle
-        if enable_tilt:
-            pid_corrected_roll = -(sc_pid(values.roll_angle))
+        if enable_tilt and values.roll_angle > min_roll:
+            if math.copysign(1, values.roll_angle) != math.copysign(1, sc_pid.setpoint):
+                sc_pid.setpoint = -sc_pid.setpoint
+            pid_corrected_roll = -(sc_pid(values.roll_angle))  # - since positive roll clockwise, inverse in the pid
         else:
             pid_corrected_roll = 0
         # Calculate the new sail angle and sail trim
