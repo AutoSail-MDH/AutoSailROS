@@ -257,7 +257,7 @@ def test_sensors():
     launch.start()
     rospy.sleep(10)  # Sleep to enable all sensors to fully load before continuing
     timer_start = rospy.Time.now()
-    while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
+    while longitude is None or w_speed is None or lin_velocity is None or yaw is None:
         timer_check = rospy.Time.now() - timer_start
         if timer_check.secs >= 10:
             rospy.logerr(f"""Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, 
