@@ -5,12 +5,31 @@ import pyzed.sl as sl
 import numpy as np
 import cv2
 import apriltag
+import sensor_msgs.msg
 
+from dynamic_reconfigure.server import Server
+from autosail.cfg import CameraConfig
 from std_msgs.msg import String
 from geometry_msgs.msg import Vector3Stamped
 from cv_bridge import CvBridge
-import sensor_msgs.msg
 from camera.bouydetection import detect_contour, startzedCamera, grab_frame, angle, convert_to_vec
+
+
+
+def dynamic_reconf_callback(config, level):
+
+    global B_L, G_L, R_L, B_U, G_U, R_U
+
+    B_L = config.B_L
+    G_L = config.G_L
+    R_L = config.R_L
+
+    B_U = config.B_U
+    G_U = config.G_U
+    R_U = config.R_U
+
+    rospy.loginfo("Reconfigure request: {}".format(config))
+    return config
 
 
 if __name__ == "__main__":
@@ -20,7 +39,12 @@ if __name__ == "__main__":
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
     status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
     apriltag_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
+    found_apriltags_pub = rospy.Publisher(name="camera/found_apriltags", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
+    mask_pub = rospy.Publisher(name="camera/mask", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
+
+    # Dynamic reconfigure
+    srv = Server(CameraConfig, dynamic_reconf_callback)
 
     rate = rospy.Rate(refresh_rate)
     zed, status = startzedCamera()
@@ -46,11 +70,13 @@ if __name__ == "__main__":
     tr_np = mirror_ref.m
 
     bridge = CvBridge()
+    foundTag = set({"No AprilTag found"})
+    tag = "No AprilTag found"
 
     while not rospy.is_shutdown():
         status_pub.publish(str(status))
         og_image, point_cloud = grab_frame(zed, runtime_parameters)
-        x, y, image, cnt_image = detect_contour(og_image)
+        x, y, image, cnt_image, mask = detect_contour(og_image)
 
         err, point_cloud_value = point_cloud.get_value(x, y)
         distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
@@ -65,15 +91,33 @@ if __name__ == "__main__":
         #Apriltag detection
         frame1 = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
 
-        detector = apriltag.Detector()
-        result = detector.detect(frame1)
 
-        if result != []:
-            tag = "tag36h11"
+        options = apriltag.DetectorOptions(families="tag36h11")
+        detector = apriltag.Detector(options)
+        results = detector.detect(frame1)
+        #print("[INFO] {} total AprilTags detected".format(len(results)))
+
+
+
+
+        if results != []:
+            if "No AprilTag found" in foundTag:
+                foundTag.remove("No AprilTag found")
+
+            for r in results:
+                tagFamily = r.tag_family.decode("utf-8")
+                #print("[INFO] tag family: {}".format(tagFamily))
+                foundTag.add(tagFamily)
+                tag = tagFamily
+
+
+
         else:
             tag = "No AprilTag found"
 
+        #print(foundTag)
         apriltag_pub.publish(str(tag))
+        found_apriltags_pub.publish(str(foundTag))
 
 
         # If an objecd src/AutosailROSct is detected, publish its position as an x, y coordinate
@@ -88,6 +132,10 @@ if __name__ == "__main__":
             camera_data.header.stamp = rospy.Time.now()
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
-        #img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
-       # image_pub.publish(img_msg)
+
+        img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
+        image_pub.publish(img_msg)
+
+        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
+        mask_pub.publish(mask_img_msg)
         rate.sleep()

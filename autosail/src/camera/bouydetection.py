@@ -77,7 +77,7 @@ def detect_contour(image):
     result = cv2.bitwise_and(image, image, mask=mask)
     # printimage('result', result)
     x, y, image, og_image = shapemask(result, image)
-    return x, y, image, og_image
+    return x, y, image, og_image, mask
 
 
 def colormask(hsvimage):
@@ -86,8 +86,18 @@ def colormask(hsvimage):
     :param hsvimage: recives the HSV image as a matrix
     :return: returns the masked image ( only the colors that are in range of the defined range will be returned
     """
-    light_orange = (0, 150, 95)
-    dark_orange = (11, 255, 255)
+    B_L = 0
+    G_L = 150
+    R_L = 255
+
+    B_U = 11
+    G_U = 255
+    R_U = 255
+
+
+
+    light_orange = (B_L, G_L, R_L)
+    dark_orange = (B_U, G_U, R_U)
     maskedimage = cv2.inRange(hsvimage, light_orange, dark_orange)
 
     return maskedimage
