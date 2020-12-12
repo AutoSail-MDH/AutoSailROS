@@ -29,14 +29,6 @@ lin_velocity = None
 yaw = None
 stm32_values = None
 
-longitudes = []
-latitudes = []
-water_levels = []
-gps_velocities = []
-wind_speeds = []
-yaws = []
-
-
 
 class FakeSignals:
     """
@@ -49,7 +41,7 @@ class FakeSignals:
         waypoint = RoutePoint()  # 90 deg
         waypoint.pose.position.x = 16.561736302687205
         waypoint.pose.position.y = 59.61744366137741
-        waypoint.id = "0" # 59.61744366137741, 16.561736302687205
+        waypoint.id = "0"  # 59.61744366137741, 16.561736302687205
         self.waypoints = waypoint_array.route_points.append(waypoint)
         # obstacle
         obstacle_msg = geometry_msgs.msg.Vector3Stamped()
@@ -82,8 +74,9 @@ class FakeSignals:
         gps_position_value = sensor_msgs.msg.NavSatFix()
         gps_position_value.longitude = 16.560838629596216
         gps_position_value.latitude = 59.617458491079226
-        self.gps_position = gps_position_value #59.617458491079226, 16.560838629596216
+        self.gps_position = gps_position_value  # 59.617458491079226, 16.560838629596216
         # -----------------------------------
+
 
 class Publisher:
     """
@@ -97,6 +90,7 @@ class Publisher:
         self.pub_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
         self.pub_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
 
+
 class TestValues:
     """
     Values used to validate the path planner and controller
@@ -106,17 +100,21 @@ class TestValues:
         self.rudder_angle = np.pi/4
         self.sail_servo_angle = 0
 
+
 def callback_desired_course(data):
-    global desired_course, course
+    global desired_course
     desired_course = data.data
+
 
 def callback_rudder_angle(data):
     global rudder_angle
     rudder_angle = data.data
 
+
 def callback_sail(data):
     global sail_servo_angle
     sail_servo_angle = data.data
+
 
 def init_system_subsribers():
     """
@@ -128,7 +126,8 @@ def init_system_subsribers():
     rospy.Subscriber(name="/rudder_controller/rudder_angle", data_class=std_msgs.msg.Float64,
                      callback=callback_rudder_angle, queue_size=1)
     rospy.Subscriber(name="sail_controller/sail_servo_angle", data_class=std_msgs.msg.Float64, callback=callback_sail,
-                                queue_size=1)
+                     queue_size=1)
+
 
 # sensor test callback
 def callback_gps_position(data):
@@ -136,11 +135,13 @@ def callback_gps_position(data):
     longitude = data.longitude
     latitude = data.latitude
 
+
 def callback_gps_velocity(data):
     global lin_velocity
     lin_velocity_x = data.twist.twist.linear.x
     lin_velocity_y = data.twist.twist.linear.y
     lin_velocity = math.sqrt((lin_velocity_x ** 2) + (lin_velocity_y ** 2))
+
 
 def callback_wind_sensor(data):
     global w_theta, w_speed
@@ -149,10 +150,12 @@ def callback_wind_sensor(data):
     w_theta = math.atan2(y, x)
     w_speed = math.sqrt(x**2+y**2)
 
+
 def callback_imu_heading(data):
     global yaw
     q = data.orientation
     yaw = math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y ** 2 + q.z ** 2))
+
 
 def callback_stm32(data):
     global stm32_values
@@ -164,7 +167,6 @@ def publish_signals(fake_signals, publisher):
     Publish the fake sensor values on the publishers in the Publisher class
     :param fake_signals: the fake signals in the FakeSignals class
     :param publisher: the publishers in the Publisher class
-    :return:
     """
     waypoint_array = Route()
     waypoint = RoutePoint()  # 90 deg
@@ -179,26 +181,28 @@ def publish_signals(fake_signals, publisher):
     publisher.pub_velocity.publish(fake_signals.gps_velocity)
     publisher.pub_position.publish(fake_signals.gps_position)
 
+
 def test_system():
     """
     test that the path planner and controller gives correct outputs
     :return:
     """
-    global desired_course, rudder_angle
+    global desired_course, rudder_angle, sail_servo_angle
     init_system_subsribers()
     fake_signals = FakeSignals()
     publisher = Publisher()
     test_values = TestValues()
     rate = rospy.Rate(1)
-    timerStart = rospy.Time.now()
+    timer_start = rospy.Time.now()
     while not rospy.is_shutdown():
-        timerCheck = rospy.Time.now() - timerStart
-        if timerCheck.secs >= 10:
-            rospy.logerr(f'Pathplanner/Motorcontroller error, desired_course:{desired_course}, ruder_angle:{rudder_angle}, sail_servo_angle:{sail_servo_angle}')
+        timer_check = rospy.Time.now() - timer_start
+        if timer_check.secs >= 10:
+            rospy.logerr(f"""Pathplanner/Motorcontroller error, desired_course:{desired_course}, 
+                         ruder_angle:{rudder_angle}, sail_servo_angle:{sail_servo_angle}""")
             break
         publish_signals(fake_signals, publisher)
         rate.sleep()
-        if desired_course is not None and rudder_angle is not None is not sail_servo_angle:
+        if desired_course is not None and rudder_angle is not None and sail_servo_angle is not None:
             break
 
     if abs(test_values.desired_course - desired_course) < np.deg2rad(5):
@@ -220,19 +224,19 @@ def init_sensor_subscribers():
     Init subsribers for the sensors
     :return:
     """
-    gps_pos_sub = rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, callback_gps_position, queue_size=1)
-    gps_velocity_sub = rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped, callback_gps_velocity,
-                                        queue_size=1)
-    wind_sub = rospy.Subscriber("/wind_sensor/wind_vector", geometry_msgs.msg.Vector3Stamped, callback_wind_sensor, queue_size=1)
-    imu_sub = rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, callback_imu_heading, queue_size=1)
-    stm32_sub = rospy.Subscriber(name="/stm32_handle/sensor_readings", data_class=stm32_msg, callback=callback_stm32,
-                                       queue_size=1)
+    rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, callback_gps_position, queue_size=1)
+    rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped,
+                     callback_gps_velocity, queue_size=1)
+    rospy.Subscriber("/wind_sensor/wind_vector", geometry_msgs.msg.Vector3Stamped, callback_wind_sensor,
+                     queue_size=1)
+    rospy.Subscriber("/imu/data", sensor_msgs.msg.Imu, callback_imu_heading, queue_size=1)
+    rospy.Subscriber(name="/stm32_handle/sensor_readings", data_class=stm32_msg, callback=callback_stm32,
+                     queue_size=1)
 
 
 def test_sensors():
     """
     Test that the sensors give consistent values
-    :return:
     """
     # Global values used in the callback functions
     global longitude, lin_velocity, yaw, w_speed
@@ -245,13 +249,14 @@ def test_sensors():
 
     rate = rospy.Rate(10)
     rate.sleep()
-    #-startup system sensors
+    # startup system sensors
     subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
-    timerStart = rospy.Time.now()
+    timer_start = rospy.Time.now()
     while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
-        timerCheck = rospy.Time.now() - timerStart
-        if timerCheck.secs >= 10:
-            rospy.logerr(f'Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, lin_velocity:{lin_velocity}, yaw: {yaw}')
+        timer_check = rospy.Time.now() - timer_start
+        if timer_check.secs >= 10:
+            rospy.logerr(f"""Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, 
+                         lin_velocity:{lin_velocity}, yaw: {yaw}""")
             break
         pass
     for i in range(10):
@@ -261,24 +266,23 @@ def test_sensors():
         yaws += [yaw]
         rate.sleep()
 
-    list_check(list=longitudes, limit=0.001, name="gps_pos")
-    list_check(list=gps_velocities, limit=0.1, name="gps_velocity")
-    list_check(list=wind_speeds, limit=2, name="Wind")
-    list_check(list=yaws, limit=1e-3, name="Imu")
+    list_check(values=longitudes, limit=0.001, name="gps_pos")
+    list_check(values=gps_velocities, limit=0.1, name="gps_velocity")
+    list_check(values=wind_speeds, limit=2, name="Wind")
+    list_check(values=yaws, limit=1e-3, name="Imu")
 
 
-def list_check(list, limit, name):
+def list_check(values, limit, name):
     """
     Check that the list of sensor values are consistent
-    :param list: list of sensor values of the same type
+    :param values: list of sensor values of the same type
     :param limit: the maximum allowed difference
     :param name: the name of the sensor value
-    :return:
     """
-    diff_list = np.diff(list)
+    diff_list = np.diff(values)
     print("diff_list", diff_list)
     if max(abs(diff_list)) > 0:
-        diff_list = abs(np.diff(diff_list) / abs(sum(list) / len(list)))
+        diff_list = abs(np.diff(diff_list) / abs(sum(values) / len(values)))
         print("max(diff_list)", max(diff_list))
         if max(diff_list) < limit:
             rospy.loginfo("Startup test-{}: Succeeded".format(name))
@@ -286,6 +290,7 @@ def list_check(list, limit, name):
             rospy.logerr("Startup test-{}: Failed".format(name))
     else:
         rospy.loginfo("Startup test-{}: Succeeded".format(name))
+
 
 def test_stm32():
     """
@@ -295,38 +300,38 @@ def test_stm32():
     global stm32_values
     rate = rospy.Rate(10)
     adc_current = []
-    I2c_current_1 = []
-    I2c_current_2 = []
-    I2c_current_3 = []
+    i2c_current_1 = []
+    i2c_current_2 = []
+    i2c_current_3 = []
     water_detect_1 = []
     water_detect_2 = []
     pump = []
-    timerStart = rospy.Time.now()
+    timer_start = rospy.Time.now()
     while not rospy.is_shutdown() and stm32_values is None:
-        timerCheck = rospy.Time.now() - timerStart
-        if timerCheck.secs >= 10:
+        timer_check = rospy.Time.now() - timer_start
+        if timer_check.secs >= 10:
             rospy.logerr(f'Problem with stm32, rospy is shutdown:{rospy.is_shutdown()}, stm32_values:{stm32_values}')
             break
         pass
 
     for i in range(10):
         adc_current += [stm32_values.adc_current]
-        I2c_current_1 += [stm32_values.I2c_current_1]
-        I2c_current_2 += [stm32_values.I2c_current_2]
-        I2c_current_3 += [stm32_values.I2c_current_3]
+        i2c_current_1 += [stm32_values.I2c_current_1]
+        i2c_current_2 += [stm32_values.I2c_current_2]
+        i2c_current_3 += [stm32_values.I2c_current_3]
         water_detect_1 += [stm32_values.water_detect_1]
         water_detect_2 += [stm32_values.water_detect_2]
         pump += [stm32_values.pump]
 
         rate.sleep()
-    print("I2c_current_2", I2c_current_2)
-    list_check(list=adc_current, limit=0.01, name="adc_current")
-    list_check(list=I2c_current_1, limit=1, name="I2c_current_1")
-    list_check(list=I2c_current_2, limit=0.01, name="I2c_current_2")
-    list_check(list=I2c_current_3, limit=0.01, name="I2c_current_3")
-    list_check(list=water_detect_1, limit=0.01, name="water_detect_1")
-    list_check(list=water_detect_2, limit=0.01, name="water_detect_2")
-    list_check(list=pump, limit=0.01, name="pump")
+    print("I2c_current_2", i2c_current_2)
+    list_check(values=adc_current, limit=0.01, name="adc_current")
+    list_check(values=i2c_current_1, limit=1, name="I2c_current_1")
+    list_check(values=i2c_current_2, limit=0.01, name="I2c_current_2")
+    list_check(values=i2c_current_3, limit=0.01, name="I2c_current_3")
+    list_check(values=water_detect_1, limit=0.01, name="water_detect_1")
+    list_check(values=water_detect_2, limit=0.01, name="water_detect_2")
+    list_check(values=pump, limit=0.01, name="pump")
 
 
 if __name__ == "__main__":
