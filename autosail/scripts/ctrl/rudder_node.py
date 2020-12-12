@@ -61,7 +61,7 @@ def dynamic_reconf_callback(config, level):
 
 
 if __name__ == "__main__":
-    rospy.init_node("rudder_controller")
+    rospy.init_node("rudder_controller", log_level=rospy.get_param("log_level", rospy.INFO))
     rc_pid = pid.PID()
     values = SubscriberValues()
 

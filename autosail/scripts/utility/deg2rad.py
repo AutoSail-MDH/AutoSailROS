@@ -16,7 +16,7 @@ def callback(msg):
 
 
 if __name__ == "__main__":
-    rospy.init_node("deg2rad", anonymous=True)
+    rospy.init_node("deg2rad", anonymous=True, log_level=rospy.get_param("log_level", rospy.INFO))
     rad_pub = rospy.Publisher("rad", Float64, queue_size=1)
     rospy.Subscriber("deg", Float64, callback, queue_size=1)
     rospy.spin()

@@ -45,7 +45,7 @@ def sail_callback(data):
 
 
 if __name__ == "__main__":
-    rospy.init_node("sim_converter")
+    rospy.init_node("sim_converter", log_level=rospy.get_param("log_level", rospy.INFO))
 
     # Subscribes
     rospy.Subscriber(name="wind/apparent", data_class=Vector3Stamped,

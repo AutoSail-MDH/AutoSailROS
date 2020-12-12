@@ -16,7 +16,7 @@ class SubscriberValues:
 
 
 if __name__ == "__main__":
-    rospy.init_node("stm32_handle")
+    rospy.init_node("stm32_handle", log_level=rospy.get_param("log_level", rospy.INFO))
 
     #  Variables
     values = SubscriberValues()

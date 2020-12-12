@@ -69,7 +69,7 @@ if __name__ == '__main__':
     '''
     Initializes the node and subscribes to the two publishers. Continually listens as long as the node is running.
     '''
-    rospy.init_node('motor_controller_listener')
+    rospy.init_node('motor_controller_listener', log_level=rospy.get_param("log_level", rospy.INFO))
     mcl = MotorControllerListener()
     queue_size = rospy.get_param("~/queue_size", 10)
     rospy.Subscriber('rudder_controller/rudder_angle', Float64, mcl.rudder_callback, queue_size=queue_size)

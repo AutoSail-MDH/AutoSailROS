@@ -44,7 +44,7 @@ def dynamic_reconf_callback(config, level):
 
 
 if __name__ == "__main__":
-    rospy.init_node("camera")
+    rospy.init_node("camera", log_level=rospy.get_param("log_level", rospy.INFO))
     refresh_rate = rospy.get_param("~rate", 60)
     queue_size = rospy.get_param("~queue_size", 1)
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
