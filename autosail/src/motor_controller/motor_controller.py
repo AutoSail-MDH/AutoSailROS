@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import time
 import serial
 import serial.tools.list_ports
 
@@ -7,6 +7,7 @@ import serial.tools.list_ports
 class MotorController:
 
     def __init__(self):
+        self.sc = None
         ports = list(serial.tools.list_ports.comports())
         port = None
         for p in ports:
@@ -15,10 +16,17 @@ class MotorController:
                 if port is None or pnr < int(port[-1]):
                     port = p[0]
         print(port)
-        while True:
+        if port is None:
+            raise Exception("Could not find port")
+        # Tries 10 times before exiting
+        tries = 10
+        for i in range(tries):
             try:
                 self.sc = serial.Serial(port, timeout=1)
-            except serial.SerialException:
+            except serial.SerialException as e:
+                time.sleep(1)
+                if i == tries-1:
+                    raise e
                 continue
             break
 
@@ -29,9 +37,10 @@ class MotorController:
         """
         Closes the serial communication and sets both our servos to their default position.
         """
-        self.set_position(0, 1500)
-        self.set_position(1, 1500)
-        self.sc.close()
+        if self.sc is not None and self.sc.isOpen() == True:
+            self.set_position(0, 1500)
+            self.set_position(1, 1500)
+            self.sc.close()
 
     def set_angle(self, servo, angle):
         """
