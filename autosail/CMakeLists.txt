@@ -102,6 +102,7 @@ add_message_files(
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
 generate_dynamic_reconfigure_options(
+   cfg/Camera.cfg
    cfg/RudderController.cfg
    cfg/SailController.cfg
    cfg/PathPlanner.cfg
@@ -144,8 +145,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-   scripts/camera/camera_node.py
 
+   scripts/camera/camera_node.py
    scripts/ctrl/rudder_node.py
    scripts/ctrl/sail_node.py
    scripts/ctrl/sail_node_wind_angle.py
