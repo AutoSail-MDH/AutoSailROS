@@ -152,7 +152,7 @@ if __name__ == "__main__":
         img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
         image_pub.publish(img_msg)
 
-        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
+        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
         mask_pub.publish(mask_img_msg)
         #cv2.imshow("mask", mask)
         cv2.waitKey(1)
