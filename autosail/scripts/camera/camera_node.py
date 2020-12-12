@@ -20,7 +20,7 @@ if __name__ == "__main__":
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
     status_pub = rospy.Publisher(name="camera/status", data_class=String, queue_size=queue_size)
     apriltag_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
-    found_apriltags_pub = rospy.Publisher(name="camera/apriltag", data_class=String, queue_size=queue_size)
+    found_apriltags_pub = rospy.Publisher(name="camera/found_apriltags", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
 
     rate = rospy.Rate(refresh_rate)
@@ -85,14 +85,16 @@ if __name__ == "__main__":
                 tagFamily = r.tag_family.decode("utf-8")
                 #print("[INFO] tag family: {}".format(tagFamily))
                 foundTag.add(tagFamily)
+                tag = tagFamily
 
 
 
         else:
             tag = "No AprilTag found"
 
-        print(foundTag)
+        #print(foundTag)
         apriltag_pub.publish(str(tag))
+        found_apriltags_pub.publish(str(foundTag))
 
 
         # If an objecd src/AutosailROSct is detected, publish its position as an x, y coordinate
