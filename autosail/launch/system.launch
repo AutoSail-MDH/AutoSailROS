@@ -7,4 +7,5 @@
     <node pkg="autosail" name="network_node" type="network_node.py"/>
     <node pkg="web_video_server" name="web_video_server" type="web_video_server"/>
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
+    <node pkg="autosail" name="route_planner" type="route_planner_service.py"/>
 </launch>
