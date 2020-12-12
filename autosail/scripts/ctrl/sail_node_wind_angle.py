@@ -90,7 +90,7 @@ if __name__ == "__main__":
         else:
             pid_corrected_roll = 0
         # Calculate the new sail angle and sail trim
-        new_sail_angle_rad = calculate_sail_angle(current_pid_roll=pid_corrected_roll, max_roll=max_roll,
+        new_sail_angle_rad = calculate_sail_angle(current_pid_roll=pid_corrected_roll, max_roll=max_roll-min_roll,
                                                   wind_angle=values.wind_angle, max_sail=sail_limits)
         trim_degree = trim_sail(new_sail_angle_rad, sail_limits, max_servo)
         rospy.loginfo("""sail angle={}""".format(math.degrees(new_sail_angle_rad)))
