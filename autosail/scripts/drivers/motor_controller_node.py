@@ -10,7 +10,12 @@ class MotorControllerListener:
         '''
         initialization of the MotorControllerListener, rudder and sail are set to None as a starting value.
         '''
-        self.mcl = MotorController()
+        try:
+            self.mcl = MotorController()
+        except:
+            rospy.logfatal("Could not establish connection with the motor controller")
+            rospy.signal_shutdown("Could not establish connection with the motor controller")
+            return
         self.rudder = None
         self.sail = None
         rudder_limit = rospy.get_param("~rudder_servo_limit", 90)
@@ -71,7 +76,8 @@ if __name__ == '__main__':
     '''
     rospy.init_node('motor_controller_listener', log_level=rospy.get_param("log_level", rospy.INFO))
     mcl = MotorControllerListener()
-    queue_size = rospy.get_param("~/queue_size", 10)
-    rospy.Subscriber('rudder_controller/rudder_angle', Float64, mcl.rudder_callback, queue_size=queue_size)
-    rospy.Subscriber('sail_controller/sail_servo_angle', Float64, mcl.sail_callback, queue_size=queue_size)
-    rospy.spin()
+    if not rospy.is_shutdown():
+        queue_size = rospy.get_param("~/queue_size", 10)
+        rospy.Subscriber('rudder_controller/rudder_angle', Float64, mcl.rudder_callback, queue_size=queue_size)
+        rospy.Subscriber('sail_controller/sail_servo_angle', Float64, mcl.sail_callback, queue_size=queue_size)
+        rospy.spin()

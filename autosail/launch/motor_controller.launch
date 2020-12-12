@@ -1,5 +1,5 @@
 <launch>
-   <node pkg="autosail" name="motor_controller_listener" type="motor_controller_node.py">
+   <node pkg="autosail" name="motor_controller_listener" type="motor_controller_node.py" output="screen" respawn="true">
       <rosparam command="load" file="$(find autosail)/config/motor_controller_config.yaml"/>
    </node>
    <node pkg="autosail" name="deg2rad_rudder" type="deg2rad.py">

@@ -37,8 +37,6 @@ def dynamic_reconf_callback(config, level):
     G_U = config.G_U
     R_U = config.R_U
 
-    print("B_L in recon", B_L)
-
     #rospy.loginfo("Reconfigure request: {}".format(config))
     return config
 
@@ -150,12 +148,12 @@ if __name__ == "__main__":
             camera_pub.publish(camera_data)
             #image_pub.publish(camera_image)
 
-        cv2.imshow("img msg", cnt_image)
-        #img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
-        #image_pub.publish(img_msg)
+        #cv2.imshow("img msg", cnt_image)
+        img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
+        image_pub.publish(img_msg)
 
-        #mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
-        #mask_pub.publish(mask_img_msg)
-        cv2.imshow("mask", mask)
+        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
+        mask_pub.publish(mask_img_msg)
+        #cv2.imshow("mask", mask)
         cv2.waitKey(1)
         rate.sleep()
