@@ -12,8 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   message_generation
   geometry_msgs
-  #marti_nav_msgs
-  #marti_common_msgs
+  marti_nav_msgs
+  marti_common_msgs
   rospy
   sensor_msgs
   std_msgs
