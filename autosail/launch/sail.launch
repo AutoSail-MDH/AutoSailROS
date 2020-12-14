@@ -1,3 +1,5 @@
-<node pkg="autosail" name="sail_controller" type="sail_node_wind_angle.py">
-    <rosparam command="load" file="$(find autosail)/config/ctrl_config.yaml"/>
-</node>
+<launch>
+    <node pkg="autosail" name="sail_controller" type="sail_node_wind_angle.py">
+        <rosparam command="load" file="$(find autosail)/config/ctrl_config.yaml"/>
+    </node>
+</launch>
