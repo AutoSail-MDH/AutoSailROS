@@ -2,6 +2,7 @@
     <include file="$(find autosail)/launch/wind_sensor.launch"/>
     <include file="$(find autosail)/launch/motor_controller.launch"/>
    <!-- <include file="$(find autosail)/launch/camera.launch"/>-->
+    <remap from="/gps/fix_velocity" to="/gps/enu_velocity"/>
     <include file="$(find ublox_gps)/launch/ublox_device.launch">
         <arg name="node_name" value="node"/>
         <arg name="param_file_name" value="zed_f9p"/>

@@ -32,7 +32,7 @@ def wind_callback(data):
 
 
 if __name__ == "__main__":
-    rospy.init_node("true_wind")
+    rospy.init_node("true_wind", log_level=rospy.get_param("log_level", rospy.INFO))
     rospy.Subscriber("/gps/fix_velocity", TwistWithCovarianceStamped, gps_velocity_callback, queue_size=1)
     rospy.Subscriber("/imu/data", Imu, imu_heading_callback, queue_size=1)
     rospy.Subscriber("/wind_sensor/wind_vector", Vector3Stamped, wind_callback, queue_size=1)

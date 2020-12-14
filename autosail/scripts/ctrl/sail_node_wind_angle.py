@@ -50,7 +50,7 @@ def dynamic_reconf_callback(config, level):
 
 
 if __name__ == "__main__":
-    rospy.init_node("sail_controller")
+    rospy.init_node("sail_controller", log_level=rospy.get_param("log_level", rospy.INFO))
 
     # Initialize variables
     values = SubscriberValues()

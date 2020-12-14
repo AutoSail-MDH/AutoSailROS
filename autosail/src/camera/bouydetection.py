@@ -5,6 +5,8 @@ import numpy as np
 import pyzed.sl as sl
 
 
+
+
 def convert_to_vec(distance, angle):
     x = distance * math.cos(angle)
     y = math.copysign(distance * math.sin(angle), angle)
@@ -64,15 +66,17 @@ def imgtohsv(image):
     return hsv
 
 
-def detect_contour(image):
+def detect_contour(image, lower, upper):
     """
     Recives a matrix that represents the image and calls for other functions
     :param image: Matrix that represent the image
     :return: returns the x and y coordinate of the detected object
     """
+
+
     hsvimg = imgtohsv(image)
     # printimage('hsv', hsvimg)
-    mask = colormask(hsvimg)
+    mask = colormask(hsvimg,lower, upper)
     # printimage('mask', mask)
     result = cv2.bitwise_and(image, image, mask=mask)
     # printimage('result', result)
@@ -80,25 +84,18 @@ def detect_contour(image):
     return x, y, image, og_image, mask
 
 
-def colormask(hsvimage):
+def colormask(hsvimage, lower, upper):
     """
     Creates a colormask based on the lower and upper range defined in the function
     :param hsvimage: recives the HSV image as a matrix
     :return: returns the masked image ( only the colors that are in range of the defined range will be returned
     """
-    B_L = 0
-    G_L = 150
-    R_L = 255
 
-    B_U = 11
-    G_U = 255
-    R_U = 255
-
-
-
-    light_orange = (B_L, G_L, R_L)
-    dark_orange = (B_U, G_U, R_U)
-    maskedimage = cv2.inRange(hsvimage, light_orange, dark_orange)
+    #light_orange = (B_L, G_L, R_L)
+    #dark_orange = (B_U, G_U, R_U)
+    #cv2.imshow("hsv", hsvimage)
+    print("lower:",lower)
+    maskedimage = cv2.inRange(hsvimage, lower, upper)
 
     return maskedimage
 
@@ -213,6 +210,7 @@ def startzedCamera():
 
 
 '''
+
 
 Functions for testing
 def camgrabzed(cam):

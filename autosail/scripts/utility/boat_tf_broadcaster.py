@@ -15,6 +15,6 @@ def handle_boat_pose(msg):
 
 
 if __name__ == '__main__':
-    rospy.init_node('boat_tf_broadcaster')
+    rospy.init_node('boat_tf_broadcaster', log_level=rospy.get_param("log_level", rospy.INFO))
     rospy.Subscriber('/odom', Odometry, handle_boat_pose)
     rospy.spin()

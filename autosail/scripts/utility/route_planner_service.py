@@ -23,7 +23,7 @@ def handle_route_planner(req):
 
 
 if __name__ == "__main__":
-    rospy.init_node('testing_service')
+    rospy.init_node('testing_service', log_level=rospy.get_param("log_level", rospy.INFO))
     rospy.Service('plan_route', PlanRoute, handle_route_planner)
     rospy.spin()
 

@@ -151,7 +151,7 @@ def obstacle_camera_callback(data):
 def path_planner_init():
     global waypoints, w_theta, current_position, heading, w_speed
     # create node for the path planner
-    rospy.init_node('path_planner')
+    rospy.init_node('path_planner', log_level=rospy.get_param("log_level", rospy.INFO))
     # start the subscribers for all sensors
     rospy.Subscriber("path_planner/waypoints", Route, waypoint_callback, queue_size=1)
     rospy.Subscriber("/gps/fix", NavSatFix, gps_position_callback, queue_size=1)

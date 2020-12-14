@@ -28,7 +28,7 @@ class WindSensorTalker:
         rpy_pub = rospy.Publisher('wind_sensor/roll_pitch_yaw', Vector3Stamped, queue_size=10)
         temp_pub = rospy.Publisher('wind_sensor/temperature', Float64, queue_size=10)
         battery_pub = rospy.Publisher('wind_sensor/battery_voltage', Float64, queue_size=10)
-        rospy.init_node('wind_sensor_node', anonymous=True)
+        rospy.init_node('wind_sensor_node', anonymous=True, log_level=rospy.get_param("log_level", rospy.INFO))
         rate = rospy.Rate(8)  # refresh rate in hz
         rospy.sleep(5)
         while not rospy.is_shutdown():

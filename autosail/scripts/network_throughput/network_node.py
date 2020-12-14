@@ -10,7 +10,7 @@ def networkPublisher():
     net = network()
     txpub = rospy.Publisher('/network/tx_Mbps', Float32, queue_size=10)
     rxpub = rospy.Publisher('/network/rx_Mbps', Float32, queue_size=10)
-    rospy.init_node('network_node', anonymous=True)
+    rospy.init_node('network_node', anonymous=True, log_level=rospy.get_param("log_level", rospy.INFO))
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         tx1 = net.get_data('tx')

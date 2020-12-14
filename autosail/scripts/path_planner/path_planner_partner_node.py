@@ -23,7 +23,7 @@ def path_planner_partner_publisher():
     pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
     pub_wind_sensor = rospy.Publisher('/wind_sensor/wind_vector', geometry_msgs.msg.Vector3Stamped, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
-    rospy.init_node('path_planner_partner')
+    rospy.init_node('path_planner_partner', log_level=rospy.get_param("log_level", rospy.INFO))
     rate = rospy.Rate(60)  # 60hz
     # obstacles 59.619834, 16.557354
     mat_obstacle = obstaclemsg()

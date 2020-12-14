@@ -15,7 +15,7 @@ def temperaturePublisher():
         else:
             pub = rospy.Publisher('/temperature/main_sbc', Float64, queue_size=10)
 
-    rospy.init_node('temperature', anonymous=True)
+    rospy.init_node('temperature', anonymous=True, log_level=rospy.get_param("log_level", rospy.INFO))
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         with open(filename) as f:

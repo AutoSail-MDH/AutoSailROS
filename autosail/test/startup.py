@@ -120,7 +120,6 @@ def callback_sail(data):
 def init_system_subsribers():
     """
     Initilize the subsribers for path planner and controller
-    :return:
     """
     rospy.Subscriber(name="/path_planner/course", data_class=std_msgs.msg.Float64,
                      callback=callback_desired_course, queue_size=1)
@@ -186,7 +185,6 @@ def publish_signals(fake_signals, publisher):
 def test_system():
     """
     test that the path planner and controller gives correct outputs
-    :return:
     """
     global desired_course, rudder_angle, sail_servo_angle
     init_system_subsribers()
@@ -223,7 +221,6 @@ def test_system():
 def init_sensor_subscribers():
     """
     Init subsribers for the sensors
-    :return:
     """
     rospy.Subscriber("/gps/fix", sensor_msgs.msg.NavSatFix, callback_gps_position, queue_size=1)
     rospy.Subscriber("/gps/fix_velocity", geometry_msgs.msg.TwistWithCovarianceStamped,
@@ -240,7 +237,7 @@ def test_sensors():
     Test that the sensors give consistent values
     """
     # Global values used in the callback functions
-    global longitude, lin_velocity, yaw, w_speed
+    global longitude, lin_velocity, yaw, w_speed, launch
     # Arrays for saving the values of the sensors
     longitudes = []
     water_levels = []
@@ -251,15 +248,12 @@ def test_sensors():
     rate = rospy.Rate(10)
     # startup system sensors
     # subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
-    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-    roslaunch.configure_logging(uuid)
-    launch = roslaunch.parent.ROSLaunchParent(uuid, [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
     launch.start()
-    rospy.sleep(10)  # Sleep to enable all sensors to fully load before continuing
+    rospy.sleep(30)  # Sleep to enable all sensors to fully load before continuing
     timer_start = rospy.Time.now()
-    while longitude is None and w_speed is None and lin_velocity is None and yaw is None:
+    while longitude is None or w_speed is None or lin_velocity is None or yaw is None:
         timer_check = rospy.Time.now() - timer_start
-        if timer_check.secs >= 10:
+        if timer_check.secs >= 30:
             rospy.logerr(f"""Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, 
                          lin_velocity:{lin_velocity}, yaw: {yaw}""")
             break
@@ -300,7 +294,6 @@ def list_check(values, limit, name):
 def test_stm32():
     """
     Tests that the stm32 sensors give consistent values
-    :return:
     """
     global stm32_values
     rate = rospy.Rate(10)
@@ -340,9 +333,20 @@ def test_stm32():
 
 
 if __name__ == "__main__":
-    rospy.init_node("startup_test")
+    node = rospy.init_node("startup_test")
+
+    uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
+    roslaunch.configure_logging(uuid)
+    launch = roslaunch.parent.ROSLaunchParent(uuid,
+                                              [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
+
     test_system()
     init_sensor_subscribers()
     test_sensors()
     test_stm32()
     rospy.loginfo("Startup test complete")
+    node.shutdown()
+    try:
+        launch.spin()
+    except:
+        launch.shutdown()
