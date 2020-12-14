@@ -165,6 +165,7 @@ catkin_install_python(PROGRAMS
    scripts/utility/true_wind_node.py
    scripts/utility/deg2rad.py
    scripts/utility/rad2deg.py
+   scripts/utility/gps_to_ned.py
 
    scripts/temperature_sbcs/temperature_node.py
 
