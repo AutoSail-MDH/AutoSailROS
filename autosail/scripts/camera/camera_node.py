@@ -51,6 +51,7 @@ if __name__ == "__main__":
     found_apriltags_pub = rospy.Publisher(name="camera/found_apriltags", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
     mask_pub = rospy.Publisher(name="camera/mask", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
+    mono_image_pub = rospy.Publisher(name="camera/image_rect", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
 
 
 
@@ -71,6 +72,7 @@ if __name__ == "__main__":
     runtime_parameters.confidence_threshold = 100
     runtime_parameters.textureness_confidence_threshold = 100
 
+
     w2 = 1280 / 2  # Half of the camera resolution
 
     mirror_ref = sl.Transform()
@@ -83,7 +85,7 @@ if __name__ == "__main__":
 
     # Dynamic reconfigure
     srv = Server(CameraConfig, dynamic_reconf_callback)
-    print(srv)
+    #print(srv)
 
     while not rospy.is_shutdown():
         status_pub.publish(str(status))
@@ -103,10 +105,11 @@ if __name__ == "__main__":
 
         ang = angle(distance, x, w2)
 
+        '''
         #Apriltag detection
         frame1 = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
 
-
+        
         options = apriltag.DetectorOptions(families="tag36h11")
         detector = apriltag.Detector(options)
         results = detector.detect(frame1)
@@ -133,7 +136,7 @@ if __name__ == "__main__":
         #print(foundTag)
         apriltag_pub.publish(str(tag))
         found_apriltags_pub.publish(str(foundTag))
-
+        '''
 
         # If an objecd src/AutosailROSct is detected, publish its position as an x, y coordinate
         if not np.isnan(distance) and not np.isinf(distance):
@@ -152,8 +155,13 @@ if __name__ == "__main__":
         img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
         image_pub.publish(img_msg)
 
-        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='bgra8')
+        mono = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
+        mono_img_msg = bridge.cv2_to_imgmsg(mono, encoding='mono8')
+        mono_image_pub.publish(mono_img_msg)
+
+        mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
         mask_pub.publish(mask_img_msg)
+
         #cv2.imshow("mask", mask)
         cv2.waitKey(1)
         rate.sleep()

@@ -94,7 +94,7 @@ def colormask(hsvimage, lower, upper):
     #light_orange = (B_L, G_L, R_L)
     #dark_orange = (B_U, G_U, R_U)
     #cv2.imshow("hsv", hsvimage)
-    print("lower:",lower)
+    #print("lower:",lower)
     maskedimage = cv2.inRange(hsvimage, lower, upper)
 
     return maskedimage
