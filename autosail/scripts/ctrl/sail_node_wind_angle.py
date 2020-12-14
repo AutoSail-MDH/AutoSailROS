@@ -32,7 +32,6 @@ class SubscriberValues:
         y = data.vector.y
         angle = math.atan2(y, x)
         self.wind_angle = angle
-        #rospy.loginfo("""wind angle={}""".format(math.degrees(self.wind_angle)))
 
 
 # Dynamic reconfiguration
@@ -81,10 +80,10 @@ if __name__ == "__main__":
     srv = Server(SailControllerConfig, dynamic_reconf_callback)
 
     while not rospy.is_shutdown():
-        # Use the PID to get a desired roll angle
+        # If the min_roll have been changed, change the PID setpoint
         if sc_pid.setpoint != min_roll:
             sc_pid.setpoint = min_roll
-        rospy.loginfo(values.roll_angle - min_roll)
+        # If the roll exceeds the minimum roll, use the PID to get a desired roll angle
         if enable_tilt and (values.roll_angle > min_roll or values.roll_angle < -min_roll):
             # if the vessel have passed the z axis when rolling, invert the sign of the setpoint
             if math.copysign(1, values.roll_angle) != math.copysign(1, sc_pid.setpoint):
@@ -92,15 +91,14 @@ if __name__ == "__main__":
             pid_corrected_roll = -(sc_pid(values.roll_angle))  # - since positive roll clockwise, the pid is the inverse
         else:
             pid_corrected_roll = -(sc_pid(sc_pid.setpoint))
+
         # Calculate the new sail angle and sail trim
-        #rospy.loginfo("pidangle = %f", pid_corrected_roll)
         if enable_tilt:
             new_sail_angle_rad = calculate_sail_angle(pid_corrected_roll, max_roll-min_roll, values.wind_angle,
                                                       sail_limits)
         else:
             new_sail_angle_rad = calculate_sail_angle(pid_corrected_roll, max_roll, values.wind_angle, sail_limits)
         trim_degree = trim_sail(new_sail_angle_rad, sail_limits, max_servo)
-        #rospy.loginfo("""sail angle={}""".format(math.degrees(new_sail_angle_rad)))
 
         # Publish the sail angle
         sail_angle.publish(new_sail_angle_rad)
