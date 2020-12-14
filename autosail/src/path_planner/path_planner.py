@@ -26,25 +26,13 @@ def quaternion_to_euler_yaw(heading_quaternion):
     return yaw
 
 
-def rotate_point(x, y, r):
-    rx = (x * math.cos(r)) - (y * math.sin(r))
-    ry = (y * math.cos(r)) + (x * math.sin(r))
-    return rx, ry
-
-"""
-def generate_circle_waypoints(center):
-    # calculate the angle between the points
-    point_angle = (2 * math.pi) / num_circle_point
-    points = []
-    for i in range(num_circle_point):
-        # create x,y at the circumference with angle point_angle * i
-        (p_x, p_y) = rotate_point(0, waypoint_radius, point_angle * i)
-        p_x += center[0]
-        p_y += center[1]
-        points.append((round(p_x), round(p_y)))
-    return points"""
-
 def generate_circle_waypoints(lat1, lon1):
+    """
+    generates lat, lon points around the input
+    :param lat1: latitude
+    :param lon1: longitude
+    :return: list of points
+    """
     R = 6378.1  # Radius of the Earth
     brng = 0
     d = 1  # Distance in km
@@ -65,9 +53,6 @@ def generate_circle_waypoints(lat1, lon1):
         lon2 = math.degrees(lon2)
         circle_waypoint.lat = lat2
         circle_waypoint.lon = lon2
-        #rospy.loginfo("lat2 {}".format(lat2))
-        #rospy.loginfo("lon2 {}".format(lon2))
-
         circle_waypoints.append(circle_waypoint)
         brng = brng + math.pi / 4
     return circle_waypoints
@@ -75,27 +60,29 @@ def generate_circle_waypoints(lat1, lon1):
 def closest_waypoint(circle_points):
     """
     finds the index of the waypoint closest to the vessel
-    :param pos: position of the vessel
     :param circle_points: waypoints in the circle
     :return:
     """
-    """
-    pos = np.ndarray(shape=(2, 2))
-    pos_vessel[0][0] = pos[0]
-    pos_vessel[0][1] = pos[1]
-    """
-    #pos = np.ndarray([0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0])
-    #closest_index = np.argmin(np.sum((circle_points)**2, axis=1))
     closest_index = np.argmin(np.linalg.norm(circle_points))
-    # closest_index = distance.cdist([pos], circle_points, 'euclidean').argmin()
     return closest_index
 
 def circle_waypoint(waypoint, current_position):
-    #circle_points = generate_circle_waypoints(waypoint)
+    """
+    runs the generate_circle_waypoints method. This is basically a usless method
+    :param waypoint: the waypoint the new points will generate around
+    :param current_position: position of the vessel
+    :return: the new generated points
+    """
     circle_points = generate_circle_waypoints(lat1=waypoint.pose.position.y, lon1=waypoint.pose.position.x)
     return circle_points
 
 def circle_to_xy(circle_points, current_position):
+    """
+    converts the lat lon points to x,y relative current position
+    :param circle_points: points in a circle
+    :param current_position: current posistion of the vessel
+    :return: circle_points in x,y
+    """
     circle_points_xy = []
     for i in range(8):
         points = geodetic2ned(circle_points[i].lat, circle_points[i].lon, 0,
@@ -104,6 +91,12 @@ def circle_to_xy(circle_points, current_position):
     return circle_points_xy
 
 def circle_in_order(circle_points, current_position):
+    """
+    checks which point is closest to the vessel and then moves that point to the start of the list
+    :param circle_points:  points in a circle
+    :param current_position: position of the vessel
+    :return: list of points in x,y. list of points in lat,lon
+    """
     circle_points_xy = []
     circle_points_lat_lon = []
     # data = waypointClass()
@@ -121,37 +114,6 @@ def circle_in_order(circle_points, current_position):
         circle_points_xy.pop(0)
         i += 1
     return circle_points_xy, circle_points_lat_lon
-
-"""
-def calc_waypoints(p_0, p_1, waypoints):
-    waypoint_xy_array = [] # np.zeros(shape=(length_waypoints, 3))
-    for waypoint in waypoints:
-        waypoints_xy = latlng_to_global_xy(waypoint.pose.position.y, waypoint.pose.position.x, p_0, p_1)
-        waypoint_xy_array.append([round(waypoints_xy[0]), round(waypoints_xy[1]), waypoint.id])
-    return waypoint_xy_array
-
-
-def circle_waypoint(latitude, longitude, waypoint, p_0, p_1):
-    position_v = latlng_to_screen_xy(latitude, longitude, p_0, p_1)
-    circle_points = generate_circle_waypoints(waypoint)
-    closest_index = closest_waypoint(position_v, circle_points)
-    for i in range(closest_index):
-        circle_points.append(circle_points[i])
-    for i in range(closest_index):
-        circle_points.pop(0)
-        i += 1
-    # goal = circle_points[0]
-    return circle_points
-
-
-def calc_waypoints(p_0, p_1, waypoints):
-    waypoint_xy_array = [] # np.zeros(shape=(length_waypoints, 3))
-    for waypoint in waypoints:
-        waypoints_xy = latlng_to_global_xy(waypoint.pose.position.y, waypoint.pose.position.x, p_0, p_1)
-        waypoint_xy_array.append([round(waypoints_xy[0]), round(waypoints_xy[1]), waypoint.id])
-    return waypoint_xy_array
-
-"""
 
 
 """
