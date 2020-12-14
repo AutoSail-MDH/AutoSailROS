@@ -9,7 +9,7 @@ from marti_nav_msgs.msg import RoutePoint, Route
 from autosail.msg import obstaclemsg
 from autosail.msg import obstacles_array_msg
 from scipy.spatial.transform import Rotation
-
+from marti_common_msgs.msg import KeyValue
 
 
 def path_planner_partner_publisher():
@@ -55,11 +55,27 @@ def path_planner_partner_publisher():
     waypoint.pose.position.x = 16.56043112576914
     waypoint.pose.position.y = 59.617494040283596
     waypoint.id = "1"
+    prop = KeyValue()
+    prop.key = "diameter"
+    prop.value = "5"
+    waypoint.properties.append(prop)
+    id = KeyValue()
+    prop.key = "id"
+    prop.value = "0"
+    waypoint.properties.append(id)
     waypoint_array.route_points.append(waypoint)
     waypoint = RoutePoint() # 45deg 59.617907031489985, 16.56098932361882
     waypoint.pose.position.x = 16.56098932361882
     waypoint.pose.position.y = 59.617907031489985
     waypoint.id = "0"
+    prop = KeyValue()
+    prop.key = "diameter"
+    prop.value = "5"
+    waypoint.properties.append(prop)
+    id = KeyValue()
+    prop.key = "id"
+    prop.value = "0"
+    waypoint.properties.append(id)
     waypoint_array.route_points.append(waypoint)
 
     # gps position

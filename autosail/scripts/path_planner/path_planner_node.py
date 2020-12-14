@@ -10,6 +10,7 @@ from geometry_msgs.msg import TwistWithCovarianceStamped, Vector3Stamped
 import message_filters
 from pymap3d.ned import geodetic2ned, ned2geodetic
 from marti_nav_msgs.msg import RoutePoint, Route
+from marti_common_msgs.msg import KeyValue
 from scipy.spatial import distance
 from dynamic_reconfigure.server import Server
 from autosail.cfg import PathPlannerConfig
@@ -247,10 +248,13 @@ if __name__ == '__main__':
                             current_position.latitude, current_position.longitude, 0)
         obstacles_xy = [geodetic2ned(o[0], o[1], 0, current_position.latitude, current_position.longitude, 0)[:2]
                         for o in obstacles]
+        for prop in waypoints[waypoint_index].properties:
+            if prop.key == "id":
+                waypoint_id = prop.value
         """
         # goal[2] = waypoints[waypoint_index].id
         # if waypoint circle waypoint?
-        if waypoints[waypoint_index].id == "1":
+        if waypoint_id == "1":
              circle_index = 0
              start = time.time()
              elapsed = 0
@@ -279,7 +283,10 @@ if __name__ == '__main__':
              waypoint_index += 1
              goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x,0,
                                  current_position.latitude, current_position.longitude, 0)
-        """
+             for prop in waypoints[waypoint_index].properties:
+                 if prop.key == "id":
+                     waypoint_id = prop.value"""
+
         min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
@@ -289,7 +296,7 @@ if __name__ == '__main__':
         webvizPlot = webviz_msg(pf)
         pub_2d.publish(webvizPlot)
 
-        # pf.plot_heat_map(0.1, heading)
+        pf.plot_heat_map(0.1, heading)
         if np.linalg.norm(goal[0:2]) < 5:
             if waypoint_index != len(waypoints)-1:
                 waypoint_index += 1
