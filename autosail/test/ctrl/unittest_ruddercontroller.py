@@ -4,6 +4,7 @@ import unittest
 import rospy
 import math
 from scipy.spatial.transform import Rotation
+import dynamic_reconfigure.client
 from std_msgs.msg import Float64
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import TwistWithCovarianceStamped
@@ -30,6 +31,22 @@ class TestRudder(unittest.TestCase):
         # test subscribers
         self.rudder_sub = rospy.Subscriber(name="/rudder_controller/rudder_angle", data_class=Float64,
                                            callback=callback_rudder_angle, queue_size=queue_size)
+
+        # Initiate client to change the dynamic reconfiguration
+        client = dynamic_reconfigure.client.Client("rudder_controller", timeout=30)
+
+        # Test configuration
+        rudder_limit = 45
+        kp = 1
+        ki = 0.05
+        kd = 0.1
+        upper_threshold = 1.5
+        lower_threshold = 0.5
+        setpoint = 0
+
+        client.update_configuration({"rudder_limit": rudder_limit, "kp": kp, "ki": ki, "kd": kd,
+                                     "upper_threshold": upper_threshold, "lower_threshold": lower_threshold,
+                                     "setpoint": setpoint})
 
         # sleep to have time to initialize
         rospy.sleep(1)
@@ -64,7 +81,8 @@ class TestRudder(unittest.TestCase):
             self.velocity_pub.publish(velocity_msg)
             if rudder_angle is not None or rospy.is_shutdown():
                 break
-        self.assertEqual(rudder_angle, -math.pi/4)
+        rospy.sleep(2)
+        self.assertEqual(rudder_angle, math.pi/4)
 
     def test_rudder_angle_max_right(self):
         global rudder_angle
@@ -91,7 +109,8 @@ class TestRudder(unittest.TestCase):
             self.velocity_pub.publish(velocity_msg)
             if rudder_angle is not None or rospy.is_shutdown():
                 break
-        self.assertEqual(rudder_angle, math.pi/4)
+        rospy.sleep(2)
+        self.assertEqual(rudder_angle, -math.pi/4)
 
 
 if __name__ == "__main__":
