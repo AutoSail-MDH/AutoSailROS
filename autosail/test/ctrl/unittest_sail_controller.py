@@ -2,6 +2,7 @@
 
 import unittest
 import rospy
+import dynamic_reconfigure.client
 import math
 from scipy.spatial.transform import Rotation
 
@@ -49,6 +50,21 @@ class TestSail(unittest.TestCase):
                                           callback=callback_sail_angle, queue_size=queue_size)
         self.servo_sub = rospy.Subscriber(name="sail_controller/sail_servo_angle", data_class=Float64,
                                           callback=callback_sail_servo, queue_size=queue_size)
+
+        # Initiate client to change the dynamic reconfiguration
+        client = dynamic_reconfigure.client.Client("sail_controller", timeout=30)
+
+        # Test configuration
+        sail_limit = 80
+        kp = 1
+        ki = 0
+        kd = 0
+        enable_auto_tilt = True
+        min_roll = 10
+        max_roll = 30
+
+        client.update_configuration({"sail_limit": sail_limit, "kp": kp, "ki": ki, "kd": kd,
+                                     "enable_auto_tilt": enable_auto_tilt, "min_roll": min_roll, "max_roll": max_roll})
 
         # sleep to have time to initialize
         rospy.sleep(1)
@@ -141,8 +157,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 0)
-        self.assertEqual(sail_angle, max_sail)
+        self.assertAlmostEqual(sail_servo, 0)
+        self.assertAlmostEqual(sail_angle, max_sail)
 
     def test_sail_angle_roll(self):
         global sail_servo, sail_angle
@@ -163,8 +179,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 2/3*max_servo)
-        self.assertAlmostEqual(sail_angle, max_sail/3)
+        self.assertAlmostEqual(sail_servo, max_servo)
+        self.assertAlmostEqual(sail_angle, 0)
 
         # Test 20 deg roll
         imu_msg = get_imu_msg(20)
@@ -175,8 +191,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 1 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, 2/3*max_sail)
+        self.assertAlmostEqual(sail_servo, 1 / 2 * max_servo)
+        self.assertAlmostEqual(sail_angle, max_sail/2)
 
         # Test 30 deg roll
         imu_msg = get_imu_msg(30)
@@ -187,7 +203,7 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 0)
+        self.assertAlmostEqual(sail_servo, 0)
         self.assertAlmostEqual(sail_angle, max_sail)
 
         # Test -30 deg roll
@@ -199,7 +215,7 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 0)
+        self.assertAlmostEqual(sail_servo, 0)
         self.assertAlmostEqual(sail_angle, -max_sail)
 
         # Test -20 deg roll
@@ -211,8 +227,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 1 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, 2 / 3 * -max_sail)
+        self.assertAlmostEqual(sail_servo, 1 / 2 * max_servo)
+        self.assertAlmostEqual(sail_angle, 1 / 2 * -max_sail)
 
         # Test -10 deg roll
         imu_msg = get_imu_msg(-10)
@@ -223,8 +239,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 2 / 3 * max_servo)
-        self.assertAlmostEqual(sail_angle, -max_sail / 3)
+        self.assertAlmostEqual(sail_servo, max_servo)
+        self.assertAlmostEqual(sail_angle, 0)
 
     def test_sail_wind_and_roll(self):
         global sail_servo, sail_angle
@@ -235,8 +251,8 @@ class TestSail(unittest.TestCase):
         wind_msg.vector.x = 0
         wind_msg.vector.y = -1
 
-        # Test 10 deg roll
-        imu_msg = get_imu_msg(10)
+        # Test 15 deg roll
+        imu_msg = get_imu_msg(15)
         sail_servo = None
         while True:
             self.imu_pub.publish(imu_msg)
@@ -244,15 +260,15 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 168.75)
-        self.assertAlmostEqual(sail_angle, math.pi/4+max_sail/3)
+        self.assertAlmostEqual(sail_servo, 303.75)
+        self.assertAlmostEqual(sail_angle, math.pi/4+max_sail/4)
 
         wind_msg = Vector3Stamped()
         wind_msg.vector.x = 0
         wind_msg.vector.y = 1
 
-        # Test -10 deg roll
-        imu_msg = get_imu_msg(-10)
+        # Test -15 deg roll
+        imu_msg = get_imu_msg(-15)
         sail_servo = None
         while True:
             self.imu_pub.publish(imu_msg)
@@ -260,8 +276,8 @@ class TestSail(unittest.TestCase):
             if sail_servo is not None or rospy.is_shutdown():
                 break
         rospy.sleep(2)
-        self.assertEqual(sail_servo, 168.75)
-        self.assertAlmostEqual(sail_angle, -math.pi/4-max_sail/3)
+        self.assertAlmostEqual(sail_servo, 303.75)
+        self.assertAlmostEqual(sail_angle, -math.pi/4-max_sail/4)
 
 
 if __name__ == "__main__":
