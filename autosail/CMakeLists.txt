@@ -62,7 +62,8 @@ add_message_files(
    obstaclemsg.msg
    obstacles_array_msg.msg
    stm32_msg.msg
-
+   TwoDimensionalPlot.msg
+   TwoDimensionalPlotDatapoint.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -84,6 +85,7 @@ add_message_files(
    DEPENDENCIES
    #geometry_msgs#   marti_nav_msgs#   sensor_msgs
    std_msgs
+   geometry_msgs
 )
 
 ################################################
