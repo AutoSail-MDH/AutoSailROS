@@ -200,7 +200,7 @@ def webviz_msg(pf):
             color = cmap(norm(profile_matrix[j, pf.diameter - 1 - i]))
             webvizPlotData.pointBackgroundColor = f"rgba({color[0]*255}, {color[1]*255}, {color[2]*255}, 1)" # pink, blue, teal, lightgray
             webvizPlotData.pointStyle = "rect"
-            webvizPlotData.pointRadius = "10"
+            webvizPlotData.pointRadius = "15"
             webvizPlot.points.append(webvizPlotData)
             h += 1
     webvizPlotLine = TwoDimensionalPlotDatapoint()
