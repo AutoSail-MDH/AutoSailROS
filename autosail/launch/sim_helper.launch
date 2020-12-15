@@ -4,7 +4,7 @@
     <node pkg="autosail" type="route_planner_service.py" name="route_planner_service"/>
     <remap from="/imu/data" to="sensors/imu" />
     <remap from="/gps/fix" to="sensors/gps" />
-    <remap from="/wind_sensor" to="/wind/apparent" />
+    <remap from="/wind_sensor/wind_vector" to="/wind/apparent" />
     <!--<remap from="/gps/fix_velocity" to="sensors/gps_velocity" /> -->
     <!--<remap from="/sail_controller/sail_angle" to="/main_sail_position/command"/>-->
     <!--<remap from="/rudder_controller/rudder_angle" to="/rudder_position/command"/>-->

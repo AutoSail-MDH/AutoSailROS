@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import math
 import numpy as np
 from unittest import TestCase
@@ -7,6 +6,7 @@ from std_msgs.msg import Float64
 from sensor_msgs.msg import NavSatFix, Imu
 from geometry_msgs.msg import TwistWithCovarianceStamped, Vector3Stamped
 from marti_nav_msgs.msg import Route, RoutePoint
+from marti_common_msgs.msg import KeyValue
 import rosunit
 
 
@@ -37,11 +37,27 @@ class TestPathPlanner(TestCase):
         waypoint.pose.position.y = 57.258346  # Latitude
         waypoint.pose.position.x = 2.927921  # Longitude
         waypoint.id = "0"
+        prop = KeyValue()
+        prop.key = "diameter"
+        prop.value = "5"
+        waypoint.properties.append(prop)
+        id = KeyValue()
+        prop.key = "id"
+        prop.value = "0"
+        waypoint.properties.append(id)
         waypoint_array.route_points.append(waypoint)
         waypoint = RoutePoint()
         waypoint.pose.position.y = 57.258346  # Latitude
         waypoint.pose.position.x = 2.937921  # Longitude
         waypoint.id = "0"
+        prop = KeyValue()
+        prop.key = "diameter"
+        prop.value = "5"
+        waypoint.properties.append(prop)
+        id = KeyValue()
+        prop.key = "id"
+        prop.value = "0"
+        waypoint.properties.append(id)
         waypoint_array.route_points.append(waypoint)
 
         # gps position
@@ -77,7 +93,7 @@ class TestPathPlanner(TestCase):
 
         # Jump to the first waypoint and test if it changes
         fix.latitude = 57.258346
-        fix.longitude = 2.927921
+        fix.longitude = 2.937921
         self.pub_gps_position.publish(fix)
         rospy.sleep(2)
         self.assertLess(abs(90 - abs(self.output)), 5)

@@ -42,7 +42,7 @@ def dynamic_reconf_callback(config, level):
 
 
 if __name__ == "__main__":
-    rospy.init_node("camera")
+    rospy.init_node("camera", log_level=rospy.get_param("log_level", rospy.INFO))
     refresh_rate = rospy.get_param("~rate", 60)
     queue_size = rospy.get_param("~queue_size", 1)
     camera_pub = rospy.Publisher(name="camera/data", data_class=Vector3Stamped, queue_size=queue_size)
@@ -155,9 +155,6 @@ if __name__ == "__main__":
         img_msg = bridge.cv2_to_imgmsg(cnt_image, encoding='bgra8')
         image_pub.publish(img_msg)
 
-        mono = cv2.cvtColor(og_image, cv2.COLOR_BGR2GRAY)
-        mono_img_msg = bridge.cv2_to_imgmsg(mono, encoding='mono8')
-        mono_image_pub.publish(mono_img_msg)
 
         mask_img_msg = bridge.cv2_to_imgmsg(mask, encoding='mono8')
         mask_pub.publish(mask_img_msg)

@@ -9,7 +9,7 @@ from marti_nav_msgs.msg import RoutePoint, Route
 from autosail.msg import obstaclemsg
 from autosail.msg import obstacles_array_msg
 from scipy.spatial.transform import Rotation
-
+from marti_common_msgs.msg import KeyValue
 
 
 def path_planner_partner_publisher():
@@ -21,9 +21,9 @@ def path_planner_partner_publisher():
     pub_gps_position = rospy.Publisher('gps/fix', sensor_msgs.msg.NavSatFix, queue_size=10)
     pub_gps_velocity = rospy.Publisher('gps/fix_velocity', geometry_msgs.msg.TwistWithCovarianceStamped, queue_size=10)
     pub_gps_heading = rospy.Publisher('/imu/data', sensor_msgs.msg.Imu, queue_size=10)
-    pub_wind_sensor = rospy.Publisher('/wind_sensor', geometry_msgs.msg.Vector3Stamped, queue_size=10)
+    pub_wind_sensor = rospy.Publisher('/wind_sensor/wind_vector', geometry_msgs.msg.Vector3Stamped, queue_size=10)
     pub_obstacles = rospy.Publisher('/path_planner/obstacles', obstacles_array_msg, queue_size=10)
-    rospy.init_node('path_planner_partner')
+    rospy.init_node('path_planner_partner', log_level=rospy.get_param("log_level", rospy.INFO))
     rate = rospy.Rate(60)  # 60hz
     # obstacles 59.619834, 16.557354
     mat_obstacle = obstaclemsg()
@@ -51,21 +51,38 @@ def path_planner_partner_publisher():
     """
     #
     waypoint_array = Route()
-    waypoint = RoutePoint() # 90 deg
-    waypoint.pose.position.x = 16.56172953630712
-    waypoint.pose.position.y = 59.617444802123934
-    waypoint.id = "0"
+    waypoint = RoutePoint() # 90 deg 59.617494040283596, 16.56043112576914
+    waypoint.pose.position.x = 16.56043112576914
+    waypoint.pose.position.y = 59.617494040283596
+    waypoint.id = "1"
+    prop = KeyValue()
+    prop.key = "diameter"
+    prop.value = "5"
+    waypoint.properties.append(prop)
+    id = KeyValue()
+    prop.key = "id"
+    prop.value = "0"
+    waypoint.properties.append(id)
     waypoint_array.route_points.append(waypoint)
-    waypoint = RoutePoint() # 45deg
-    waypoint.pose.position.x = 16.561725025387066
-    waypoint.pose.position.y = 59.617895393972184
+    waypoint = RoutePoint() # 45deg 59.617907031489985, 16.56098932361882
+    waypoint.pose.position.x = 16.56098932361882
+    waypoint.pose.position.y = 59.617907031489985
     waypoint.id = "0"
+    prop = KeyValue()
+    prop.key = "diameter"
+    prop.value = "5"
+    waypoint.properties.append(prop)
+    id = KeyValue()
+    prop.key = "id"
+    prop.value = "0"
+    waypoint.properties.append(id)
     waypoint_array.route_points.append(waypoint)
 
     # gps position
     fix = sensor_msgs.msg.NavSatFix()
-    fix.longitude = 16.560831863216134
-    fix.latitude = 59.61745620958708
+    # 59.617465001648355, 16.560823459114914
+    fix.longitude = 16.560823459114914
+    fix.latitude = 59.617465001648355
 
     # gps velocity
     velocity = geometry_msgs.msg.TwistWithCovarianceStamped()
@@ -73,7 +90,7 @@ def path_planner_partner_publisher():
     velocity.twist.twist.linear.y = 0
     # imu heading
     heading = sensor_msgs.msg.Imu()
-    rot = Rotation.from_euler('xyz', [0, 0, 90], degrees=True)
+    rot = Rotation.from_euler('xyz', [0, 0, 45], degrees=True)
     rot_quat = rot.as_quat()
     heading.orientation.x = rot_quat[0]
     heading.orientation.y = rot_quat[1]

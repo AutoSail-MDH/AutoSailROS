@@ -241,6 +241,7 @@ class PotentialField:
             for i in range(self.diameter):
                 profile_matrix[self.diameter - 1 - i, j] = profile[g].u
                 g = g + 1
+        profile_matrix_noflip = profile_matrix
         profile_matrix = np.flip(np.flip(np.transpose(profile_matrix), 0), 1)
         return profile_matrix
 
@@ -297,6 +298,10 @@ class PotentialField:
                 plt.plot(heading_x, heading_y, linewidth=3)
             plt.gcf().canvas.draw_idle()
             plt.gcf().canvas.start_event_loop(0.3)
+
+    def reshpe_profile_2d_plot(self):
+        profile_matrix = self._reshape_profile(self.profile)
+        return profile_matrix
 
     def calc_heading(self, goal, heading, w_speed, w_theta, position_v, obstacles, v_v):
         """

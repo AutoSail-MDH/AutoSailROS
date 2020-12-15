@@ -1,6 +1,8 @@
 <launch>
+    <param name="log_level" value="4"/>
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
     <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>
+    <node pkg="autosail" name="gps_to_ned" type="gps_to_ned.py"/>
     <include file="$(find autosail)/launch/path_planner.launch"/>
     <include file="$(find autosail)/launch/ctrl.launch"/>
     <include file="$(find autosail)/test/startup.launch"/>

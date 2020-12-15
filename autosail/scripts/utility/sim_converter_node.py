@@ -15,8 +15,19 @@ gps_vel_pub = rospy.Publisher("/gps/fix_velocity", TwistWithCovarianceStamped, q
 
 def gps_velocity_callback(data):
     global gps_vel_pub
+    sim_x = data.vector.x
+    sim_y = data.vector.y
+    sim_z = data.vector.z
+
+    x = sim_x
+    y = -sim_y
+    z = -sim_z
+
     vel_msg = TwistWithCovarianceStamped()
-    vel_msg.twist.twist.linear = data.vector
+    vel_msg.header.stamp = rospy.Time.now()
+    vel_msg.twist.twist.linear.x = x
+    vel_msg.twist.twist.linear.y = y
+    vel_msg.twist.twist.linear.z = z
     gps_vel_pub.publish(vel_msg)
 
 
@@ -40,12 +51,12 @@ def rudder_callback(data):
 def sail_callback(data):
     global wind_angle
     proposed_sail_angle = data.data
-    sail_angle = -max(min(proposed_sail_angle, wind_angle), -proposed_sail_angle)
+    sail_angle = -proposed_sail_angle#-max(min(proposed_sail_angle, wind_angle), -proposed_sail_angle)
     sail_pub.publish(sail_angle)
 
 
 if __name__ == "__main__":
-    rospy.init_node("sim_converter")
+    rospy.init_node("sim_converter", log_level=rospy.get_param("log_level", rospy.INFO))
 
     # Subscribes
     rospy.Subscriber(name="wind/apparent", data_class=Vector3Stamped,
