@@ -1,4 +1,7 @@
 <launch>
+    <!-- ARGUMENTS -->
+    <arg name="test_stm32" default="true"/>
+
     <param name="log_level" value="4"/>
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
     <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>

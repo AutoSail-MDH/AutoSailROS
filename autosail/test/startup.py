@@ -215,26 +215,32 @@ def test_system():
     while not rospy.is_shutdown():
         timer_check = rospy.Time.now() - timer_start
         if timer_check.secs >= 10:
-            rospy.logerr(f"""Pathplanner/Motorcontroller error, desired_course:{desired_course}, 
+            rospy.logerr(f"""Timeout: Pathplanner/Motorcontroller, desired_course:{desired_course}, 
                          ruder_angle:{rudder_angle}, sail_servo_angle:{sail_servo_angle}""")
-            break
+            return
         publish_signals(fake_signals, publisher)
         rate.sleep()
         if desired_course is not None and rudder_angle is not None and sail_servo_angle is not None:
             break
 
-    if abs(test_values.desired_course - desired_course) < np.deg2rad(5):
+    val = abs(test_values.desired_course - desired_course)
+    limit = np.deg2rad(5)
+    if val < limit:
         rospy.loginfo("Startup test-Path planner: Succeeded")
     else:
-        rospy.logerr("Startup test-Path planner: Failed")
-    if abs(test_values.rudder_angle - rudder_angle) < np.deg2rad(5):
+        rospy.logerr("Startup test-Path planner: Failed, {} is not under {}".format(val, limit))
+
+    val = abs(test_values.rudder_angle - rudder_angle)
+    if val < limit:
         rospy.loginfo("Startup test-Rudder control: Succeeded")
     else:
-        rospy.logerr("Startup test-Rudder control: Failed")
-    if abs(test_values.sail_servo_angle - sail_servo_angle) < np.deg2rad(5):
+        rospy.logerr("Startup test-Rudder control: Failed, {} is not under {}".format(val, limit))
+
+    val = abs(test_values.sail_servo_angle - sail_servo_angle)
+    if val < limit:
         rospy.loginfo("Startup test-Sail control: Succeeded")
     else:
-        rospy.logerr("Startup test-Sail control: Failed")
+        rospy.logerr("Startup test-Sail control: Failed, {} is not under {}".format(val, limit))
 
 
 def init_sensor_subscribers():
@@ -268,15 +274,13 @@ def test_sensors():
     # startup system sensors
     # subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
     launch.start()
-    rospy.sleep(30)  # Sleep to enable all sensors to fully load before continuing
     timer_start = rospy.Time.now()
     while longitude is None or w_speed is None or lin_velocity is None or yaw is None:
         timer_check = rospy.Time.now() - timer_start
-        if timer_check.secs >= 30:
-            rospy.logerr(f"""Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, 
+        if timer_check.secs >= 60:
+            rospy.logerr(f"""Timeout: Sensor values not received, longitude:{longitude}, w_speed:{w_speed}, 
                          lin_velocity:{lin_velocity}, yaw: {yaw}""")
-            break
-        pass
+            return
     for i in range(10):
         longitudes += [longitude]
         gps_velocities += [lin_velocity]
@@ -300,12 +304,12 @@ def list_check(values, limit, name):
     diff_list = np.diff(values)
     print("diff_list", diff_list)
     if max(abs(diff_list)) > 0:
-        diff_list = abs(np.diff(diff_list) / abs(sum(values) / len(values)))
+        diff_list = abs(diff_list / abs(sum(values) / len(values)))
         print("max(diff_list)", max(diff_list))
         if max(diff_list) < limit:
             rospy.loginfo("Startup test-{}: Succeeded".format(name))
         else:
-            rospy.logerr("Startup test-{}: Failed".format(name))
+            rospy.logerr("Startup test-{}: Failed, {} is not under {}".format(name, max(diff_list), limit))
     else:
         rospy.loginfo("Startup test-{}: Succeeded".format(name))
 
@@ -327,10 +331,8 @@ def test_stm32():
     while not rospy.is_shutdown() and stm32_values is None:
         timer_check = rospy.Time.now() - timer_start
         if timer_check.secs >= 10:
-            rospy.logerr(f'Problem with stm32, rospy is shutdown:{rospy.is_shutdown()}, stm32_values:{stm32_values}')
-            break
-        pass
-
+            rospy.logerr(f'Timeout: STM32, rospy is shutdown:{rospy.is_shutdown()}, stm32_values:{stm32_values}')
+            return
     for i in range(10):
         adc_current += [stm32_values.adc_current]
         i2c_current_1 += [stm32_values.I2c_current_1]
@@ -362,7 +364,10 @@ if __name__ == "__main__":
     test_system()
     init_sensor_subscribers()
     test_sensors()
-    test_stm32()
+    if rospy.get_param("test_stm32", "true") == "true":
+        test_stm32()
+    else:
+        rospy.logwarn("Skipping STM32 test")
     rospy.loginfo("Startup test complete")
     node.shutdown()
     try:

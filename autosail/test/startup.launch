@@ -1,3 +1,6 @@
 <launch>
-    <node pkg="autosail" name="startup" type="startup.py" output="screen"/>
+    <arg name="test_stm32" default="true"/>
+    <node pkg="autosail" name="startup" type="startup.py" output="screen">
+        <param name="test_stm32" value="$(arg test_stm32)"/>
+    </node>
 </launch>
