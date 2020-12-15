@@ -1,25 +1,13 @@
 #!/usr/bin/env python
 import rospy
-import std_msgs.msg
-import numpy as np
-from stm32.stm32_handle import sensor_readings
+from stm32.stm32_handle import sensor_readings, openSTM32Serial, closeSTM32Serial
 from autosail.msg import stm32_msg
-
-
-class SubscriberValues:
-    def __init__(self):
-        self.desired_angle = 1.0
-
-    def callback_SailAngle(self, data):
-        if data.data is not None:
-            self.desired_angle = data.data
 
 
 if __name__ == "__main__":
     rospy.init_node("stm32_handle", log_level=rospy.get_param("log_level", rospy.INFO))
 
     #  Variables
-    values = SubscriberValues()
     queue_size = rospy.get_param("~queue_size", 60)
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
@@ -30,6 +18,7 @@ if __name__ == "__main__":
     #  subscriber wind sensor readings
 
     sensor_send = stm32_msg()
+    openSTM32Serial(rospy.get_param("~port", "/dev/ttyACM60"))
     while not rospy.is_shutdown():
         # Get sensor values from stm32
         sensor_values = sensor_readings()
@@ -46,4 +35,4 @@ if __name__ == "__main__":
 
         stm32_sensors.publish(sensor_send)
         rate.sleep()
-
+    closeSTM32Serial()
