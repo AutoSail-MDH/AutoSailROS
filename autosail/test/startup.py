@@ -50,10 +50,10 @@ class FakeSignals:
         prop.key = "diameter"
         prop.value = "5"
         waypoint.properties.append(prop)
-        id = KeyValue()
+        prop = KeyValue()
         prop.key = "id"
         prop.value = "0"
-        waypoint.properties.append(id)
+        waypoint.properties.append(prop)
         self.waypoints = waypoint_array.route_points.append(waypoint)
         # obstacle
         obstacle_msg = geometry_msgs.msg.Vector3Stamped()
@@ -184,6 +184,14 @@ def publish_signals(fake_signals, publisher):
     waypoint.pose.position.x = 16.561736302687205
     waypoint.pose.position.y = 59.61744366137741
     waypoint.id = "0"  # 59.61744366137741, 16.561736302687205
+    prop = KeyValue()
+    prop.key = "diameter"
+    prop.value = "5"
+    waypoint.properties.append(prop)
+    prop = KeyValue()
+    prop.key = "id"
+    prop.value = "0"
+    waypoint.properties.append(prop)
     waypoint_array.route_points.append(waypoint)
     publisher.pub_waypoints.publish(waypoint_array)
     publisher.pub_obstacle.publish(fake_signals.obstacle)
