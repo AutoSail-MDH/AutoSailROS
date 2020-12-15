@@ -11,6 +11,8 @@ from autosail.msg import obstacles_array_msg
 from scipy.spatial.transform import Rotation
 import std_msgs.msg
 from autosail.msg import stm32_msg
+from marti_common_msgs.msg import KeyValue
+
 
 
 import math
@@ -31,6 +33,7 @@ yaw = None
 stm32_values = None
 
 
+
 class FakeSignals:
     """
     Creates fake sensor values to publish to the path planner and controller.
@@ -43,6 +46,14 @@ class FakeSignals:
         waypoint.pose.position.x = 16.561736302687205
         waypoint.pose.position.y = 59.61744366137741
         waypoint.id = "0"  # 59.61744366137741, 16.561736302687205
+        prop = KeyValue()
+        prop.key = "diameter"
+        prop.value = "5"
+        waypoint.properties.append(prop)
+        id = KeyValue()
+        prop.key = "id"
+        prop.value = "0"
+        waypoint.properties.append(id)
         self.waypoints = waypoint_array.route_points.append(waypoint)
         # obstacle
         obstacle_msg = geometry_msgs.msg.Vector3Stamped()
