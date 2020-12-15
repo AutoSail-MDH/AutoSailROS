@@ -51,7 +51,7 @@ def rudder_callback(data):
 def sail_callback(data):
     global wind_angle
     proposed_sail_angle = data.data
-    sail_angle = -max(min(proposed_sail_angle, wind_angle), -proposed_sail_angle)
+    sail_angle = -proposed_sail_angle#-max(min(proposed_sail_angle, wind_angle), -proposed_sail_angle)
     sail_pub.publish(sail_angle)
 
 
