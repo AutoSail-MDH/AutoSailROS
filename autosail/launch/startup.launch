@@ -7,6 +7,7 @@
 
     <!-- Args -->
     <arg name="test_stm32" default="true"/>
+    <arg name="plot" default="false"/>
 
     <node pkg="autosail" name="startup" type="startup.py" output="screen">
         <param name="test_stm32" value="$(arg test_stm32)"/>

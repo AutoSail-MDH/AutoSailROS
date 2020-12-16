@@ -316,7 +316,8 @@ if __name__ == '__main__':
         webvizPlot = webviz_msg(pf)
         pub_2d.publish(webvizPlot)
 
-        pf.plot_heat_map(0.1, heading)
+        if rospy.get_param("~plot", "true") == "true":
+            pf.plot_heat_map(0.1, heading)
         if np.linalg.norm(goal[0:2]) < 5:
             if waypoint_index != len(waypoints) - 1:
                 waypoint_index += 1

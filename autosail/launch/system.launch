@@ -1,4 +1,5 @@
 <launch>
+    <arg name="plot" default="false"/>
     <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>
     <node pkg="autosail" name="gps_to_ned" type="gps_to_ned.py"/>
     <include file="$(find autosail)/launch/path_planner.launch"/>
