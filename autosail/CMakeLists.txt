@@ -172,6 +172,8 @@ catkin_install_python(PROGRAMS
    scripts/temperature_sbcs/temperature_node.py
 
    scripts/network_throughput/network_node.py
+
+   test/startup.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -181,6 +183,10 @@ install(DIRECTORY config/
 )
 install(DIRECTORY launch/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+    PATTERN ".svn" EXCLUDE
+)
+install(DIRECTORY test/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
     PATTERN ".svn" EXCLUDE
 )
 
