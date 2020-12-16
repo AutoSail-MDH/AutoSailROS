@@ -1,5 +1,13 @@
 <launch>
+    <!-- Environment -->
+    <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
+
+    <!-- Params -->
+    <param name="log_level" value="4"/>
+
+    <!-- Args -->
     <arg name="test_stm32" default="true"/>
+
     <node pkg="autosail" name="startup" type="startup.py" output="screen">
         <param name="test_stm32" value="$(arg test_stm32)"/>
     </node>

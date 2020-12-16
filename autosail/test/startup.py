@@ -1,25 +1,18 @@
 #!/usr/bin/env python
-import sys
+import math
+import roslaunch
+import os
 import rospy
+import rospkg
 import std_msgs.msg
 import sensor_msgs.msg
 import geometry_msgs.msg
 import numpy as np
 from marti_nav_msgs.msg import RoutePoint, Route
-from autosail.msg import obstaclemsg
-from autosail.msg import obstacles_array_msg
 from scipy.spatial.transform import Rotation
 import std_msgs.msg
 from autosail.msg import stm32_msg
 from marti_common_msgs.msg import KeyValue
-
-
-
-import math
-import roslaunch
-import runpy
-import os
-import subprocess
 
 desired_course = None
 rudder_angle = None
@@ -262,7 +255,7 @@ def test_sensors():
     Test that the sensors give consistent values
     """
     # Global values used in the callback functions
-    global longitude, lin_velocity, yaw, w_speed, launch
+    global longitude, lin_velocity, yaw, w_speed, launch_sensors
     # Arrays for saving the values of the sensors
     longitudes = []
     water_levels = []
@@ -273,7 +266,7 @@ def test_sensors():
     rate = rospy.Rate(10)
     # startup system sensors
     # subprocess.Popen("roslaunch autosail sensor.launch", shell=True)
-    launch.start()
+    launch_sensors.start()
     timer_start = rospy.Time.now()
     while longitude is None or w_speed is None or lin_velocity is None or yaw is None:
         timer_check = rospy.Time.now() - timer_start
@@ -358,9 +351,11 @@ if __name__ == "__main__":
 
     uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
     roslaunch.configure_logging(uuid)
-    launch = roslaunch.parent.ROSLaunchParent(uuid,
-                                              [os.path.join(os.path.dirname(sys.argv[0]), "../launch/sensor.launch")])
-
+    launchfile = os.path.join(rospkg.RosPack().get_path("autosail"), "launch", "sensor.launch")
+    launch_sensors = roslaunch.parent.ROSLaunchParent(uuid, [launchfile])
+    launchfile = os.path.join(rospkg.RosPack().get_path("autosail"), "launch", "system.launch")
+    launch = roslaunch.parent.ROSLaunchParent(uuid, [launchfile])
+    launch.start()
     test_system()
     init_sensor_subscribers()
     test_sensors()
@@ -373,4 +368,5 @@ if __name__ == "__main__":
     try:
         launch.spin()
     except:
+        launch_sensors.shutdown()
         launch.shutdown()
