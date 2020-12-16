@@ -66,6 +66,7 @@
   <exec_depend>python3-serial</exec_depend>
   <exec_depend>python3-empy</exec_depend>
   <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>python3-rospkg</exec_depend>
   <!--<exec_depend>pymap3d</exec_depend>-->
 
   <!-- The export tag contains other, unspecified, tags -->
