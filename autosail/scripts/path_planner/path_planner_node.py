@@ -16,13 +16,12 @@ from dynamic_reconfigure.server import Server
 from autosail.cfg import PathPlannerConfig
 from path_planner.potential_field_algorithm import PotentialField
 from path_planner.path_planner import *
-
 import matplotlib
-
 
 from autosail.msg import obstacles_array_msg
 from autosail.msg import TwoDimensionalPlotDatapoint, TwoDimensionalPlot
 import geometry_msgs.msg
+
 # global variables updated by the callback functions via the subscribers
 waypoints = []
 obstacles = []
@@ -69,6 +68,7 @@ def dynamic_reconf_callback(dyn_conf, level):
     pf.p_ngz = config.p_ngz = dyn_conf.p_ngz
     pf.p_hyst = config.p_hyst = dyn_conf.p_hyst
     pf.g_v = config.g_v = dyn_conf.g_v
+    config.circle_time_limit = dyn_conf.circle_time_limit
     rospy.loginfo("Reconfigure request: {}".format(config))
     return dyn_conf
 
@@ -94,7 +94,7 @@ def wind_sensor_callback(data):
     w_speed = np.linalg.norm(true_wind_)
     w_theta = w_theta + np.pi
     w_theta = math.atan2(math.sin(w_theta), math.cos(w_theta))
-        #rospy.loginfo("True wind: {}".format(math.degrees(w_theta)))
+    # rospy.loginfo("True wind: {}".format(math.degrees(w_theta)))
 
 
 def gps_position_callback(data):
@@ -113,7 +113,7 @@ def gps_velocity_callback(data):
     """
     global velocity
     lin_velocity_x = data.twist.twist.linear.x * 1.94384449
-    #lin_velocity_y = - data.twist.twist.linear.y * 1.94384449
+    # lin_velocity_y = - data.twist.twist.linear.y * 1.94384449
     lin_velocity_y = data.twist.twist.linear.y * 1.94384449
     lin_velocity = [lin_velocity_x, lin_velocity_y]
     velocity = math.sqrt((lin_velocity_x ** 2) + (lin_velocity_y ** 2))
@@ -128,7 +128,7 @@ def imu_heading_callback(data):
     global heading
     heading_quaternion = Imu()
     heading_quaternion.orientation = data.orientation
-    #yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
+    # yaw = -quaternion_to_euler_yaw(heading_quaternion.orientation)
     yaw = quaternion_to_euler_yaw(heading_quaternion.orientation)
     heading = [np.cos(yaw), np.sin(yaw)]
 
@@ -179,6 +179,7 @@ def path_planner_init():
         if waypoints and w_theta is not None and current_position is not None and heading and w_speed is not None:
             break
 
+
 def webviz_msg(pf):
     """
     create heatmap msg for webviz 2dplot
@@ -192,25 +193,25 @@ def webviz_msg(pf):
     cmap = matplotlib.cm.get_cmap('hot')
 
     h = 0
-    #min_value = min(list)
+    # min_value = min(list)
     for j in range(pf.diameter):
         for i in range(pf.diameter):
             data = geometry_msgs.msg.Point()
             webvizPlotData = TwoDimensionalPlotDatapoint()
             string_label = str(h)
-            data.x = -pf.diameter - 1 -i
+            data.x = -pf.diameter - 1 - i
             data.y = -j
             webvizPlotData.data.append(data)
             webvizPlotData.label = string_label
             color = cmap(norm(profile_matrix[j, pf.diameter - 1 - i]))
-            webvizPlotData.pointBackgroundColor = f"rgba({color[0]*255}, {color[1]*255}, {color[2]*255}, 1)" # pink, blue, teal, lightgray
+            webvizPlotData.pointBackgroundColor = f"rgba({color[0] * 255}, {color[1] * 255}, {color[2] * 255}, 1)"  # pink, blue, teal, lightgray
             webvizPlotData.pointStyle = "rect"
             webvizPlotData.pointRadius = "15"
             webvizPlot.points.append(webvizPlotData)
             h += 1
     webvizPlotLine = TwoDimensionalPlotDatapoint()
     webvizPlotLine.label = "line"
-    webvizPlotLine.borderColor= "blue"
+    webvizPlotLine.borderColor = "blue"
     webvizPlotLine.backgroundColor = "blue"
     webvizPlotLine.borderWidth = 10
     data = geometry_msgs.msg.Point()
@@ -218,9 +219,9 @@ def webviz_msg(pf):
     data.y = -(pf.diameter / 2 - 1 / 2)
     webvizPlotLine.data.append(data)
     data = geometry_msgs.msg.Point()
-    #data.x = heading[1]
+    # data.x = heading[1]
     data.x = - 102 + pf.diameter / 2 + heading[1] * 25
-    #data.y = heading[0]
+    # data.y = heading[0]
     data.y = -(pf.diameter / 2 - heading[0] * 25)
     webvizPlotLine.data.append(data)
     webvizPlot.lines.append(webvizPlotLine)
@@ -228,6 +229,38 @@ def webviz_msg(pf):
     webvizPlot.yAxisLabel = "yAxisLabel"
     webvizPlot.xAxisLabel = "xAxisLabel"
     return webvizPlot
+
+
+def circle_waypoint(lat, lon, config, pf, pub_heading):
+    global current_position
+    circle_index = 0
+    start = time.time()
+    elapsed = 0
+    circle_points = generate_circle_waypoints(lat1=lat, lon1=lon)
+    circle_points_xy, circle_points_lat_lon = circle_in_order(circle_points, current_position)
+
+    # goal_circle = circle_points_xy[0]
+
+    while elapsed < config.circle_time_limit and not rospy.is_shutdown():
+
+        circle_points_xy = circle_to_xy(circle_points_lat_lon, current_position)
+        goal_circle = circle_points_xy[circle_index]
+        rospy.loginfo("goal_circle {}".format(goal_circle))
+
+        if np.linalg.norm(goal_circle[0:2]) < 5:  # set limit in meter
+            circle_index += 1
+            if goal_circle == circle_points_xy[7]:
+                circle_index = 0
+                goal_circle = circle_points_xy[0]
+            else:
+                goal_circle = circle_points_xy[circle_index]
+        min_angle = pf.calc_heading(goal_circle, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
+
+        # publish the calculated angle
+        pub_heading.publish(min_angle)
+        pf.plot_heat_map(0.1, heading)
+        elapsed = time.time() - start
+
 
 if __name__ == '__main__':
     waypoint_index = 0
@@ -247,52 +280,37 @@ if __name__ == '__main__':
 
     rate = rospy.Rate(5)
     # current loop
-
+    circle = KeyValue()
+    circle.value = "1"
     while not rospy.is_shutdown():
         goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x, 0,
                             current_position.latitude, current_position.longitude, 0)
         obstacles_xy = [geodetic2ned(o[0], o[1], 0, current_position.latitude, current_position.longitude, 0)[:2]
                         for o in obstacles]
+        # rospy.loginfo("obstacles_xy {}".format(obstacles_xy))
         for prop in waypoints[waypoint_index].properties:
             if prop.key == "id":
                 waypoint_id = prop.value
         # Code for circling waypoints
 
-        if waypoint_id == "1":
-             circle_index = 0
-             start = time.time()
-             elapsed = 0
-             circle_points = circle_points = generate_circle_waypoints(lat1=waypoints[waypoint_index].pose.position.y,
-                                                                       lon1=waypoints[waypoint_index].pose.position.x)
-             circle_points_xy, circle_points_lat_lon = circle_in_order(circle_points, current_position)
-             goal_circle = circle_points_xy[0]
-             # while time limit
-             while elapsed < config.circle_time_limit and not rospy.is_shutdown():
-                 circle_points_xy = circle_to_xy(circle_points_lat_lon, current_position)
+        #if obstacles:
+        #    rospy.loginfo("obstacles[0] {}" .format(obstacles[0]))
+        #    # rospy.loginfo("obstacles[0][0] {}" .format(obstacles[0][0]))
+        #    circle_waypoint(obstacles[0][0], obstacles[0][1], config, pf, pub_heading)
 
-                 if np.linalg.norm(goal_circle[0:2]) < 2:  # set limit in meter
-                     circle_index += 1
-                     if goal_circle == circle_points_xy[7]:
-                         circle_index = 0
-                         goal_circle = circle_points_xy[0]
-                     else:
-                         goal_circle = circle_points_xy[circle_index]
-                 min_angle = pf.calc_heading(goal_circle, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
-                 #rospy.loginfo("min_angle {}".format(min_angle))
-                 # publish the calculated angle
-                 pub_heading.publish(min_angle)
-                 elapsed = time.time() - start
-             waypoint_index += 1
-             goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x,0,
-                                 current_position.latitude, current_position.longitude, 0)
-             for prop in waypoints[waypoint_index].properties:
-                 if prop.key == "id":
-                     waypoint_id = prop.value
+        if waypoint_id == circle.value:
+            circle_waypoint(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x,
+                            config, pf, pub_heading)
+            waypoint_index += 1
+            goal = geodetic2ned(waypoints[waypoint_index].pose.position.y, waypoints[waypoint_index].pose.position.x, 0,
+                                current_position.latitude, current_position.longitude, 0)
+            for prop in waypoints[waypoint_index].properties:
+                if prop.key == "id":
+                    waypoint_id = prop.value
 
         min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
-
         pub_heading.publish(min_angle)
 
         webvizPlot = webviz_msg(pf)
@@ -300,7 +318,7 @@ if __name__ == '__main__':
 
         pf.plot_heat_map(0.1, heading)
         if np.linalg.norm(goal[0:2]) < 5:
-            if waypoint_index != len(waypoints)-1:
+            if waypoint_index != len(waypoints) - 1:
                 waypoint_index += 1
                 goal = waypoints[waypoint_index]
                 rospy.logwarn("Next waypoint %d", waypoint_index)
