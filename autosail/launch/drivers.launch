@@ -7,7 +7,7 @@
         <arg name="node_name" value="node"/>
         <arg name="param_file_name" value="zed_f9p"/>
     </include>
-    <node pkg="autosail" name="temperature_node" type="temperature_node.py"/>
+    <node pkg="autosail" name="temperature_node" type="temperature_node.py" respawn="true"/>
     <include file="$(find autosail)/launch/stm32.launch"/>
     <include file="$(find xsens_mti_driver)/launch/xsens_mti_node.launch"/>
 </launch>

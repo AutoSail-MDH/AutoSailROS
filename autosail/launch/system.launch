@@ -1,11 +1,24 @@
 <launch>
-    <arg name="plot" default="false"/>
-    <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>
-    <node pkg="autosail" name="gps_to_ned" type="gps_to_ned.py"/>
-    <include file="$(find autosail)/launch/path_planner.launch"/>
-    <include file="$(find autosail)/launch/ctrl.launch"/>
-    <node pkg="autosail" name="network_node" type="network_node.py"/>
-    <node pkg="web_video_server" name="web_video_server" type="web_video_server"/>
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-    <node pkg="autosail" name="route_planner" type="route_planner_service.py"/>
+    <include file="$(find autosail)/launch/system_without_drivers.launch"/>
+    <include file="$(find autosail)/launch/drivers.launch"/>
+
+    <node pkg="autosail" type="probe_node.py" name="probe_node">
+        <rosparam>
+            topics:
+              - name: /wind_sensor/wind_vector
+                timeout: 1
+              - name: /imu/data
+                timeout: 1
+              - name: /gps/fix
+                timeout: 1
+              - name: /gps/fix_velocity
+                timeout: 1
+              - name: /stm32_handle/sensor_readings
+                timeout: 5
+              - name: /rudder_controller/rudder_angle
+                timeout: 1
+              - name: /sail_controller/sail_servo_angle
+                timeout: 1
+        </rosparam>
+    </node>
 </launch>
