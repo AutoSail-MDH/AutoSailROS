@@ -1,14 +1,17 @@
 import serial
 import time
 import serial.tools.list_ports
-
+from serial import SerialException, SerialTimeoutException
 
 ser = None
 
 
 def openSTM32Serial(port):
     global ser
-    ser = serial.Serial(port, 52000, timeout=2)  # open serial port
+    try:
+        ser = serial.Serial(port, 52000, timeout=2)  # open serial port
+    except (SerialException, SerialTimeoutException) as e:
+        raise e
     if ser.isOpen():
         print("STM32 port already open")
         ser.close()
@@ -20,7 +23,8 @@ def openSTM32Serial(port):
 
 def closeSTM32Serial():
     global ser
-    ser.close()
+    if ser is not None and ser.isOpen():
+        ser.close()
 
 
 def sensor_readings(timeout):

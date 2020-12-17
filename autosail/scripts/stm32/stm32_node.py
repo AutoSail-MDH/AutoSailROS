@@ -12,6 +12,7 @@ if __name__ == "__main__":
     predefined_rate = rospy.get_param("~rate", 60)
     rate = rospy.Rate(predefined_rate)
     timeout = rospy.get_param("~timeout", 1)
+    port = rospy.get_param("~port", "/dev/ttyACM60")
 
     #  Publisher
     stm32_sensors = rospy.Publisher("stm32_handle/sensor_readings", stm32_msg, queue_size=queue_size)
@@ -19,7 +20,11 @@ if __name__ == "__main__":
     #  subscriber wind sensor readings
 
     sensor_send = stm32_msg()
-    openSTM32Serial(rospy.get_param("~port", "/dev/ttyACM60"))
+    try:
+        openSTM32Serial(port)
+    except:
+        rospy.logfatal(f"Could not open port {port} for STM32")
+        rospy.signal_shutdown(f"Could not open port {port} for STM32")
     while not rospy.is_shutdown():
         # Get sensor values from stm32
         sensor_values = sensor_readings(timeout=timeout)
