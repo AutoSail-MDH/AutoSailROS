@@ -1,5 +1,6 @@
 <launch>
     <arg name="plot" default="false"/>
+    <param name="mast_distance" value="2"/>
     <node pkg="autosail" name="true_wind_node" type="true_wind_node.py" respawn="true"/>
     <node pkg="autosail" name="gps_to_ned" type="gps_to_ned.py" respawn="true"/>
     <include file="$(find autosail)/launch/path_planner.launch"/>

@@ -8,6 +8,7 @@ import message_filters
 
 
 def callback(wind_msg, imu_msg, vel_msg):
+    global mast_distance
     lin_velocity_x = vel_msg.twist.twist.linear.x
     lin_velocity_y = vel_msg.twist.twist.linear.y
     velocity = [lin_velocity_x, lin_velocity_y]
@@ -16,7 +17,7 @@ def callback(wind_msg, imu_msg, vel_msg):
     ang_velocity = imu_msg.angular_velocity
 
     wind = [wind_msg.vector.x, wind_msg.vector.y]
-    v = [ang_velocity.x * 4.25, ang_velocity.y * 4.25]
+    v = [ang_velocity.x * mast_distance, ang_velocity.y * mast_distance]
 
     true_wind = [wind[0] + velocity[0] + v[0], wind[1] + velocity[1] + v[1]]
     true_wind = [np.cos(yaw) * true_wind[0] - np.sin(yaw) * true_wind[1],
@@ -30,6 +31,7 @@ def callback(wind_msg, imu_msg, vel_msg):
 
 
 if __name__ == "__main__":
+    mast_distance = rospy.get_param("mast_distance", 4.25)
     pub = rospy.Publisher("wind_sensor/true", Vector3Stamped, queue_size=1)
     rospy.init_node("true_wind", log_level=rospy.get_param("log_level", rospy.INFO))
 
