@@ -172,8 +172,6 @@ catkin_install_python(PROGRAMS
    scripts/temperature_sbcs/temperature_node.py
 
    scripts/network_throughput/network_node.py
-
-   test/startup.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -198,4 +196,5 @@ if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_rostest(test/ctrl/ctrl_rostest.test)
     add_rostest(test/path_planner/path_planner_rostest.test)
+    catkin_add_nosetests(test/integration_test.py)
 endif()
