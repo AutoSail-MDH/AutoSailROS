@@ -28,7 +28,7 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
         # Get sensor values from stm32
         sensor_values = sensor_readings(timeout=timeout)
-        if sensor_values and len(sensor_values) < 12:
+        if sensor_values and len(sensor_values) >= 13:
             # position the sensor values correct
             sensor_send.adc_current = (sensor_values[1] + sensor_values[0]) / 100
             sensor_send.I2c_current_1 = (sensor_values[3] + sensor_values[2]) / 100
