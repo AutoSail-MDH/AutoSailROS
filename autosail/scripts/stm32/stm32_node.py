@@ -39,6 +39,22 @@ if __name__ == "__main__":
             sensor_send.water_detect_2 = sensor_values[11]
             sensor_send.pump = sensor_values[12]
             rospy.logdebug("Received data from STM32: {}".format(sensor_values))
+            if sensor_send.adc_current == 54:
+                rospy.logerr("ADC current received error code 5400")
+            if sensor_send.I2c_current_1 == 51:
+                rospy.logerr("I2C current sensor 1 received error code 5100")
+            if sensor_send.I2c_current_2 == 51:
+                rospy.logerr("I2C current sensor 2 received error code 5100")
+            if sensor_send.I2c_current_3 == 51:
+                rospy.logerr("I2C current sensor 3 received error code 5100")
+            if sensor_send.I2c_current_1 == 51.1:
+                rospy.logerr("I2C current sensor 1 received error code 5110")
+            if sensor_send.I2c_current_2 == 51.1:
+                rospy.logerr("I2C current sensor 2 received error code 5110")
+            if sensor_send.I2c_current_3 == 51.1:
+                rospy.logerr("I2C current sensor 3 received error code 5110")
+            if sensor_send.Battery == 52.1:
+                rospy.logerr("Battery sensor received error code 5210")
         else:
             rospy.logerr("STM32 read timeout: did not receive any data under a period of {}s".format(timeout))
         stm32_sensors.publish(sensor_send)
