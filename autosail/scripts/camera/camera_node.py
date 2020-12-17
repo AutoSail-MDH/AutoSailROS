@@ -51,11 +51,14 @@ if __name__ == "__main__":
     found_apriltags_pub = rospy.Publisher(name="camera/found_apriltags", data_class=String, queue_size=queue_size)
     image_pub = rospy.Publisher(name="camera/image", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
     mask_pub = rospy.Publisher(name="camera/mask", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
-    mono_image_pub = rospy.Publisher(name="camera/image_rect", data_class=sensor_msgs.msg.Image, queue_size=queue_size)
+
 
 
 
     rate = rospy.Rate(refresh_rate)
+
+    #Start zed camera
+    '''
     zed, status = startzedCamera()
 
     # Check if camera initialized successfully
@@ -71,6 +74,7 @@ if __name__ == "__main__":
     # Setting the depth confidence parameters
     runtime_parameters.confidence_threshold = 100
     runtime_parameters.textureness_confidence_threshold = 100
+    '''
 
 
     w2 = 1280 / 2  # Half of the camera resolution
@@ -87,13 +91,32 @@ if __name__ == "__main__":
     srv = Server(CameraConfig, dynamic_reconf_callback)
     #print(srv)
 
+    frame = sensor_msgs.msg.Image()
+    point_cloud = sensor_msgs.msg.PointCloud2()
+
+    def image_callback(msg: sensor_msgs.msg.Image):
+        global frame
+        frame = msg
+
+    def point_cloud_callback(msg: sensor_msgs.msg.PointCloud2):
+        global point_cloud
+        point_cloud = msg
+
+
+
     while not rospy.is_shutdown():
-        status_pub.publish(str(status))
-        og_image, point_cloud = grab_frame(zed, runtime_parameters)
+
+        global frame, point_cloud
+        #status_pub.publish(str(status))
+        rospy.Subscriber("zed2/zed_node/rgb_raw/image_raw_color", sensor_msgs.msg.Image, image_callback, queue_size=10)
+        rospy.Subscriber("zed2/zed_node/point_cloud/cloud_registred", sensor_msgs.msg.PointCloud2, point_cloud_callback, queue_size=10)
+        #og_image, point_cloud = grab_frame(zed, runtime_parameters)
+
+
         lower = (B_L, G_L, R_L)
         upper = (B_U, G_U, R_U)
 
-        x, y, image, cnt_image, mask = detect_contour(og_image, lower, upper)
+        x, y, image, cnt_image, mask = detect_contour(frame, lower, upper)
 
         err, point_cloud_value = point_cloud.get_value(x, y)
         distance = math.sqrt(point_cloud_value[0] * point_cloud_value[0] +
