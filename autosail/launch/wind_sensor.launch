@@ -1,4 +1,3 @@
 <launch>
    <node pkg="autosail" name="wind_sensor_node" type="wind_sensor_node.py" respawn="true"/>
-   <node pkg="autosail" name="true_wind_node" type="true_wind_node.py" respawn="true"/>
 </launch>
