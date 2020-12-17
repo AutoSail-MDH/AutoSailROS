@@ -15,19 +15,12 @@
         <rosparam>
             topics:
               - name: /wind_sensor/wind_vector
-                timeout: 1
               - name: /imu/data
-                timeout: 1
               - name: /gps/fix
-                timeout: 1
               - name: /gps/fix_velocity
-                timeout: 1
               - name: /stm32_handle/sensor_readings
-                timeout: 5
               - name: /rudder_controller/rudder_angle
-                timeout: 1
               - name: /sail_controller/sail_servo_angle
-                timeout: 1
         </rosparam>
     </node>
 </launch>
