@@ -24,15 +24,16 @@ if __name__ == "__main__":
         sensor_values = sensor_readings()
 
         # position the sensor values correct
-        sensor_send.adc_current = sensor_values[1] + sensor_values[0]
-        sensor_send.I2c_current_1 = sensor_values[3] + sensor_values[2]
-        sensor_send.I2c_current_2 = sensor_values[5] + sensor_values[4]
-        sensor_send.I2c_current_3 = sensor_values[7] + sensor_values[6]
-        sensor_send.Battery = sensor_values[9] + sensor_values[8]
-        sensor_send.water_detect_1 = sensor_values[10]
-        sensor_send.water_detect_2 = sensor_values[11]
-        sensor_send.pump = sensor_values[12]
+        if len(sensor_values) < 12:
+            sensor_send.adc_current = (sensor_values[1] + sensor_values[0]) / 100
+            sensor_send.I2c_current_1 = (sensor_values[3] + sensor_values[2]) / 100
+            sensor_send.I2c_current_2 = (sensor_values[5] + sensor_values[4]) / 100
+            sensor_send.I2c_current_3 = (sensor_values[7] + sensor_values[6]) / 100
+            sensor_send.Battery = (sensor_values[9] + sensor_values[8]) / 100
+            sensor_send.water_detect_1 = sensor_values[10]
+            sensor_send.water_detect_2 = sensor_values[11]
+            sensor_send.pump = sensor_values[12]
 
-        stm32_sensors.publish(sensor_send)
+            stm32_sensors.publish(sensor_send)
         rate.sleep()
     closeSTM32Serial()
