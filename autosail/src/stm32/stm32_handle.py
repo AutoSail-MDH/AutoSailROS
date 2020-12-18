@@ -9,7 +9,7 @@ ser = None
 def openSTM32Serial(port):
     global ser
     try:
-        ser = serial.Serial(port, 52000, timeout=1)  # open serial port
+        ser = serial.Serial(port, 52000, timeout=2)  # open serial port
     except (SerialException, SerialTimeoutException) as e:
         raise e
     if ser.isOpen():
@@ -35,8 +35,7 @@ def sensor_readings():
     global ser
     data = b'5'  # data sent
     ser.write(data)  # Serial port write data
-    data = ser.read(size=13)
+    data = ser.read(size=14)
     print("receive data is:", list(data))
-    ser.close()
     return data
 
