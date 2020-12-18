@@ -59,7 +59,7 @@ if __name__ == "__main__":
     predefined_rate = rospy.get_param("~rate")
     rate = rospy.Rate(predefined_rate)
     sail_limits = rospy.get_param("~sail_limits") * math.pi / 180
-    max_servo = rospy.get_param("~max_servo")
+    max_servo = math.radians(rospy.get_param("~max_servo"))
     queue_size = rospy.get_param("~queue_size")
     min_roll = math.radians(rospy.get_param("~min_roll"))
     max_roll = rospy.get_param("~max_roll") * math.pi / 180
