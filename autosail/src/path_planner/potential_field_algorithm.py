@@ -37,7 +37,7 @@ class PotentialField:
                               [2.3, 3.48, 4.6, 5.63, 6.5, 7.11, 7.6, 8.53, 10.09],
                               [2.16, 3.28, 4.35, 5.35, 6.25, 6.91, 7.4, 8.29, 9.62]])
 
-    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v):
+    def __init__(self, diameter, obstacle_weight, d_inf, goal_weight, p_ngz, p_hyst, g_v, wind_limit):
         """
 
         :param diameter: diameter of profile
@@ -56,6 +56,7 @@ class PotentialField:
         self.p_hyst = p_hyst
         self.g_v = g_v
         self.profile = None
+        self.wind_limit = wind_limit
 
         plt.ion()
 
@@ -223,8 +224,11 @@ class PotentialField:
             u_g = self._potential_relative_goal_calculation(goal, p)
             p[0] = profile[i].l_kx
             p[1] = profile[i].l_ky
-            u_w = self._wind_potential_calculation(w_theta, p, heading, w_speed, v_v)
-            profile[i].u = u_o + u_g + u_w + profile[i].u
+            if w_speed > self.wind_limit:
+                u_w = self._wind_potential_calculation(w_theta, p, heading, w_speed, v_v)
+                profile[i].u = u_o + u_g + u_w + profile[i].u
+            else:
+                profile[i].u = u_o + u_g + profile[i].u
         return profile
 
     def _reshape_profile(self, profile):

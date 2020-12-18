@@ -68,6 +68,7 @@ def dynamic_reconf_callback(dyn_conf, level):
     pf.p_ngz = config.p_ngz = dyn_conf.p_ngz
     pf.p_hyst = config.p_hyst = dyn_conf.p_hyst
     pf.g_v = config.g_v = dyn_conf.g_v
+    pf.wind_limit = dyn_conf.wind_limit
     config.circle_time_limit = dyn_conf.circle_time_limit
     rospy.loginfo("Reconfigure request: {}".format(config))
     return dyn_conf
@@ -274,7 +275,7 @@ if __name__ == '__main__':
     path_planner_init()
     config = Config()
     pf = PotentialField(config.profile_diameter, config.obstacle_weight, config.d_inf, config.goal_weight, config.p_ngz,
-                        config.p_hyst, config.g_v)
+                        config.p_hyst, config.g_v, 0)
     # Dynamic reconfigure
     srv = Server(PathPlannerConfig, dynamic_reconf_callback)
 
@@ -316,8 +317,8 @@ if __name__ == '__main__':
         webvizPlot = webviz_msg(pf)
         pub_2d.publish(webvizPlot)
 
-        if rospy.get_param("~plot", "true") == "true":
-            pf.plot_heat_map(0.1, heading)
+        # if rospy.get_param("~plot", "true") == "true":
+        pf.plot_heat_map(0.1, heading)
         if np.linalg.norm(goal[0:2]) < 5:
             if waypoint_index != len(waypoints) - 1:
                 waypoint_index += 1
