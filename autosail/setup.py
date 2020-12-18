@@ -11,7 +11,8 @@ setup_args = generate_distutils_setup(
               'camera',
               'stm32',
               'camera',
-              'network_throughput'
+              'network_throughput',
+              'utils'
               ],
     package_dir={'': 'src'}
 )

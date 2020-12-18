@@ -183,6 +183,10 @@ install(DIRECTORY launch/
     DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
     PATTERN ".svn" EXCLUDE
 )
+install(DIRECTORY test/
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/test
+    PATTERN ".svn" EXCLUDE
+)
 
 #############
 ## Testing ##
@@ -192,4 +196,5 @@ if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_rostest(test/ctrl/ctrl_rostest.test)
     add_rostest(test/path_planner/path_planner_rostest.test)
+    catkin_add_nosetests(test/integration_test.py)
 endif()

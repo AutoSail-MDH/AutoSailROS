@@ -32,6 +32,7 @@ class SubscriberValues:
         y = data.vector.y
         angle = math.atan2(y, x)
         self.wind_angle = angle
+        rospy.loginfo(f"wind angle: {math.degrees(angle)}")
 
 
 # Dynamic reconfiguration
@@ -43,6 +44,8 @@ def dynamic_reconf_callback(config, level):
     sc_pid.set_limits((-config.sail_limit * math.pi / 180, config.sail_limit * math.pi / 180))
     enable_tilt = config.enable_auto_tilt
     min_roll = math.radians(config.min_roll)
+    if sc_pid.setpoint != min_roll:
+        sc_pid.setpoint = min_roll
     max_roll = math.radians(config.max_roll)
     rospy.loginfo("""Reconfigure request: PID=[{kp} {ki} {kd}], angle_limit={sail_limit}""".format(**config))
     return config
@@ -81,17 +84,16 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         # If the min_roll have been changed, change the PID setpoint
-        if sc_pid.setpoint != min_roll:
-            sc_pid.setpoint = min_roll
+        #if sc_pid.setpoint != min_roll:
+        #    sc_pid.setpoint = min_roll
         # If the roll exceeds the minimum roll, use the PID to get a desired roll angle
+        rospy.loginfo("rolllllllllllllllllllllll: {}".format(math.degrees(values.roll_angle)))
         if enable_tilt and (values.roll_angle > min_roll or values.roll_angle < -min_roll):
-            # if the vessel have passed the z axis when rolling, invert the sign of the setpoint
-            if math.copysign(1, values.roll_angle) != math.copysign(1, sc_pid.setpoint):
-                sc_pid.setpoint = -sc_pid.setpoint
-            pid_corrected_roll = -(sc_pid(values.roll_angle))  # - since positive roll clockwise, the pid is the inverse
+            pid_corrected_roll = (sc_pid(abs(values.roll_angle)))  # - since positive roll clockwise, the pid is the inverse
         else:
-            pid_corrected_roll = -(sc_pid(sc_pid.setpoint))
-
+            pid_corrected_roll = (sc_pid(sc_pid.setpoint))
+        pid_corrected_roll = -math.copysign(pid_corrected_roll, values.roll_angle)
+        rospy.loginfo(f"sail piderino {pid_corrected_roll} setpoint {sc_pid.setpoint}")
         # Calculate the new sail angle and sail trim
         if enable_tilt:
             new_sail_angle_rad = calculate_sail_angle(pid_corrected_roll, max_roll-min_roll, values.wind_angle,

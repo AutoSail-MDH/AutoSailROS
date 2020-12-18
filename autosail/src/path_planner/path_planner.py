@@ -35,9 +35,9 @@ def generate_circle_waypoints(lat1, lon1):
     """
     R = 6378.1  # Radius of the Earth
     brng = 0
-    d = 1  # Distance in km
+    d = 0.01  # Distance in km
     circle_waypoints = []
-    #circle_waypoint = waypointClass(0, 0, 0, 0)
+    # circle_waypoint = waypointClass(0, 0, 0, 0)
 
 
     lat1 = math.radians(lat1)

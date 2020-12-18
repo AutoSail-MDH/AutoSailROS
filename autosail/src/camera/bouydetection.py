@@ -94,7 +94,7 @@ def colormask(hsvimage, lower, upper):
     #light_orange = (B_L, G_L, R_L)
     #dark_orange = (B_U, G_U, R_U)
     #cv2.imshow("hsv", hsvimage)
-    print("lower:",lower)
+    #print("lower:",lower)
     maskedimage = cv2.inRange(hsvimage, lower, upper)
 
     return maskedimage
@@ -127,7 +127,7 @@ def shapemask(image, og_image):
 
         else:
             cX, cY = 0, 0
-    cv2.drawContours(og_image, cnts, -1, (0, 255, 0), 10)
+    cv2.drawContours(og_image, cnts, -1, (0, 255, 0), 6)
     cv2.circle(og_image, (cX, cY), 7, (255, 255, 255), -1)
 
     cv2.putText(og_image, "Bouy", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 0), 8)

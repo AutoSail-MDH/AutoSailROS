@@ -1,13 +1,26 @@
 <launch>
-    <param name="log_level" value="4"/>
+    <!-- Environment -->
     <env name="ROSCONSOLE_CONFIG_FILE" value="$(find autosail)/config/custom_rosconsole.conf"/>
-    <node pkg="autosail" name="true_wind_node" type="true_wind_node.py"/>
-    <node pkg="autosail" name="gps_to_ned" type="gps_to_ned.py"/>
-    <include file="$(find autosail)/launch/path_planner.launch"/>
-    <include file="$(find autosail)/launch/ctrl.launch"/>
-    <include file="$(find autosail)/test/startup.launch"/>
-    <node pkg="autosail" name="network_node" type="network_node.py"/>
-    <node pkg="web_video_server" name="web_video_server" type="web_video_server"/>
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-    <node pkg="autosail" name="route_planner" type="route_planner_service.py"/>
+
+    <!-- Params -->
+    <param name="log_level" value="4"/>
+
+    <!-- Args -->
+    <arg name="plot" default="false"/>
+
+    <include file="$(find autosail)/launch/system_without_drivers.launch"/>
+    <include file="$(find autosail)/launch/drivers.launch"/>
+
+    <node pkg="autosail" type="probe_node.py" name="probe_node">
+        <rosparam>
+            topics:
+              - name: /wind_sensor/wind_vector
+              - name: /imu/data
+              - name: /gps/fix
+              - name: /gps/fix_velocity
+              - name: /stm32_handle/sensor_readings
+              - name: /rudder_controller/rudder_angle
+              - name: /sail_controller/sail_servo_angle
+        </rosparam>
+    </node>
 </launch>

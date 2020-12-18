@@ -1,3 +1,0 @@
-<launch>
-    <node pkg="autosail" name="startup" type="startup.py" output="screen"/>
-</launch>

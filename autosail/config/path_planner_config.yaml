@@ -10,7 +10,7 @@ local_coord_scale: 100 # how many x,y there are per 100m i.e 100 = each x,y coor
 default_waypoint_id: 0 # id for normal waypoints
 waypoints_to_circle_id: 1 # id for waypoints that should be circled
 waypoints_in_circle_id: 2 # id for waypoints in a circle
-circle_time_limit: 30 # limit for circling a waypoint in sec
+circle_time_limit: 180 # limit for circling a waypoint in sec
 
 radius_earth: 6371 # radius of the earth in km
 waypoint_radius: 10 # radius for waypoint in which the vessel should circle
