@@ -27,7 +27,7 @@ if __name__ == "__main__":
         rospy.signal_shutdown(f"Could not open port {port} for STM32")
     while not rospy.is_shutdown():
         # Get sensor values from stm32
-        sensor_values = sensor_readings(timeout=timeout)
+        sensor_values = sensor_readings()
         if sensor_values and len(sensor_values) >= 13:
             # position the sensor values correct
             sensor_send.adc_current = (sensor_values[1] + sensor_values[0]) / 100

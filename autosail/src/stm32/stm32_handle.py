@@ -9,7 +9,7 @@ ser = None
 def openSTM32Serial(port):
     global ser
     try:
-        ser = serial.Serial(port, 52000, timeout=2)  # open serial port
+        ser = serial.Serial(port, 52000, timeout=1)  # open serial port
     except (SerialException, SerialTimeoutException) as e:
         raise e
     if ser.isOpen():
@@ -27,7 +27,7 @@ def closeSTM32Serial():
         ser.close()
 
 
-def sensor_readings(timeout):
+def sensor_readings():
     """
     Communicating to MCU to acquire sensor  data, from battery life, current consumption and water detection
     :return: data from MCU sensors
@@ -35,11 +35,8 @@ def sensor_readings(timeout):
     global ser
     data = b'5'  # data sent
     ser.write(data)  # Serial port write data
-    time_start = time.time()
-    while True:
-        data = ser.readline()
-        if data != b"" or time.time() - time_start > timeout:
-            break
+    data = ser.read(size=13)
     print("receive data is:", list(data))
+    ser.close()
     return data
 
