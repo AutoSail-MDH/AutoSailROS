@@ -1,5 +1,5 @@
 goal_weight: 1 # the weight determining how much the goal will affect the potential of a point
-profile_diameter: 50 # n in the nxn square around the vessel for which potential is calculated
+profile_diameter: 20 # n in the nxn square around the vessel for which potential is calculated
 obstacle_weight: 100 # the weight determining how much the obstacles will affect the potential of a point
 d_inf: 20 # the euclidean distance inside which obstacles affect the potential of a point
 p_ngz: 50 # the potential added to a point inside the no-go zones

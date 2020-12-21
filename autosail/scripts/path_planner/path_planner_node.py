@@ -17,6 +17,7 @@ from autosail.cfg import PathPlannerConfig
 from path_planner.potential_field_algorithm import PotentialField
 from path_planner.path_planner import *
 import matplotlib
+import threading
 
 from autosail.msg import obstacles_array_msg
 from autosail.msg import TwoDimensionalPlotDatapoint, TwoDimensionalPlot
@@ -60,7 +61,8 @@ def dynamic_reconf_callback(dyn_conf, level):
     creates dynamic reconfiguration in rqt
     :return:
     """
-    global pf, config, waypoint_threshold
+    global pf, config, waypoint_threshold, lock
+    lock.acquire()
     pf.goal_weight = config.goal_weight = dyn_conf.goal_weight
     pf.obstacle_weight = config.obstacle_weight = dyn_conf.obstacle_weight
     pf.diameter = config.profile_diameter = dyn_conf.profile_diameter
@@ -72,6 +74,7 @@ def dynamic_reconf_callback(dyn_conf, level):
     config.circle_time_limit = dyn_conf.circle_time_limit
     waypoint_threshold = dyn_conf.waypoint_threshold
     rospy.loginfo("Reconfigure request: {}".format(config))
+    lock.release()
     return dyn_conf
 
 
@@ -215,14 +218,14 @@ def webviz_msg(pf):
     webvizPlotLine.label = "line"
     webvizPlotLine.borderColor = "blue"
     webvizPlotLine.backgroundColor = "blue"
-    webvizPlotLine.borderWidth = 10
+    webvizPlotLine.borderWidth = 5
     data = geometry_msgs.msg.Point()
-    data.x = -102 + (pf.diameter / 2 - 1 / 2)
+    data.x = -(pf.diameter + pf.diameter/2) + (- 1 / 2)
     data.y = -(pf.diameter / 2 - 1 / 2)
     webvizPlotLine.data.append(data)
     data = geometry_msgs.msg.Point()
     # data.x = heading[1]
-    data.x = - 102 + pf.diameter / 2 + heading[1] * 25
+    data.x = - (pf.diameter + pf.diameter/2) + heading[1] * 25
     # data.y = heading[0]
     data.y = -(pf.diameter / 2 - heading[0] * 25)
     webvizPlotLine.data.append(data)
@@ -265,6 +268,7 @@ def circle_waypoint(lat, lon, config, pf, pub_heading):
 
 
 if __name__ == '__main__':
+    lock = threading.Lock()
     waypoint_index = 0
     # initialize subscribers
 
@@ -309,7 +313,7 @@ if __name__ == '__main__':
             for prop in waypoints[waypoint_index].properties:
                 if prop.key == "id":
                     waypoint_id = prop.value
-
+        lock.acquire()
         min_angle = pf.calc_heading(goal, heading, w_speed, w_theta, [0, 0], obstacles_xy, velocity)
         min_angle = math.atan2(math.sin(min_angle), math.cos(min_angle))
         # publish the calculated angle
@@ -317,6 +321,7 @@ if __name__ == '__main__':
 
         webvizPlot = webviz_msg(pf)
         pub_2d.publish(webvizPlot)
+        lock.release()
 
         if rospy.get_param("~plot", "true") == "true":
             pf.plot_heat_map(0.1, heading)
