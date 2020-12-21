@@ -48,10 +48,10 @@ class WindSensorTalker:
             rpy_msg.vector.z = -rpy_vector[2]
 
             battery_msg = Float64()
-            battery_msg.data = self.wnd.get_battery_charge()
+            battery_msg = self.wnd.get_battery_charge()
 
             temp_msg = Float64()
-            temp_msg.data = self.wnd.get_temp()
+            temp_msg = self.wnd.get_temp()
             temp_msg -= 273.15  # convert to celsius from kelvin
             stdoutdata = sp.getoutput("hcitool con")
             if "DC:73:74:12:94:80" not in stdoutdata.split():

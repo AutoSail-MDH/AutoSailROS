@@ -60,7 +60,7 @@ def dynamic_reconf_callback(dyn_conf, level):
     creates dynamic reconfiguration in rqt
     :return:
     """
-    global pf, config
+    global pf, config, waypoint_threshold
     pf.goal_weight = config.goal_weight = dyn_conf.goal_weight
     pf.obstacle_weight = config.obstacle_weight = dyn_conf.obstacle_weight
     pf.diameter = config.profile_diameter = dyn_conf.profile_diameter
@@ -70,6 +70,7 @@ def dynamic_reconf_callback(dyn_conf, level):
     pf.g_v = config.g_v = dyn_conf.g_v
     pf.wind_limit = dyn_conf.wind_limit
     config.circle_time_limit = dyn_conf.circle_time_limit
+    waypoint_threshold = dyn_conf.waypoint_threshold
     rospy.loginfo("Reconfigure request: {}".format(config))
     return dyn_conf
 
@@ -317,9 +318,9 @@ if __name__ == '__main__':
         webvizPlot = webviz_msg(pf)
         pub_2d.publish(webvizPlot)
 
-        # if rospy.get_param("~plot", "true") == "true":
-        pf.plot_heat_map(0.1, heading)
-        if np.linalg.norm(goal[0:2]) < 5:
+        if rospy.get_param("~plot", "true") == "true":
+            pf.plot_heat_map(0.1, heading)
+        if np.linalg.norm(goal[0:2]) < waypoint_threshold:
             if waypoint_index != len(waypoints) - 1:
                 waypoint_index += 1
                 goal = waypoints[waypoint_index]
