@@ -10,13 +10,13 @@ import subprocess as sp
 class WindSensorTalker:
     def __init__(self):
         """
-        Function that initializes the variable self.wnd based on the WindSensor class that is defined in wind_sensor.py
+        Initializes the WindSensor class that is defined in wind_sensor.py
         """
         self.wnd = WindSensor()
 
     def talker(self):
         """
-        Function that initializes the 4 publishers(wind_pub, rpy_pub, temp_pub, battery_pub), then initializes the node
+        Initializes the 4 publishers(wind_pub, rpy_pub, temp_pub, battery_pub), then initializes the node
         as wind_sensor_node and sets the rate to the users defined value(8 is the max of the wind sensor) then sleeps to
         let the startup and bluetooth connection finish.
 
@@ -37,7 +37,6 @@ class WindSensorTalker:
             vec_msg = Vector3Stamped()
             vec_msg.header.stamp = rospy.Time.now()
             vec_msg.vector.x = -wind_vector[0]
-            #vec_msg.vector.y = wind_vector[1]
             vec_msg.vector.y = -wind_vector[1]
             vec_msg.vector.z = 0
 
@@ -49,15 +48,15 @@ class WindSensorTalker:
             rpy_msg.vector.z = -rpy_vector[2]
 
             battery_msg = Float64()
-            battery_msg = self.wnd.get_battery_charge()
+            battery_msg.data = self.wnd.get_battery_charge()
 
             temp_msg = Float64()
-            temp_msg = self.wnd.get_temp()
-            temp_msg -= 273.15 # convert to celsius from kelvin
+            temp_msg.data = self.wnd.get_temp()
+            temp_msg -= 273.15  # convert to celsius from kelvin
             stdoutdata = sp.getoutput("hcitool con")
             if "DC:73:74:12:94:80" not in stdoutdata.split():
                 rospy.logerr("Connection Failed, Reconnecting!")
-                del self.wnd
+                self.wnd.close()
                 self.wnd = WindSensor()
                 rospy.sleep(5)
             wind_pub.publish(vec_msg)

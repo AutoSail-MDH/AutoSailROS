@@ -5,7 +5,6 @@ from subprocess import Popen, PIPE
 import sys
 import os
 import collections
-import time
 import threading
 import math
 
@@ -13,10 +12,11 @@ import math
 class WindSensor:
     def __init__(self):
         """
-        Initialize function that opens up communication to the wind sensor through a javascript and starts a thread to
+        Opens up communication to the wind sensor through a javascript and starts a thread to
         continously read the data published.
         """
-        self.wind_sensor = Popen(['node', os.path.dirname(sys.argv[0]) + '/../../src/signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
+        self.node_proc = Popen(['node', os.path.dirname(sys.argv[0]) +
+                                '/../../src/signalk-calypso-ultrasonic/test/standalone.js'], stdout=PIPE)
         self.data = {}
         self.q = collections.deque(maxlen=1)
         self.stop_thread = False
@@ -29,14 +29,14 @@ class WindSensor:
         Reads the output line by line and adds it to the line variable.
         """
         while not self.stop_thread:
-            for line in iter(self.wind_sensor.stdout.readline, ""):
+            for line in iter(self.node_proc.stdout.readline, ""):
                 if self.stop_thread:
                     break
                 self.q.append(line)
 
     def update(self):
         """
-        Function that updates the variable self.data with the last line read and decodes it to a string.
+        Updates data with the last line read and decodes it to a string.
         """
         line = b''
         while not line:
@@ -46,7 +46,7 @@ class WindSensor:
 
     def get_data(self, path):
         """
-        Function that returns the value for the given path. For example a path such as "environment.wind.angleApparent"
+        Returns the value for the given path. For example a path such as "environment.wind.angleApparent"
         returns the value of the winds apparent angle from the wind sensor.
         :param path: The desired path to the value
         :type path: String
@@ -61,7 +61,7 @@ class WindSensor:
 
     def get_wind_vector(self):
         """
-        Function to get the values for the wind vector based on the apparent wind angle and speed measured from the wind
+        Returns the values for the wind vector based on the apparent wind angle and speed measured from the wind
         sensor.
         :return: returns the wind vector [x,y].
         :rtype: Float64 list.
@@ -77,7 +77,7 @@ class WindSensor:
 
     def get_rpy(self):
         """
-        Function to get the values of the roll, pitch, and yaw of the wind sensor.
+        Returns the values of the roll, pitch, and yaw of the wind sensor.
         :return: returns the rpy list containing [roll(x), pitch(y), yaw(z)].
         :rtype: Float64 list.
         """
@@ -90,7 +90,7 @@ class WindSensor:
 
     def get_temp(self):
         """
-        Function that returns the current temperature of the wind sensor.
+        Returns the current temperature of the wind sensor.
         :return: returns the current measured temperature in kelvin.
         :rtype: Float64
         """
@@ -99,7 +99,7 @@ class WindSensor:
 
     def get_battery_charge(self):
         """
-        Function that returns the measured battery charge in decimals. 0,1 , 0,2 , 0,3 etc. Seems like 0,1 = 10% and so
+        Returns the measured battery charge in decimals. 0,1 , 0,2 , 0,3 etc. Seems like 0,1 = 10% and so
         on.
         :return: returns the value of the battery charge level.
         :rtype: Float64
@@ -113,7 +113,7 @@ class WindSensor:
         """
         self.stop_thread = True
         self.readThread.join()
-        self.wind_sensor.kill()
+        self.node_proc.kill()
 
     def __del__(self):
         self.close()
