@@ -1,12 +1,12 @@
 <!-- to tests run: rostest path_planner rostest.tests -->
 <launch>
 
-    <node pkg="path_planner" name="path_planner_partner_node" type="path_planner_partner_node.py" >
+    <node pkg="autosail" name="path_planner_partner_node" type="path_planner_partner_node.py" >
     </node>
 
 
-    <node pkg="path_planner" name="path_planner_node" type="path_planner_node.py">
-      <rosparam command="load" file="$(find path_planner)/config/config.yaml"/>
+    <node pkg="autosail" name="path_planner_node" type="path_planner_node.py">
+      <rosparam command="load" file="$(find autosail)/config/path_planner_config.yaml"/>
    </node>
 
    <!-- Run unittest and rostest for services -->
