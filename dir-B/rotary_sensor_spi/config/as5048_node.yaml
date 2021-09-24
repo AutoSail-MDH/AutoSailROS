@@ -1,0 +1,29 @@
+# The name of the node
+name: "as5048"
+
+# Anonymous determines if it can exist multiple of the same node by giving the name a unique suffix
+anonymous: False
+
+# If the publisher can publish faster than the subscriber can handle, the messages will be put in a queue
+# in a FIFO manner. when the queue is full the old messages will be discarded by new messages.
+publisher_queue_size: 10
+
+# The rate (Hz) of the node to determine the sleep, as long as the execution time don't exceed the rate
+rate: 10
+
+# SPI configurations
+spi:
+  # The path to the SPI device
+  device: "/dev/spidev0.0"
+
+  # SPI transfer mode
+  # CPOL determines the polarity of the clock while
+  # CPHA determines the phase of the databits relative to the clock
+  # 0: CPOL=0, CPHA=0
+  # 1: CPOL=0, CPHA=1
+  # 2: CPOL=1, CPHA=0
+  # 3: CPOL=1, CPHA=1
+  mode: 1
+
+  # The max speed the SPI can transfer in Hz
+  max_speed: 1000000
