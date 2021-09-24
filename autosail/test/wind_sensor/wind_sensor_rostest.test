@@ -1,0 +1,24 @@
+<!-- to tests run: rostest autosail wind_sensor/wind_sensor_rostest.tests -->
+<launch>
+
+    <node pkg="wind_sensor" name="wind_sensor_node" type="wind_sensor_node.py" >
+    </node>
+
+
+    <!-- Run publish tests -->
+    <test pkg="rostest" type="hztest" test-name="wind_sensor_publish_test">
+        <param name="topic" value="/wind_sensor/wind_vector"/>
+        <param name="hz" value="8"/>
+        <param name="hzerror" value="0.5"/>
+        <param name="test_duration" value="10.0"/>
+    </test>
+
+    <test name="publishtest" pkg="rostest" type="publishtest" test-name="pub_test" >
+        <rosparam>
+            topics:
+              - name: /wind_sensor/wind_vector
+                timeout: 10
+                negative: False
+        </rosparam>
+    </test>
+</launch>

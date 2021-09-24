@@ -1,0 +1,7 @@
+<launch>
+   <arg name="plot" default="false"/>
+   <node pkg="autosail" name="path_planner" type="path_planner_node.py" output="screen" respawn="true">
+      <rosparam command="load" file="$(find autosail)/config/path_planner_config.yaml"/>
+      <param name="plot" value="$(arg plot)"/>
+   </node>
+</launch>

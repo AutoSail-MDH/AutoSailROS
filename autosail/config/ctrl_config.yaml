@@ -1,0 +1,20 @@
+# --- Global Configs ---
+queue_size: 1
+
+rate: 100
+
+# --- Sail Configs ---
+sail_limits: 80 #1.3962634  # 80 degree
+sail_setpoint: 5
+min_roll: 10
+max_roll: 30 #0.52359877559 # pi/6
+max_servo: 1620
+
+# --- Rudder Configs ---
+rudder_limits: 45 #0.7853981633974483  # pi/4 radians
+pid_coefficients:
+    kp: 1
+    ki: 0.1
+    kd: 0.05
+rudder_upper_threshold: 1.5
+rudder_lower_threshold: 0.5

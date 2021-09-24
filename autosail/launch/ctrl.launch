@@ -1,0 +1,4 @@
+<launch>
+   <include file="$(find autosail)/launch/sail.launch"/>
+   <include file="$(find autosail)/launch/rudder.launch"/>
+</launch>
