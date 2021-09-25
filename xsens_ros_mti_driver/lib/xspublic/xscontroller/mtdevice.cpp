@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -81,7 +49,7 @@ MtDevice::MtDevice(Communicator* comm)
 
 /*! \brief Constructs a standalone MtDevice based on \a master and \a childDeviceId
 */
-MtDevice::MtDevice(XsDevice * master, const XsDeviceId &childDeviceId)
+MtDevice::MtDevice(MtContainer * master, const XsDeviceId &childDeviceId)
 	: XsDeviceEx(master, childDeviceId)
 {
 }
@@ -93,7 +61,6 @@ MtDevice::~MtDevice()
 	JLTRACEG("entry");
 	XSEXITLOGN(gJournal);
 }
-
 /*! \brief Checks for the sanity of a message
 	\param msg A message to check
 	\returns True if successful
@@ -252,12 +219,9 @@ bool MtDevice::canDoOrientationResetInFirmware(XsResetMethod method)
 /*! \copybrief XsDevice::scheduleOrientationReset */
 bool MtDevice::scheduleOrientationReset(XsResetMethod method)
 {
-	switch (deviceState())
-	{
+	switch (deviceState()) {
 	case XDS_Measurement:
 	case XDS_Recording:
-	case XDS_WaitingForRecordingStart:
-	case XDS_FlushingData:
 		if (method == XRM_StoreAlignmentMatrix)
 			return false;
 
@@ -280,8 +244,6 @@ bool MtDevice::scheduleOrientationReset(XsResetMethod method)
 		}
 		return true;
 
-	case XDS_Initial:
-	case XDS_Destructing:
 	default:
 		return false;
 	}
@@ -309,7 +271,7 @@ bool MtDevice::storeAlignmentMatrix()
 double MtDevice::headingOffset() const
 {
 	XsMessage snd(XMID_ReqHeading), rcv;
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	if (!doTransaction(snd, rcv))
 		return 0;
@@ -322,7 +284,7 @@ double MtDevice::headingOffset() const
 bool MtDevice::setLocationId(int id)
 {
 	XsMessage snd(XMID_SetLocationId, XS_LEN_LOCATIONID);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataShort((uint16_t)id);
 
 	return doTransaction(snd);
@@ -333,7 +295,7 @@ bool MtDevice::setLocationId(int id)
 int MtDevice::locationId() const
 {
 	XsMessage snd(XMID_ReqLocationId), rcv;
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	if (!doTransaction(snd, rcv))
 		return 0;
@@ -346,7 +308,7 @@ int MtDevice::locationId() const
 XsBaudRate MtDevice::serialBaudRate() const
 {
 	XsMessage snd(XMID_ReqBaudrate), rcv;
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	if (!doTransaction(snd, rcv))
 		return XBR_Invalid;
@@ -380,7 +342,7 @@ XsFilterProfileArray MtDevice::readFilterProfilesFromDevice() const
 	XsFilterProfileArray result;
 
 	XsMessage snd(XMID_ReqAvailableFilterProfiles);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	XsMessage rcv;
 	if (!doTransaction(snd, rcv))
@@ -393,7 +355,7 @@ XsFilterProfileArray MtDevice::readFilterProfilesFromDevice() const
 	result.resize(nofScenarios);
 	for (XsSize i = 0; i < nofScenarios; ++i)
 	{
-		uint8_t type = rcv.getDataByte(i*(1+1+XS_LEN_FILTERPROFILELABEL));
+		uint8_t type = rcv.getDataByte(0 + i*(1+1+XS_LEN_FILTERPROFILELABEL));
 		result[i].setType(type);
 		result[i].setVersion(rcv.getDataByte(1 + i*(1+1+XS_LEN_FILTERPROFILELABEL)));
 		result[i].setLabel((const char*) rcv.getDataBuffer(2 + i*(1+1+XS_LEN_FILTERPROFILELABEL)));
@@ -489,7 +451,7 @@ bool MtDevice::setOnboardFilterProfile(int profileType)
 		return false;
 
 	XsMessage snd(XMID_SetFilterProfile, XS_LEN_SETFILTERPROFILE);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataShort((uint16_t)profileType);
 
 	if (!doTransaction(snd))
@@ -524,7 +486,7 @@ bool MtDevice::setOnboardFilterProfile(XsString const& profile)
 		return false;
 
 	XsMessage snd(XMID_SetFilterProfile, profile.size());
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataBuffer((const uint8_t*)profile.c_str(), profile.size());
 
 	if (!doTransaction(snd))
@@ -569,7 +531,7 @@ void MtDevice::writeDeviceSettingsToFile()
 bool MtDevice::setNoRotation(uint16_t duration)
 {
 	XsMessage snd(XMID_SetNoRotation, 2);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataShort(duration);
 
 	return doTransaction(snd);
@@ -601,15 +563,15 @@ bool MtDevice::setInitialPositionLLA(const XsVector& lla)
 */
 XsVector MtDevice::initialPositionLLA() const
 {
-	XsVector vec;
 	XsMessage snd(XMID_ReqLatLonAlt), rcv;
 	if (doTransaction(snd, rcv))
 	{
-		vec.setSize(3);
+		XsVector3 vec;
 		for (XsSize i = 0; i < 3; i++)
 			vec[i] = rcv.getDataDouble(i * 8);
+		return vec;
 	}
-	return vec;
+	return XsVector();
 }
 
 /*! \brief Convert mt sync ticks to microseconds
@@ -647,7 +609,7 @@ XsErrorMode MtDevice::errorMode() const
 bool MtDevice::setErrorMode(XsErrorMode em)
 {
 	XsMessage snd(XMID_SetErrorMode, 2);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataShort(em);
 	return doTransaction(snd);
 }
@@ -676,7 +638,7 @@ uint16_t MtDevice::rs485TransmissionDelay() const
 bool MtDevice::setRs485TransmissionDelay(uint16_t delay)
 {
 	XsMessage snd(XMID_SetTransmitDelay, 2);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataShort(delay);
 
 	return doTransaction(snd);
@@ -690,7 +652,7 @@ bool MtDevice::setRs485TransmissionDelay(uint16_t delay)
 bool MtDevice::requestData()
 {
 	XsMessage snd(XMID_ReqData);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	return sendRawMessage(snd);
 }
@@ -701,7 +663,7 @@ bool MtDevice::requestData()
 XsSelfTestResult MtDevice::runSelfTest()
 {
 	XsMessage snd(XMID_RunSelfTest, 0);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	XsMessage rcv;
 	if (!doTransaction(snd, rcv, 3000))
 		return XsSelfTestResult();
@@ -716,7 +678,7 @@ bool MtDevice::storeFilterState()
 	if (deviceState() == XDS_Config)
 	{
 		XsMessage snd(XMID_StoreFilterState);
-		snd.setBusId(busId());
+		snd.setBusId((uint8_t)busId());
 
 		if (doTransaction(snd))
 			return true;
@@ -764,24 +726,4 @@ uint32_t MtDevice::supportedStatusFlags() const
 {
 	// essentially an unknown device, assume everything is supported
 	return ~(uint32_t)0;
-}
-
-/*!	\brief Helper function to strip the hardware type from the product code
-	\param code A productcode to be stripped
-	\returns Code without the hardware type postfix
-*/
-XsString MtDevice::stripProductCode(const XsString& code)
-{
-	XsString hwtype = findHardwareType(code);
-	if (hwtype.empty())
-		return code;
-
-	int offset = code.findSubStr(hwtype);
-	while (offset >= 0 && code[(unsigned int)offset] != '-')
-		--offset;
-
-	if (offset < 0)
-		return code;
-
-	return code.mid(0, (unsigned int)offset);
 }

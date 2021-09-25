@@ -1,5 +1,0 @@
-<launch>
-   <node pkg="autosail" name="camera" type="camera_node.py" output="screen" respawn="true">
-      <rosparam command="load" file="$(find autosail)/config/camera_config.yaml"/>
-   </node>
-</launch>

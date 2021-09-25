@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="autosail" name="stm32_node" type="stm32_node.py" respawn="true">
-        <rosparam command="load" file="$(find autosail)/config/stm32_config.yaml"/>
-    </node>
-</launch>

@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -123,8 +91,7 @@ struct XsDeviceParameter;
 struct XsIccRepMotionResult;
 //AUTO }
 
-#define DebugFileType FILE		// required for autogenerate to correctly parse this
-#define NOEXCEPT	noexcept	// required for autogenerate to correctly parse this
+#define DebugFileType FILE	// required for autogenerate to correctly parse this
 
 //AUTO namespace xstypes {
 struct XsFilterProfile;
@@ -170,10 +137,10 @@ public:
 
 	virtual XsDevice *master() const;
 
-	virtual XsDevice *findDevice(XsDeviceId const& deviceid);
-	XsDevice const *findDeviceConst(XsDeviceId const& deviceid) const;
+	virtual XsDevice *findDevice(XsDeviceId deviceid);
+	XsDevice const *findDeviceConst(XsDeviceId deviceid) const;
 	virtual int busId() const;
-	XsDeviceId const& deviceId() const;
+	XsDeviceId deviceId() const;
 	virtual XsVersion firmwareVersion() const;
 	bool isMasterDevice() const;
 	virtual bool isContainerDevice() const;
@@ -184,8 +151,7 @@ public:
 	virtual XsDevice *deviceAtBusId(int busid);
 
 	Communicator XSNOEXPORT *communicator() const;
-	DataLogger XSNOEXPORT *logFileInterface(std::unique_ptr<xsens::Lock>& myLock) const;
-	virtual XsResultValue updatePortInfo(XsPortInfo const& newInfo);
+	DataLogger XSNOEXPORT *logFileInterface() const;
 
 	void setGotoConfigOnClose(bool gotoConfigOnClose);
 
@@ -207,11 +173,11 @@ public:
 
 	virtual XsDeviceState deviceState() const;
 
-	static bool supportsSyncSettings(XsDeviceId const& deviceId);
-	static bool isCompatibleSyncSetting(XsDeviceId const& deviceId, XsSyncSetting const & setting1, XsSyncSetting const & setting2);
-	static unsigned int syncSettingsTimeResolutionInMicroSeconds(XsDeviceId const& deviceId);
+	static bool supportsSyncSettings(XsDeviceId deviceId);
+	static bool isCompatibleSyncSetting(XsDeviceId deviceId, XsSyncSetting const & setting1, XsSyncSetting const & setting2);
+	static unsigned int syncSettingsTimeResolutionInMicroSeconds(XsDeviceId deviceId);
 
-#ifdef DOXYGEN
+#if DOXYGEN
 	// Explicit inheritance for generator
 	void XSNOCOMEXPORT clearCallbackHandlers(bool chain = true);
 	void XSNOCOMEXPORT addCallbackHandler(XsCallbackPlainC* cb, bool chain = true);
@@ -225,10 +191,10 @@ public:
 	bool operator == (const XsDevice& dev) const
 		{ return m_deviceId.toInt() == dev.m_deviceId.toInt(); }
 	//! \brief Compare device ID with \a devId \param devId DeviceId to compare against \returns true if \a devId is higher than the contained device ID \sa deviceId()
-	bool operator < (XsDeviceId const& devId) const
+	bool operator < (XsDeviceId devId) const
 		{ return m_deviceId.toInt() < devId.toInt(); }
 	//! \brief Compare device ID with \a devId \param devId DeviceId to compare against \returns true if \a devId is the same as the contained device ID \sa deviceId()
-	bool operator == (XsDeviceId const& devId) const
+	bool operator == (XsDeviceId devId) const
 		{ return m_deviceId.toInt() == devId.toInt(); }
 
 	XsDeviceConfiguration deviceConfiguration() const;
@@ -251,7 +217,6 @@ public:
 	virtual bool hasDataEnabled(XsDataIdentifier dataType) const;
 	virtual bool hasProcessedDataEnabled(XsDataIdentifier dataType) const;
 	virtual XsString productCode() const;
-	virtual XsString shortProductCode() const;
 	virtual XsString portName() const;
 	virtual XsPortInfo portInfo() const;
 	virtual XsBaudRate baudRate() const;
@@ -283,7 +248,6 @@ public:
 	XSNOEXPORT virtual void handleNonDataMessage(const XsMessage &msg);
 	XSNOEXPORT virtual void handleErrorMessage(const XsMessage &msg);
 	XSNOEXPORT virtual void handleWarningMessage(const XsMessage &msg);
-	XSNOEXPORT virtual void handleWakeupMessage(const XsMessage& msg);
 
 	virtual bool setSerialBaudRate(XsBaudRate baudrate);
 
@@ -326,7 +290,7 @@ public:
 	virtual bool isSyncMaster() const;
 	virtual bool isSyncSlave() const;
 	virtual XsSyncSettingArray supportedSyncSettings() const;
-	static XsSyncSettingArray supportedSyncSettings(XsDeviceId const& deviceId);
+	static XsSyncSettingArray supportedSyncSettings(XsDeviceId deviceId);
 
 	virtual bool gotoMeasurement();
 	virtual bool gotoConfig();
@@ -487,9 +451,9 @@ public:
 	XSNOEXPORT virtual bool messageLooksSane(const XsMessage &msg) const;
 	XSNOEXPORT virtual void prepareForTermination();
 
-	// MTi with RTK support
-	virtual bool setGnssLeverArm(const XsVector& arm);
-	virtual XsVector gnssLeverArm() const;
+	// MTi with GPS/GNSS support
+	XSNOEXPORT virtual bool setLeverArm(const XsVector &arm);
+	XSNOEXPORT virtual XsVector leverArm() const;
 	XSNOEXPORT virtual bool requestUtcTime();
 
 	// Snapshot related
@@ -526,11 +490,10 @@ protected:
 
 	virtual bool scheduleOrientationReset(XsResetMethod method);
 
-	explicit XsDevice(XsDeviceId const& id);
+	explicit XsDevice(XsDeviceId id);
 	explicit XsDevice(Communicator* comm);
-	explicit XsDevice(XsDevice *master, const XsDeviceId &childDeviceId);
+	explicit XsDevice(MtContainer *master, const XsDeviceId &childDeviceId);
 
-	/*! \return A const reference to the cached device configuration */
 	inline const XsDeviceConfiguration& deviceConfig() const
 	{ return m_config; }
 
@@ -547,25 +510,21 @@ protected:
 
 	bool readDeviceConfiguration();
 
-	/*! \return A reference to the cached latest received packet */
 	inline XsDataPacket& latestLivePacket()
 	{
 		assert(m_latestLivePacket); assert(m_deviceMutex.haveGuardedLock());
 		return *m_latestLivePacket;
 	}
-	/*! \return A reference to the cached latest buffered packet */
 	inline XsDataPacket& latestBufferedPacket()
 	{
 		assert(m_latestBufferedPacket); assert(m_deviceMutex.haveGuardedLock());
 		return *m_latestBufferedPacket;
 	}
-	/*! \return A const reference to the cached latest received packet */
 	inline XsDataPacket const& latestLivePacketConst() const
 	{
 		assert(m_latestLivePacket); assert(m_deviceMutex.haveGuardedLock());
 		return *m_latestLivePacket;
 	}
-	/*! \return A const reference to the cached latest buffered packet */
 	inline XsDataPacket const& latestBufferedPacketConst() const
 	{
 		assert(m_latestBufferedPacket); assert(m_deviceMutex.haveGuardedLock());
@@ -579,11 +538,8 @@ protected:
 	void updateConnectivityState(XsConnectivityState newState);
 	virtual XsConnectivityState defaultChildConnectivityState() const;
 
-	//! \brief Set the initialized state to \a initialized
 	void setInitialized(bool initialized) { m_isInitialized = initialized; }
-	//! \brief Set the "termination prepared" state to \a prepared
-	void setTerminationPrepared(bool prepared)
-	NOEXCEPT { m_terminationPrepared  = prepared; }
+	void setTerminationPrepared(bool prepared) { m_terminationPrepared  = prepared; }
 
 	virtual bool shouldWriteMessageToLogFile(const XsMessage &msg) const;
 	virtual bool shouldWriteMessageToLogFile(const XsDevice *dev, const XsMessage &message) const;
@@ -591,7 +547,7 @@ protected:
 public:
 	XSNOEXPORT virtual void onMessageSent(const XsMessage &message);
 	XSNOEXPORT virtual void onMessageReceived(const XsMessage &message);
-	XSNOEXPORT virtual void onMessageDetected2(XsProtocolType type, const XsByteArray &rawMessage);
+	XSNOEXPORT virtual void onMessageDetected(XsProtocolType type, const XsByteArray &rawMessage);
 
 	XSNOEXPORT virtual void onSessionRestarted();
 	XSNOEXPORT virtual void onConnectionLost();
@@ -605,8 +561,7 @@ protected:
 	bool doTransaction(const XsMessage &snd, XsMessage &rcv, uint32_t timeout) const;
 	bool doTransaction(const XsMessage &snd, uint32_t timeout) const;
 
-	//! \return The value of the m_justWriteSetting flag, which is used in file-based processing
-	bool justWriteSetting() const { return m_justWriteSetting; }
+	bool justWriteSetting() const {return m_justWriteSetting;}
 
 	virtual void clearProcessors();
 	virtual void clearDataCache();
@@ -616,8 +571,8 @@ protected:
 
 	virtual bool resetRemovesPort() const;
 
-	virtual bool isSoftwareFilteringEnabled() const;
-	virtual bool isSoftwareCalibrationEnabled() const;
+	virtual inline bool isSoftwareFilteringEnabled() const { return false; }
+	virtual inline bool isSoftwareCalibrationEnabled() const { return false; }
 
 
 	virtual void setStartRecordingPacketId(int64_t startFrame);
@@ -627,11 +582,8 @@ protected:
 
 	/*! @} */
 
-	//! The mutex for guarding state changes of the device
+	//! A device mutex.
 	mutable xsens::GuardedMutex m_deviceMutex;
-
-	//! The mutex for guarding access to the log file
-	mutable xsens::Mutex m_logFileMutex;
 
 	//! \brief A copy of the latest ready live packet. This is the packet with the highest 64-bit sample counter so far. Use latestLivePacket() to access.
 	XsDataPacket* m_latestLivePacket;
@@ -718,7 +670,8 @@ protected:
 	*/
 	XsMessage m_emtsBlob;
 
-	//These members are protected instead of private to give direct access to tests
+protected:
+	//These members are protected to give direct access to tests
 
 	//! \brief The ID of the first packet that should be / was recorded
 	int64_t m_startRecordingPacketId;
@@ -745,7 +698,7 @@ protected:
 	*/
 	DebugFileType* m_toaDumpFile;
 
-	XSENS_DISABLE_COPY(XsDevice);
+	XSENS_DISABLE_COPY(XsDevice)
 };
 
 #ifndef XDA_PRIVATE_BUILD

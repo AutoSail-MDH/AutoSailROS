@@ -1,2 +1,4 @@
+build/
+devel/
 .idea/
-__pycache__
+install/

@@ -1,1 +1,0 @@
-waypointmsg[] data

@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -108,7 +76,6 @@ XSTYPES_DLL_API void XsString_sort(XsString* thisPtr);
 XSTYPES_DLL_API void XsString_reverse(XsString* thisPtr);
 XSTYPES_DLL_API int XsString_findSubStr(XsString const* thisPtr, XsString const* needle);
 XSTYPES_DLL_API void XsString_mid(XsString* thisPtr, XsString const* source, XsSize start, XsSize count);
-XSTYPES_DLL_API void XsString_replaceAll(XsString* thisPtr, XsString const* src, XsString const* dst);
 
 #ifndef XSENS_NO_WCHAR
 XSTYPES_DLL_API XsSize XsString_copyToWCharArray(const XsString* thisPtr, wchar_t* dest, XsSize size);
@@ -205,7 +172,7 @@ template<> inline void XsArrayImpl<char, g_xsStringDescriptor, XsString>::assign
 	\param count The desired size of the string. This excludes the terminating 0 character.
 	\sa XsString_resize
 */
-template<> inline void XsArrayImpl<char, g_xsStringDescriptor, XsString>::resize(XsSize count)
+template<> inline void XsStringType::resize(XsSize count)
 {
 	XsString_resize((XsString*) this, count);
 }
@@ -215,7 +182,7 @@ template<> inline void XsArrayImpl<char, g_xsStringDescriptor, XsString>::resize
 	\param count The desired new size fo the array.
 	\sa XsArray_assign \sa reserve \sa resize
 */
-template<> inline void XsArrayImpl<char, g_xsStringDescriptor, XsString>::setSize(XsSize count)
+template<> inline void XsStringType::setSize(XsSize count)
 {
 	if (count != size())
 		XsString_assign((XsString*) this, count, 0);
@@ -236,18 +203,11 @@ struct XsString : public XsStringType {
 			XsString_assign(this, sz, src);
 	}
 
-#ifndef SWIG
 	//! \brief Constructs an XsString as a copy of \a other
 	inline XsString(const XsStringType& other)
 		 : XsStringType(other)
 	{
 	}
-#else
-	inline XsString(const XsString& other)
-		: XsStringType(other)
-	{
-	}
-#endif
 
 	//! \brief Constructs an XsInt64Array that references the data supplied in \a ref
 	inline explicit XsString(char* ref, XsSize sz, XsDataFlags flags /* = XSDF_None */)
@@ -305,7 +265,6 @@ struct XsString : public XsStringType {
 		static const char nullChar = 0;
 		if (empty())
 			return const_cast<char*>(&nullChar);
-#ifdef XSENS_NO_EXCEPTION
 		try
 		{
 			return begin().operator ->();
@@ -314,9 +273,6 @@ struct XsString : public XsStringType {
 		{
 			return const_cast<char*>(&nullChar);
 		}
-#else
-		return begin().operator->();
-#endif
 	}
 
 	//! \brief Return the internal 0-terminated C-style string
@@ -325,7 +281,6 @@ struct XsString : public XsStringType {
 		static const char nullChar = 0;
 		if (empty())
 			return &nullChar;
-#ifdef XSENS_NO_EXCEPTION
 		try
 		{
 			return begin().operator ->();
@@ -334,9 +289,6 @@ struct XsString : public XsStringType {
 		{
 			return &nullChar;
 		}
-#else
-		return begin().operator->();
-#endif
 	}
 
 #ifndef XSENS_NO_STL
@@ -440,14 +392,6 @@ struct XsString : public XsStringType {
 #endif
 	}
 
-#ifndef SWIG
-	/*! \brief Swap the contents the \a first and \a second array */
-	friend void swap(XsString& first, XsString& second)
-	{
-		first.swap(second);
-	}
-#endif
-
 	//! \brief Append a character to the string
 	inline XsString& push_back(char c)
 	{
@@ -461,14 +405,7 @@ struct XsString : public XsStringType {
 		return !!XsString_empty(this);
 	}
 
-#ifndef SWIG
 	using XsStringType::append;
-#else
-	void append(XsString const& other)
-	{
-		XsStringType::append(other);
-	}
-#endif
 
 	//! \brief Append a char array to the string
 	inline void append(char const* other)
@@ -581,26 +518,6 @@ struct XsString : public XsStringType {
 	{
 		XsString rv;
 		XsString_mid(&rv, this, start, count);
-		return rv;
-	}
-
-	/*! \brief Replace all occurrences of \a src with \a dst, modifying this
-		\param src Substring to search for
-		\param dst Substring to use as replacement
-	*/
-	void replaceAll(XsString const& src, XsString const& dst)
-	{
-		XsString_replaceAll(this, &src, &dst);
-	}
-
-	/*! \brief Replace all occurrences of \a src with \a dst, returning the modified result without modifying this
-		\param src Substring to search for
-		\param dst Substring to use as replacement
-	*/
-	XsString replacedAll(XsString const& src, XsString const& dst) const
-	{
-		XsString rv(*this);
-		XsString_replaceAll(&rv, &src, &dst);
 		return rv;
 	}
 };

@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="autosail" name="rudder_controller" type="rudder_node.py" respawn="true">
-        <rosparam command="load" file="$(find autosail)/config/ctrl_config.yaml"/>
-    </node>
-</launch>

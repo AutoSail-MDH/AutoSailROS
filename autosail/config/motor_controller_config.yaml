@@ -1,5 +1,0 @@
-# --- Config ---
-queue_size: 10
-# Servo limits in degrees
-rudder_servo_limit: 90
-sail_servo_limit: 1440

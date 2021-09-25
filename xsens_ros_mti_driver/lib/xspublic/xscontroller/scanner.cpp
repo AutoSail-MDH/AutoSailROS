@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -109,18 +77,15 @@ using namespace XsScannerNamespace;
 Scanner& Scanner::Accessor::scanner() const
 {
 	if (!gScanner)
+	{
 		gScanner = new Scanner();
+	}
 	return *gScanner;
 }
 
 /*!	\class Scanner
 	\brief Provides static functionality for scanning for Xsens devices.
 */
-
-/*! \brief Destructor */
-Scanner::~Scanner()
-{
-}
 
 /*!	\brief Set a callback function for scan log progress and problem reporting
 	\details When set, any scan will use the provided callback function to report progress and failures.
@@ -182,7 +147,7 @@ XsResultValue Scanner::fetchBasicInfo(XsPortInfo &portInfo, uint32_t singleScanT
 			return port->lastResult();
 	}
 
-	LOGXSSCAN("Port " << portInfo.portName() << " opened successfully, device is " << port->masterDeviceId());
+	LOGXSSCAN("Port " << portInfo.portName() << " opened succesfully, device is " << port->masterDeviceId());
 	portInfo.setDeviceId(port->masterDeviceId());
 
 	// Enable flow control for Awinda2 stations/dongles which support this:
@@ -422,7 +387,11 @@ bool Scanner::xsEnumerateSerialPorts(XsPortInfoArray& ports, bool ignoreNonXsens
 		if (hDeviceKey == INVALID_HANDLE_VALUE)
 			continue;
 
-		xsens::JanitorFuncStdCall<HKEY, LSTATUS> devkeyCleaner(&RegCloseKey, hDeviceKey, true);
+		auto devkeycleaner = [](HKEY *key)
+		{
+			RegCloseKey(*key);
+		};
+		std::unique_ptr<HKEY, decltype(devkeycleaner)> devkey(&hDeviceKey, devkeycleaner);
 
 		// Read in the name of the port
 		char pszPortName[256];
@@ -673,7 +642,7 @@ XsPortInfo Scanner::xsScanPortByHubId(const char* id)
 		}
 		else
 		{
-			size_t buffer[1024/sizeof(size_t)];	// we use size_t instead of char to ensure proper data alignment
+			char buffer[1024];
 
 			SP_DEVINFO_DATA diData;
 			diData.cbSize = sizeof(SP_DEVINFO_DATA);
@@ -766,7 +735,7 @@ bool Scanner::xsScanXsensUsbHubs(XsIntArray& hubs, XsPortInfoArray& ports)
 	SP_DEVICE_INTERFACE_DATA devInterfaceData;
 	ZeroMemory(&devInterfaceData, sizeof(SP_DEVICE_INTERFACE_DATA));
 	devInterfaceData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
-	for (DWORD dwIndex = 0; ; ++dwIndex)
+	for (DWORD dwIndex = 0; true; ++dwIndex)
 	{
 		BOOL bRet = SetupDiEnumDeviceInterfaces(
 			hDevInfo, /* HDEVINFO DeviceInfoSet */
@@ -782,13 +751,13 @@ bool Scanner::xsScanXsensUsbHubs(XsIntArray& hubs, XsPortInfoArray& ports)
 			continue;
 		}
 
-		size_t tmp1[1024/sizeof(size_t)];
-		size_t tmp2[1024/sizeof(size_t)];
-		char* buffer = (char*) tmp1;
+		char* tmp = new char[2048];
+		char* buffer = tmp;
+		char* devPath = tmp+1024;
 		SP_DEVINFO_DATA diData;
 		diData.cbSize = sizeof(SP_DEVINFO_DATA);
 
-		SP_DEVICE_INTERFACE_DETAIL_DATA_A& ifdData = *(SP_DEVICE_INTERFACE_DETAIL_DATA_A*) tmp2;
+		SP_DEVICE_INTERFACE_DETAIL_DATA_A& ifdData = *(SP_DEVICE_INTERFACE_DETAIL_DATA_A*) devPath;
 		ifdData.cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA_A);
 		DWORD reqSize;
 		XsPortInfo port;
@@ -796,7 +765,13 @@ bool Scanner::xsScanXsensUsbHubs(XsIntArray& hubs, XsPortInfoArray& ports)
 		while (SetupDiGetDeviceInterfaceDetailA(hDevInfo, &devInterfaceData, &ifdData, 1020, &reqSize, &diData))
 		{
 			DWORD dataT;
-			if (SetupDiGetDeviceRegistryPropertyA(hDevInfo, &diData, SPDRP_MFG, &dataT, (PBYTE)buffer, 256, NULL))
+			if (SetupDiGetDeviceRegistryPropertyA(hDevInfo,
+						&diData,
+						SPDRP_MFG,
+						&dataT,
+						(PBYTE)buffer,
+						256,
+						NULL))
 			{
 				if (_strnicmp(buffer,"xsens",5))	// if this is NOT an xsens device, ignore it
 					break;
@@ -826,6 +801,7 @@ bool Scanner::xsScanXsensUsbHubs(XsIntArray& hubs, XsPortInfoArray& ports)
 			hubs.push_back(hubNr);
 			ports.push_back(port);
 		}
+		delete[] tmp;
 	}
 
 	SetupDiDestroyDeviceInfoList(hDevInfo);
@@ -870,7 +846,7 @@ XsUsbHubInfo Scanner::xsScanUsbHub(const XsPortInfo& portInfo)
 
 	// check if it's in the ports list before going through all THAT trouble...
 	for (size_t i = 0; i < ports.size(); ++i)
-		if (_stricmp(ports[i].portName_c_str(), portInfo.portName_c_str()) == 0)
+		if (_stricmp(ports[i].portName().c_str(), portInfo.portName().c_str()) == 0)
 			return XsUsbHubInfo(hubs[i]);
 
 	HDEVINFO hDevInfo;
@@ -922,7 +898,7 @@ XsUsbHubInfo Scanner::xsScanUsbHub(const XsPortInfo& portInfo)
 					if (_strnicmp(pszPortName, "COM", 3))
 						continue;
 					//int32_t nPort = atoi(&pszPortName[3]);
-					if (_stricmp(pszPortName, portInfo.portName_c_str()) == 0)
+					if (_stricmp(pszPortName, portInfo.portName().c_str()) == 0)
 					{
 						//This is the port we are looking for
 						//check if the hub number is in the hubs list
@@ -976,7 +952,7 @@ XsUsbHubInfo Scanner::xsScanUsbHub(const XsPortInfo& portInfo)
 			return XsUsbHubInfo();
 
 		const char *devnode = xsudev.device_get_devnode(device);
-		if (!devnode || strcmp(devnode, portInfo.portName_c_str()) != 0)
+		if (!devnode || strcmp(devnode, portInfo.portName().c_str()) != 0)
 			continue;
 
 		udev_device *parent = xsudev.device_get_parent_with_subsystem_devtype(device, "usb", "usb_device");

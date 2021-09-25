@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -103,8 +71,9 @@ MtiBaseDevice::BaseFrequencyResult Mti6X0Device::getBaseFrequencyInternal(XsData
 	result.m_divedable = true;
 
 	if ((dataType == XDI_FreeAcceleration && deviceId().isImu()) ||
-			((dataType & XDI_FullTypeMask) == XDI_LocationId) ||
-			((dataType & XDI_FullTypeMask) == XDI_DeviceId))
+		((dataType & XDI_FullTypeMask) == XDI_LocationId) ||
+		((dataType & XDI_FullTypeMask) == XDI_DeviceId) ||
+		(dataType == XDI_GnssSatInfo))
 		return result;
 
 	if ((dataType & XDI_FullTypeMask) == XDI_AccelerationHR)
@@ -119,7 +88,7 @@ MtiBaseDevice::BaseFrequencyResult Mti6X0Device::getBaseFrequencyInternal(XsData
 		return result;
 	}
 
-	auto baseFreq = [this](XsDataIdentifier dataType)
+	auto baseFreq = [&](XsDataIdentifier dataType)
 	{
 		switch (dataType & XDI_TypeMask)
 		{
@@ -193,7 +162,7 @@ XsStringOutputTypeArray Mti6X0Device::supportedStringOutputTypes() const
 	\param frequency The frequency to set
 	\returns True if the device was successfully updated
 */
-bool Mti6X0Device::setStringOutputMode6x0(uint32_t type, uint16_t frequency)
+bool Mti6X0Device::setStringOutputMode(uint32_t type, uint16_t frequency)
 {
 	XsMessage sndType(XMID_SetStringOutputConfig);
 	sndType.setBusId(XS_BID_MASTER);	// Always send to master device
@@ -208,46 +177,37 @@ bool Mti6X0Device::setStringOutputMode6x0(uint32_t type, uint16_t frequency)
 
 uint32_t Mti6X0Device::supportedStatusFlags() const
 {
-	return (uint32_t) (
-			   XSF_ExternalClockSynced
-			   | (deviceId().isImu() ? 0 : XSF_OrientationValid
-				  |XSF_NoRotationMask
-				  |XSF_RepresentativeMotion
-				 )
-			   | (deviceId().isGnss() ? XSF_GpsValid : 0)
-			   |XSF_ClipAccX
-			   |XSF_ClipAccY
-			   |XSF_ClipAccZ
-			   |XSF_ClipGyrX
-			   |XSF_ClipGyrY
-			   |XSF_ClipGyrZ
-			   |XSF_ClipMagX
-			   |XSF_ClipMagY
-			   |XSF_ClipMagZ
-			   //|XSF_Retransmitted
-			   |XSF_ClippingDetected
-			   //|XSF_Interpolated
-			   |XSF_SyncIn
-			   |XSF_SyncOut
-			   | (deviceId().isGnss() ? XSF_FilterMode : 0)
-			   | (deviceId().isGnss() ? XSF_HaveGnssTimePulse : 0)
-			   | (deviceId().isRtk() ? XSF_RtkStatus : 0)
-		   );
-}
-
-/*! \copybrief XsDevice::shortProductCode
-*/
-XsString Mti6X0Device::shortProductCode() const
-{
-	XsString code = productCode();
-	return stripProductCode(code);
+	return (uint32_t) (0
+		| (deviceId().isImu() ? 0 : XSF_OrientationValid
+			|XSF_NoRotationMask
+			|XSF_RepresentativeMotion
+			)
+		|XSF_ExternalClockSynced
+		| (deviceId().isGnss() ? XSF_GpsValid : 0)
+		|XSF_ClipAccX
+		|XSF_ClipAccY
+		|XSF_ClipAccZ
+		|XSF_ClipGyrX
+		|XSF_ClipGyrY
+		|XSF_ClipGyrZ
+		|XSF_ClipMagX
+		|XSF_ClipMagY
+		|XSF_ClipMagZ
+		//|XSF_Retransmitted
+		|XSF_ClippingDetected
+		//|XSF_Interpolated
+		|XSF_SyncIn
+		|XSF_SyncOut
+		| (deviceId().isGnss() ? XSF_FilterMode : 0)
+		| (deviceId().isGnss() ? XSF_HaveGnssTimePulse : 0)
+		);
 }
 
 /*! \copybrief XsDevice::canOutputConfiguration
 */
 XsCanOutputConfigurationArray Mti6X0Device::canOutputConfiguration() const
 {
-	XsMessage snd(XMID_ReqCanOutputConfig), rcv;
+	XsMessage snd(XMID_ReqCanConfig), rcv;
 	if (!doTransaction(snd, rcv))
 		return XsCanOutputConfigurationArray();
 
@@ -263,7 +223,7 @@ XsCanOutputConfigurationArray Mti6X0Device::canOutputConfiguration() const
 bool Mti6X0Device::setCanOutputConfiguration(XsCanOutputConfigurationArray& config)
 {
 	XsMessage snd(XMID_SetCanOutputConfig, 4);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	bool wasEmpty = config.empty();
 	MessageSerializer(snd) << config;
 
@@ -305,12 +265,12 @@ XsIntArray Mti6X0Device::portConfiguration() const
 
 /*! \copydoc XsDevice::setPortConfiguration
 */
-bool Mti6X0Device::setPortConfiguration(XsIntArray& config)
+bool Mti6X0Device::setPortConfiguration(XsIntArray &config)
 {
 	XsIntArray currentConfig = portConfiguration();
 
 	XsMessage snd(XMID_SetPortConfig);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 
 	if (config.size() > 0)
 		snd.setDataLong((uint32_t)config[0], 0);
@@ -336,7 +296,7 @@ bool Mti6X0Device::setCanConfiguration(uint32_t config)
 	uint32_t currentConfig = canConfiguration();
 
 	XsMessage snd(XMID_SetCanConfig, 4);
-	snd.setBusId(busId());
+	snd.setBusId((uint8_t)busId());
 	snd.setDataLong(config);
 
 	XsMessage rcv;
@@ -348,42 +308,3 @@ bool Mti6X0Device::setCanConfiguration(uint32_t config)
 
 	return true;
 }
-
-/*! \copydoc XsDevice::setGnssLeverArm
-*/
-bool Mti6X0Device::setGnssLeverArm(const XsVector& arm)
-{
-	if (!deviceId().isRtk())
-		return false;
-
-	XsMessage snd(XMID_SetGnssLeverArm, 3 * sizeof(float));
-	snd.setBusId(busId());
-	snd.setDataFloat((float)arm[0], 0/* sizeof(float)*/);
-	snd.setDataFloat((float)arm[1], 1 * sizeof(float));
-	snd.setDataFloat((float)arm[2], 2 * sizeof(float));
-
-	XsMessage rcv;
-	if (!doTransaction(snd, rcv))
-		return false;
-
-	return true;
-}
-
-/*! \copydoc XsDevice::gnssLeverArm
-*/
-XsVector Mti6X0Device::gnssLeverArm() const
-{
-	if (!deviceId().isRtk())
-		return XsVector();
-
-	XsMessage snd(XMID_ReqGnssLeverArm), rcv;
-	if (!doTransaction(snd, rcv))
-		return XsVector();
-
-	XsVector arm(3);
-	arm[0] = rcv.getDataFloat(0/* sizeof(float)*/);
-	arm[1] = rcv.getDataFloat(1 * sizeof(float));
-	arm[2] = rcv.getDataFloat(2 * sizeof(float));
-	return arm;
-}
-

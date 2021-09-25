@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -339,11 +307,11 @@ std::vector<XsDeviceId> XsControl::deviceIds() const
 	for (uint32_t index = 0; index < m_deviceList.size(); ++index)
 	{
 		XsDevice const* dev = m_deviceList[index];
-		result.push_back(dev->deviceId());
+		result.push_back(XsDeviceId(dev->deviceId()));
 		auto childrn = dev->children();
 		for (auto child : childrn)
 			if (child)
-				result.push_back(child->deviceId());
+				result.push_back(XsDeviceId(child->deviceId()));
 	}
 	return result;
 }
@@ -364,8 +332,7 @@ XsDevice* XsControl::getDeviceFromLocationId(uint16_t locationId) const
 {
 	JLDEBUGG((int) locationId);
 	XSEXITLOGD(gJournal);
-	for (uint16_t i = 0; i < m_deviceList.size(); ++i)
-	{
+	for (uint16_t i = 0; i < m_deviceList.size(); ++i) {
 		XsDevice *d = m_deviceList[i]->getDeviceFromLocationId(locationId);
 		if (!d)
 			continue;
@@ -534,7 +501,7 @@ void XsControl::gotoMeasurement()
 	\details Restores the communication settings to the default factory settings.
 	\note Works with RS422 and legacy products only.
 	\param portName the name of port to which device is connected.
-	\returns XRV_OK if restore communication procedure was successful.
+	\returns XRV_OK if restore communication procedure was successfull.
 */
 XsResultValue XsControl::startRestoreCommunication(const XsString & portName)
 {
@@ -658,8 +625,7 @@ bool XsControl::openPort(int portNr, XsBaudRate baudrate, uint32_t timeout, bool
 	JLDEBUGG("port " << (int32_t) portNr << " baudrate " << baudrate << " timeout " << timeout << " detectRs485 " << (int32_t)detectRs485);
 	XSEXITLOGD(gJournal);
 
-	XsPortInfo pinfo(portNr, baudrate);
-	return openPort(pinfo, timeout, detectRs485);
+	return openPort(XsPortInfo(portNr, baudrate), timeout, detectRs485);
 }
 #endif
 
@@ -830,21 +796,14 @@ XsPortInfo XsControl::customPortInfo(int channelId) const
 */
 void XsControl::closeCustomPort(int channelId)
 {
-	auto it = m_proxyChannels.find(channelId);
-	if (it == m_proxyChannels.end())
+	if (m_proxyChannels.find(channelId) == m_proxyChannels.end())
 		return;
 
-	ProxyCommunicator* p = it->second;
-	if (p)
-	{
-		XsDevice* dev = findDevice(p->masterDeviceId());
-		if (dev)
-			dev->setGotoConfigOnClose(false);
-		m_proxyChannels.erase(it);
-		closePort(p->masterDeviceId());
-	}
-	else
-		m_proxyChannels.erase(it);
+	ProxyCommunicator* p = m_proxyChannels[channelId];
+	XsDevice* dev = findDevice(p->masterDeviceId());
+	dev->setGotoConfigOnClose(false);
+	m_proxyChannels.erase(channelId);
+	closePort(p->masterDeviceId());
 }
 
 /*! \brief Feed data coming back from an Xsens device over a custom channel into XDA
@@ -987,8 +946,7 @@ void XsControl::updateRecordingState()
 */
 XsDevice* XsControl::findDevice(const XsDeviceId& deviceId) const
 {
-	if (m_deviceList.empty())
-	{
+	if (m_deviceList.empty()) {
 		m_lastResult = XRV_NOFILEORPORTOPEN;
 		return NULL;
 	}
@@ -1002,8 +960,9 @@ XsDevice* XsControl::findDevice(const XsDeviceId& deviceId) const
 	{
 		XsDevice *dev = m_deviceList[i];
 
-		if (!dev)
+		if (dev == 0) {
 			break;
+		}
 
 		if (dev->deviceId() == deviceId)
 			return dev;

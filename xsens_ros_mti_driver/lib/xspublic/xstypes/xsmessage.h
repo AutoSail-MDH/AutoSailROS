@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -180,12 +148,11 @@ struct XsMessageHeader {
 	uint8_t m_busId;     //!< \brief The bus ID \sa XS_BID_MASTER XS_BID_BROADCAST XS_BID_MT
 	uint8_t m_messageId; //!< \brief The message ID \sa XsXbusMessageId
 	uint8_t m_length;    //!< \brief The length of the message \details A length of 255 means extended length is used
-
-	/*! Contains optional extended length of message and first byte of data buffer */
+	//! \brief Contains optional extended length of message and first byte of data buffer
 	union LengthData {
-		/*! Contains extended length information and first byte of data buffer if normal length is 255 */
+		//! \brief Contains extended length information and first byte of data buffer if normal length is 255
 		struct ExtendedLength {
-			/*! The high and low byte of the extended length */
+			//! \brief The high and low byte of the extended length
 			struct ExtendedParts {
 				uint8_t m_high;	//!< \brief High byte of extended length
 				uint8_t m_low;	//!< \brief Low byte of extended length
@@ -215,7 +182,7 @@ struct XsMessage {
 		\param msgId		The message Id that will be assigned to the m_messageId field.
 		\param dataLength	The length of the data in the message.
 	*/
-	inline explicit XsMessage(XsXbusMessageId msgId = XMID_InvalidMessage, XsSize dataLength = 0)
+	explicit XsMessage(XsXbusMessageId msgId = XMID_InvalidMessage, XsSize dataLength = 0)
 		: m_autoUpdateChecksum(1)
 		, m_checksum(0)
 	{
@@ -232,7 +199,7 @@ struct XsMessage {
 		\param source		The source byte array containing message data
 		\param size			The size of the source string
 	*/
-	inline XsMessage(const uint8_t* source, XsSize size)
+	XsMessage(const uint8_t* source, XsSize size)
 		: m_autoUpdateChecksum(1)
 		, m_checksum(0)
 	{
@@ -246,7 +213,7 @@ struct XsMessage {
 		\param source			The source string containing the full message.
 		\param computeChecksum	When set to true (default), the checksum will be automatically computed and added or updated. When set to false, a valid checksum is assumed to be included in \a source.
 	*/
-	inline XsMessage(const XsString& source, bool computeChecksum = true)
+	XsMessage(const XsString& source, bool computeChecksum = true)
 		: m_autoUpdateChecksum(1)
 		, m_checksum(0)
 	{
@@ -271,7 +238,7 @@ struct XsMessage {
 	}
 
 	//! \brief Copy constructor
-	inline XsMessage(const XsMessage& src)
+	XsMessage(const XsMessage& src)
 		: m_message(src.m_message)
 		, m_autoUpdateChecksum(src.m_autoUpdateChecksum)
 		, m_checksum(0)
@@ -280,13 +247,13 @@ struct XsMessage {
 	}
 
 	//! Destroy the message
-	inline ~XsMessage()
+	~XsMessage()
 	{
 		XsMessage_destruct(this);
 	}
 
 	//! \brief Clear all data in the message
-	inline void clear(void)
+	void clear(void)
 	{
 		XsMessage_destruct(this);
 	}
@@ -295,13 +262,13 @@ struct XsMessage {
 
 		\returns true if this message is empty, false otherwise
 	*/
-	inline bool empty(void) const
+	bool empty(void) const
 	{
 		return 0 != XsMessage_empty(this);
 	}
 
 	//! Return the busId header field.
-	inline uint8_t getBusId(void) const
+	uint8_t getBusId(void) const
 	{
 		const XsMessageHeader* hdr = XsMessage_getConstHeader(this);
 		if (!hdr)
@@ -311,76 +278,75 @@ struct XsMessage {
 
 	/*! \copydoc XsMessage_constData
 	*/
-	inline const uint8_t* getDataBuffer(XsSize offset = 0) const
+	const uint8_t* getDataBuffer(XsSize offset = 0) const
 	{
 		return XsMessage_constData(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataByte
 	*/
-	inline uint8_t getDataByte(XsSize offset = 0) const
+	uint8_t getDataByte(XsSize offset = 0) const
 	{
 		return XsMessage_getDataByte(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataDouble
 	*/
-	inline double getDataDouble(XsSize offset = 0) const
+	double getDataDouble(XsSize offset = 0) const
 	{
 		return XsMessage_getDataDouble(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataFloat
 	*/
-	inline float getDataFloat(XsSize offset = 0) const
+	float getDataFloat(XsSize offset = 0) const
 	{
 		return XsMessage_getDataFloat(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataF1220
 	*/
-	inline double getDataF1220(XsSize offset = 0) const
+	double getDataF1220(XsSize offset = 0) const
 	{
 		return XsMessage_getDataF1220(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataFP1632
 	*/
-	inline double getDataFP1632(XsSize offset = 0) const
+	double getDataFP1632(XsSize offset = 0) const
 	{
 		return XsMessage_getDataFP1632(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataLong
 	*/
-	inline uint32_t getDataLong(XsSize offset = 0) const
+	uint32_t getDataLong(XsSize offset = 0) const
 	{
 		return XsMessage_getDataLong(this, offset);
 	}
-
 	/*! \copydoc XsMessage_getDataLongLong
 	*/
-	inline uint64_t getDataLongLong(XsSize offset = 0) const
+	uint64_t getDataLongLong(XsSize offset = 0) const
 	{
 		return XsMessage_getDataLongLong(this, offset);
 	}
 
 	/*! \copydoc XsMessage_getDataShort
 	*/
-	inline uint16_t getDataShort(XsSize offset = 0) const
+	uint16_t getDataShort(XsSize offset = 0) const
 	{
 		return XsMessage_getDataShort(this, offset);
 	}
 
 	/*! \copydoc XsMessage_dataSize
 	*/
-	inline XsSize getDataSize(void) const
+	XsSize getDataSize(void) const
 	{
 		return XsMessage_dataSize(this);
 	}
 
 	//! Return the current value of the m_messageId field.
-	inline XsXbusMessageId getMessageId(void) const
+	XsXbusMessageId getMessageId(void) const
 	{
 		const XsMessageHeader* hdr = XsMessage_getConstHeader(this);
 		if (!hdr)
@@ -403,21 +369,21 @@ struct XsMessage {
 
 	/*! \copydoc XsMessage_getMessageStart
 	*/
-	inline const uint8_t* getMessageStart(void) const
+	const uint8_t* getMessageStart(void) const
 	{
 		return XsMessage_getMessageStart(this);
 	}
 
 	/*!	\copydoc XsMessage_getTotalMessageSize
 	*/
-	inline XsSize getTotalMessageSize(void) const
+	XsSize getTotalMessageSize(void) const
 	{
 		return XsMessage_getTotalMessageSize(this);
 	}
 
 	/*! \copydoc XsMessage_isChecksumOk
 	*/
-	inline bool isChecksumOk(void) const
+	bool isChecksumOk(void) const
 	{
 		return 0 != XsMessage_isChecksumOk(this);
 	}
@@ -429,7 +395,7 @@ struct XsMessage {
 
 		\returns true if the checksum of the loaded message is OK.
 	*/
-	inline bool loadFromString(const uint8_t* src, XsSize msgSize)
+	bool loadFromString(const uint8_t* src, XsSize msgSize)
 	{
 		XsArray_destruct(&m_message);
 		XsMessage_load(this, msgSize, src);
@@ -438,104 +404,96 @@ struct XsMessage {
 
 	/*! \copydoc XsMessage_recomputeChecksum
 	*/
-	inline void recomputeChecksum(void)
+	void recomputeChecksum(void)
 	{
 		XsMessage_recomputeChecksum(this);
 	}
 
 	/*! \copydoc XsMessage_resizeData
 	*/
-	inline void resizeData(XsSize newSize)
+	void resizeData(XsSize newSize)
 	{
 		XsMessage_resizeData(this, newSize);
 	}
 
 	/*! \copydoc XsMessage_setBusId
 	*/
-	inline void setBusId(uint8_t busId)
+	void setBusId(uint8_t busId)
 	{
 		XsMessage_setBusId(this, busId);
 	}
 
-	/*! \copydoc XsMessage_setBusId
-	*/
-	inline void setBusId(int busId)
-	{
-		XsMessage_setBusId(this, (uint8_t) busId);
-	}
-
 	/*! \copydoc XsMessage_setDataBuffer
 	*/
-	inline void setDataBuffer(const uint8_t* buffer, XsSize size, XsSize offset = 0)
+	void setDataBuffer(const uint8_t* buffer, XsSize size, XsSize offset = 0)
 	{
 		XsMessage_setDataBuffer(this, buffer, size, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataByte
 	*/
-	inline void setDataByte(const uint8_t value, XsSize offset = 0)
+	void setDataByte(const uint8_t value, XsSize offset = 0)
 	{
 		XsMessage_setDataByte(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataDouble
 	*/
-	inline void setDataDouble(const double value, XsSize offset=0)
+	void setDataDouble(const double value, XsSize offset=0)
 	{
 		XsMessage_setDataDouble(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataFloat
 	*/
-	inline void setDataFloat(const float value, XsSize offset = 0)
+	void setDataFloat(const float value, XsSize offset = 0)
 	{
 		XsMessage_setDataFloat(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataF1220
 	*/
-	inline void setDataF1220(const double value, XsSize offset = 0)
+	void setDataF1220(const double value, XsSize offset = 0)
 	{
 		XsMessage_setDataF1220(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataFP1632
 	*/
-	inline void setDataFP1632(const double value, XsSize offset = 0)
+	void setDataFP1632(const double value, XsSize offset = 0)
 	{
 		XsMessage_setDataFP1632(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setDataLong
 	*/
-	inline void setDataLong(const uint32_t value, XsSize offset = 0)
+	void setDataLong(const uint32_t value, XsSize offset = 0)
 	{
 		XsMessage_setDataLong(this, value, offset);
 	}
-
 	/*! \copydoc XsMessage_setDataLongLong
 	*/
-	inline void setDataLongLong(const uint64_t value, XsSize offset = 0)
+	void setDataLongLong(const uint64_t value, XsSize offset = 0)
 	{
 		XsMessage_setDataLongLong(this, value, offset);
 	}
 
 	/*!	\copydoc XsMessage_setDataShort
 	*/
-	inline void setDataShort(const uint16_t value, XsSize offset = 0)
+	void setDataShort(const uint16_t value, XsSize offset = 0)
 	{
 		XsMessage_setDataShort(this, value, offset);
 	}
 
 	/*! \copydoc XsMessage_setMessageId
 	*/
-	inline void setMessageId(const XsXbusMessageId msgId)
+	void setMessageId(const XsXbusMessageId msgId)
 	{
 		XsMessage_setMessageId(this, msgId);
 	}
 
 	//! Copy message src into this
-	inline XsMessage& operator = (const XsMessage& src)
+	XsMessage& operator = (const XsMessage& src)
 	{
 		if (this != &src)
 			XsMessage_copy(this, &src);
@@ -543,13 +501,13 @@ struct XsMessage {
 	}
 
 	/*! \copydoc XsMessage_deleteData */
-	inline void deleteData(XsSize count, XsSize offset = 0)
+	void deleteData(XsSize count, XsSize offset = 0)
 	{
 		XsMessage_deleteData(this, count, offset);
 	}
 
 	/*! \copydoc XsMessage_insertData */
-	inline void insertData(XsSize count, XsSize offset = 0)
+	void insertData(XsSize count, XsSize offset = 0)
 	{
 		XsMessage_insertData(this, count, offset);
 	}
@@ -561,7 +519,7 @@ struct XsMessage {
 	}
 
 	/*! \copydoc XsMessage_getDataFPValuesById */
-	inline void getDataFPValue(XsDataIdentifier dataIdentifier, double *dest, XsSize offset = 0, XsSize numValues = 1) const
+	void getDataFPValue(XsDataIdentifier dataIdentifier, double *dest, XsSize offset = 0, XsSize numValues = 1) const
 	{
 		XsMessage_getDataFPValuesById(this, dataIdentifier, dest, offset, numValues);
 	}
@@ -573,7 +531,7 @@ struct XsMessage {
 
 		\returns the current data value as double
 	*/
-	inline double getDataFPValue(XsDataIdentifier dataIdentifier, XsSize offset = 0) const
+	double getDataFPValue(XsDataIdentifier dataIdentifier, XsSize offset = 0) const
 	{
 		double tmp;
 		XsMessage_getDataFPValuesById(this, dataIdentifier, &tmp, offset, 1);
@@ -581,7 +539,7 @@ struct XsMessage {
 	}
 
 	/*! \copydoc XsMessage_setDataFPValuesById */
-	inline void setDataFPValue(XsDataIdentifier dataIdentifier, const double *data, XsSize offset = 0, XsSize numValues = 1)
+	void setDataFPValue(XsDataIdentifier dataIdentifier, const double *data, XsSize offset = 0, XsSize numValues = 1)
 	{
 		XsMessage_setDataFPValuesById(this, dataIdentifier, data, offset, numValues);
 	}
@@ -592,7 +550,7 @@ struct XsMessage {
 		\param data		The data array to be written to the buffer.
 		\param offset Offset in the data buffer from where to start writing.
 	*/
-	inline void setDataFPValue(XsDataIdentifier dataIdentifier, double data, XsSize offset = 0)
+	void setDataFPValue(XsDataIdentifier dataIdentifier, double data, XsSize offset = 0)
 	{
 		XsMessage_setDataFPValuesById(this, dataIdentifier, &data, offset, 1);
 	}
@@ -630,7 +588,7 @@ struct XsMessage {
 		\param numValues The number of consecutive values to read
 	*/
 	template <typename T>
-	inline void getData(T* data, XsDataIdentifier id, XsSize offset = 0, int numValues = 1) const
+	void getData(T* data, XsDataIdentifier id, XsSize offset = 0, int numValues = 1) const
 	{
 		(void) id;
 		for (int i = 0; i < numValues; ++i)
@@ -645,7 +603,7 @@ struct XsMessage {
 		\param numValues The number of consecutive values to write
 	*/
 	template <typename T>
-	inline void setData(T const* data, XsDataIdentifier id, XsSize offset = 0, int numValues = 1)
+	void setData(T const* data, XsDataIdentifier id, XsSize offset = 0, int numValues = 1)
 	{
 		(void) id;
 		for (int i = 0; i < numValues; ++i)
@@ -658,7 +616,7 @@ struct XsMessage {
 		\return The number of bytes that \a numValues items of type T will require in a message
 	*/
 	template <typename T>
-	inline static int sizeInMsg(XsDataIdentifier id, int numValues = 1)
+	static int sizeInMsg(XsDataIdentifier id, int numValues = 1)
 	{
 		(void) id;
 		return numValues * (int) sizeof(T);
@@ -666,7 +624,7 @@ struct XsMessage {
 
 private:
 	/*! \brief Update the checksum pointer after changing the size of the message */
-	inline void updateChecksumPtr()
+	void updateChecksumPtr()
 	{
 		XsSize sz = XsMessage_getTotalMessageSize(this);
 		if (sz)
@@ -679,7 +637,7 @@ private:
 
 	XsByteArray m_message;
 	int m_autoUpdateChecksum;
-	uint8_t* const m_checksum;	//!< Points to the checksum to speed up automatic checksum updates
+	uint8_t* const m_checksum;	//! Points to the checksum to speed up automatic checksum updates
 };
 
 #ifdef __cplusplus
@@ -728,4 +686,4 @@ inline int XsMessage::sizeInMsg<XsReal>(XsDataIdentifier id, int numValues)
 #define swapEndian32(src) (((uint32_t)(src) >> 24) | (((uint32_t)(src) >> 8) & 0xFF00) | (((uint32_t)(src) << 8) & 0xFF0000) | ((uint32_t)(src) << 24))
 #define swapEndian64(src) (((src >> 56) & 0xFFULL) | ((src >> 40) & 0xFF00ULL) | ((src >> 24) & 0xFF0000ULL) | ((src >> 8) & 0xFF000000ULL) | ((src << 8) & 0xFF00000000ULL) | ((src << 24) & 0xFF0000000000ULL) | ((src << 40) & 0xFF000000000000ULL) | ((src << 56)))
 
-#endif
+#endif	// file guard

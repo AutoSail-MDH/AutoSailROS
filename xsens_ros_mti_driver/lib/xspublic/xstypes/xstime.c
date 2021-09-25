@@ -1,37 +1,5 @@
 
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
-//  All rights reserved.
-//  
-//  Redistribution and use in source and binary forms, with or without modification,
-//  are permitted provided that the following conditions are met:
-//  
-//  1.	Redistributions of source code must retain the above copyright notice,
-//  	this list of conditions, and the following disclaimer.
-//  
-//  2.	Redistributions in binary form must reproduce the above copyright notice,
-//  	this list of conditions, and the following disclaimer in the documentation
-//  	and/or other materials provided with the distribution.
-//  
-//  3.	Neither the names of the copyright holders nor the names of their contributors
-//  	may be used to endorse or promote products derived from this software without
-//  	specific prior written permission.
-//  
-//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
-//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-//  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
-//  THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-//  SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
-//  OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY OR
-//  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.THE LAWS OF THE NETHERLANDS 
-//  SHALL BE EXCLUSIVELY APPLICABLE AND ANY DISPUTES SHALL BE FINALLY SETTLED UNDER THE RULES 
-//  OF ARBITRATION OF THE INTERNATIONAL CHAMBER OF COMMERCE IN THE HAGUE BY ONE OR MORE 
-//  ARBITRATORS APPOINTED IN ACCORDANCE WITH SAID RULES.
-//  
-
-
-//  Copyright (c) 2003-2020 Xsens Technologies B.V. or subsidiaries worldwide.
+//  Copyright (c) 2003-2019 Xsens Technologies B.V. or subsidiaries worldwide.
 //  All rights reserved.
 //  
 //  Redistribution and use in source and binary forms, with or without modification,
@@ -70,7 +38,7 @@
 
 #ifdef _WIN32
 #	include <windows.h>
-#	include "xssimpleversion.h"
+#	define snprintf _snprintf
 #else
 #	include <errno.h>
 #	include <unistd.h>
@@ -134,84 +102,48 @@ static int clock_gettime(int clk_id, struct timespec *tp)
 uint32_t XsTime_getTimeOfDay(struct tm* date_, time_t* secs_)
 {
 #ifdef _WIN32
-	typedef void(WINAPI *GetSystemTimeType)(LPFILETIME);
-	static GetSystemTimeType getSystemTime = 0;
-	static int havePreciseFileTime = 0;
-	if (getSystemTime == 0)
+	// CORRECTION_DELTA_MS is the maximum allowed difference between the system time and the performance counter time. This depends on the granularity of the clocks.
+	static const int64_t CORRECTION_DELTA_MS = 32;
+	static int64_t startTimePerfCount;
+	static int64_t startTimeSysTime;
+	static int64_t perfCountFreq = 0;
+	int64_t t;
+	LARGE_INTEGER pc;
+	FILETIME now;
+	__time64_t tin;
+
+	GetSystemTimeAsFileTime(&now);
+	t = (int64_t) (((((uint64_t) now.dwHighDateTime << 32) | now.dwLowDateTime)/10000) - 11644473600000);
+
+	if (QueryPerformanceCounter(&pc))
 	{
-		XsSimpleVersion ver;
-		XsSimpleVersion_osVersion(&ver);
-		if (ver.m_major >= 8)
+		int64_t tNow;
+		if (!perfCountFreq)
 		{
-			getSystemTime = (GetSystemTimeType)GetProcAddress(GetModuleHandleA("Kernel32"), "GetSystemTimePreciseAsFileTime");
-			if (getSystemTime)
-				havePreciseFileTime = 1;
-			else
-				getSystemTime = GetSystemTimeAsFileTime;
+			LARGE_INTEGER tmp;
+			QueryPerformanceFrequency(&tmp);
+			perfCountFreq = tmp.QuadPart;
+			startTimePerfCount = pc.QuadPart;
+			startTimeSysTime = t;
+		}
+
+		tNow = startTimeSysTime + (1000*(pc.QuadPart - startTimePerfCount))/perfCountFreq;
+
+		if (t > tNow || (tNow-t) > CORRECTION_DELTA_MS)
+		{
+			startTimePerfCount = pc.QuadPart;
+			startTimeSysTime = t;
 		}
 		else
-			getSystemTime = GetSystemTimeAsFileTime;
+			t = tNow;
 	}
 
-	if (havePreciseFileTime)
-	{
-		int64_t t;
-		FILETIME now;
-		__time64_t tin;
-		getSystemTime(&now);
-		t = (int64_t) (((((uint64_t) now.dwHighDateTime << 32) | now.dwLowDateTime)/10000) - 11644473600000);
-		tin = t/1000;
-		if (date_ != NULL)
-			_localtime64_s(date_,&tin);
-		if (secs_ != NULL)
-			*secs_ = (time_t) tin;
-		return (uint32_t) (t % (XsTime_secPerDay.m_msTime*1000));
-	}
-	else
-	{
-		// CORRECTION_DELTA_MS is the maximum allowed difference between the system time and the performance counter time. This depends on the granularity of the clocks.
-		static const int64_t CORRECTION_DELTA_MS = 32;
-		static int64_t startTimePerfCount;
-		static int64_t startTimeSysTime;
-		static int64_t perfCountFreq = 0;
-		int64_t t;
-		LARGE_INTEGER pc;
-		FILETIME now;
-		__time64_t tin;
-
-		GetSystemTimeAsFileTime(&now);
-		t = (int64_t) (((((uint64_t) now.dwHighDateTime << 32) | now.dwLowDateTime)/10000) - 11644473600000);
-
-		if (QueryPerformanceCounter(&pc))
-		{
-			int64_t tNow;
-			if (!perfCountFreq)
-			{
-				LARGE_INTEGER tmp;
-				QueryPerformanceFrequency(&tmp);
-				perfCountFreq = tmp.QuadPart;
-				startTimePerfCount = pc.QuadPart;
-				startTimeSysTime = t;
-			}
-
-			tNow = startTimeSysTime + (1000*(pc.QuadPart - startTimePerfCount))/perfCountFreq;	//lint !e414
-
-			if (t > tNow || (tNow-t) > CORRECTION_DELTA_MS)
-			{
-				startTimePerfCount = pc.QuadPart;
-				startTimeSysTime = t;
-			}
-			else
-				t = tNow;
-		}
-
-		tin = t/1000;
-		if (date_ != NULL)
-			_localtime64_s(date_,&tin);
-		if (secs_ != NULL)
-			*secs_ = (time_t) tin;
-		return (uint32_t) (t % (XsTime_secPerDay.m_msTime*1000));
-	}
+	tin = t/1000;
+	if (date_ != NULL)
+		_localtime64_s(date_,&tin);
+	if (secs_ != NULL)
+		*secs_ = (time_t) tin;
+	return (uint32_t) (t % (XsTime_secPerDay.m_msTime*1000));
 #else
 	struct timespec tp;
 	clock_gettime(CLOCK_REALTIME, &tp); // compile with -lrt
@@ -269,10 +201,7 @@ void XsTime_getDateAsString(char* dest, const struct tm* date)
 
 	year = dt.tm_year + 1900;
 	month = dt.tm_mon + 1;
-
-	char tmpDest[9];
-	snprintf(tmpDest, 9, "%04d%02d%02d", year, month, dt.tm_mday);
-	memcpy(dest, tmpDest, 8);
+	snprintf(dest, 9, "%04d%02d%02d", year, month, dt.tm_mday);
 }
 
 /*! \brief Retrieves the time as binary
@@ -291,9 +220,7 @@ void XsTime_getTimeAsString(char* dest, const struct tm* date)
 	else
 		XsTime_getDateTime(&dt);
 
-	char tmpDest[9];
-	snprintf(tmpDest, 9, "%02d%02d%02d%02d", dt.tm_hour, dt.tm_min, dt.tm_sec, 0);
-	memcpy(dest, tmpDest, 8);
+	snprintf(dest, 8, "%02d%02d%02d%02d", dt.tm_hour, dt.tm_min, dt.tm_sec, 0);
 }
 
 /*! \brief Retrieves the date as wstring representation
@@ -377,7 +304,7 @@ void XsTime_udelay(uint64_t us)
 	int ret = -1;
 
 	ts.tv_sec = us / 1000000;
-	ts.tv_nsec = ((long)us - (ts.tv_sec * 1000000)) * 1000;
+	ts.tv_nsec = (us - (ts.tv_sec * 1000000)) * 1000;
 
 	while (ret)
 	{
@@ -400,7 +327,7 @@ int64_t XsTime_timeStampNow(XsTimeStamp* now)
 	if (now == 0)
 		now = &tmp;
 
-	now->m_msTime = (long long) XsTime_getTimeOfDay(NULL, &s);
+	now->m_msTime = (long long) XsTime_getTimeOfDay(NULL,&s);
 	now->m_msTime = (now->m_msTime % 1000) + (((long long)s)*1000);
 
 	return now->m_msTime;
