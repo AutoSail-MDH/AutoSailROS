@@ -1,1 +1,0 @@
-## Welcome to AutoSail website!
