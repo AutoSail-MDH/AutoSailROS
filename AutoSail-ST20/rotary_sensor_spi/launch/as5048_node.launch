@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="rotary_sensor_spi" name="as5048" type="as5048_node.py">
-        <rosparam command="load" file="$(find rotary_sensor_spi)/config/as5048_node.yaml"/>
-    </node>
-</launch>
